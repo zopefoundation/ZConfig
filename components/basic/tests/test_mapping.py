@@ -12,7 +12,8 @@
 #
 ##############################################################################
 
-"""Tests of the 'basic' section types provided as part of ZConfig.basic."""
+"""Tests of the 'basic' section types provided as part of
+ZConfig.components.basic."""
 
 import unittest
 

@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-"""Python datatype for the ZConfig.basic.mapping section type."""
+"""Python datatype for the ZConfig.components.basic.mapping section type."""
 
 def mapping(section):
     return section.mapping
