@@ -205,11 +205,12 @@ class SectionInfo(BaseInfo):
 
 class AbstractType:
     __metaclass__ = type
-    __slots__ = '_subtypes', 'name'
+    __slots__ = '_subtypes', 'name', 'description'
 
     def __init__(self, name):
         self._subtypes = {}
         self.name = name
+        self.description = None
 
     def addsubtype(self, type):
         self._subtypes[type.name] = type
