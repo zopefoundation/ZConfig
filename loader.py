@@ -150,15 +150,19 @@ class SchemaLoader(BaseLoader):
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + `package`)
         file = file or "component.xml"
-        for dir in sys.path:
-            dirname = os.path.join(os.path.abspath(dir), *parts)
+        __import__(package)
+        pkg = sys.modules[package]
+        if not hasattr(pkg, "__path__"):
+            raise ZConfig.SchemaError(
+                "import name does not refer to a package: " + `package`)
+        for dir in pkg.__path__:
+            dirname = os.path.abspath(dir)
             fn = os.path.join(dirname, file)
             if os.path.exists(fn):
-                break
+                return "file://" + urllib.pathname2url(fn)
         else:
             raise ZConfig.SchemaError(
                 "schema component not found: " + `package`)
-        return "file://" + urllib.pathname2url(fn)
 
 
 class ConfigLoader(BaseLoader):
