@@ -157,7 +157,7 @@ class ZConfigParser:
             self.error("cannot redefine " + `defname`)
         if not isname(defname):
             self.error("not a substitution legal name: " + `defname`)
-        self.defs[defname] = defvalue
+        self.defs[defname] = substitute(defvalue, self.defs)
 
     def error(self, message):
         raise ConfigurationSyntaxError(message, self.url, self.lineno)
