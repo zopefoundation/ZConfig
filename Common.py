@@ -24,7 +24,7 @@ class ConfigurationMissingSectionError(ConfigurationError):
     def __init__(self, type, name=None):
         self.type = type
         self.name = name
-        details = 'Missing section, type: %s' % type
+        details = 'Missing section (type: %s' % type
         if name is not None:
             details += ', name: %s' % name
         ConfigurationError.__init__(self, details + ')')
@@ -34,7 +34,7 @@ class ConfigurationConflictingSectionError(ConfigurationError):
     def __init__(self, type, name=None):
         self.type = type
         self.name = name
-        details = 'Conflicting sections, (type: %s' % type
+        details = 'Conflicting sections (type: %s' % type
         if name is not None:
             details += ', name: %s' % name
         ConfigurationError.__init__(self, details + ')')
