@@ -164,9 +164,10 @@ class DatatypeTestCase(unittest.TestCase):
     def test_datatype_inet_address(self):
         convert = self.types.get("inet-address")
         eq = self.assertEqual
+        defhost = ZConfig.datatypes.DEFAULT_HOST
         eq(convert("Host.Example.Com:80"), ("host.example.com", 80))
-        eq(convert(":80"),                 ("", 80))
-        eq(convert("80"),                  ("", 80))
+        eq(convert(":80"),                 (defhost, 80))
+        eq(convert("80"),                  (defhost, 80))
         eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
         self.assertRaises(ValueError, convert, "40 # foo")
 
@@ -220,6 +221,7 @@ class DatatypeTestCase(unittest.TestCase):
         convert = self.types.get("socket-address")
         eq = self.assertEqual
         AF_INET = socket.AF_INET
+        defhost = ZConfig.datatypes.DEFAULT_HOST
 
         def check(value, family, address, self=self, convert=convert):
             a = convert(value)
@@ -227,8 +229,8 @@ class DatatypeTestCase(unittest.TestCase):
             self.assertEqual(a.address, address)
 
         check("Host.Example.Com:80", AF_INET, ("host.example.com", 80))
-        check(":80",                 AF_INET, ("", 80))
-        check("80",                  AF_INET, ("", 80))
+        check(":80",                 AF_INET, (defhost, 80))
+        check("80",                  AF_INET, (defhost, 80))
         check("host.EXAMPLE.com",    AF_INET, ("host.example.com",None))
         a1 = convert("/tmp/var/@345.4")
         a2 = convert("/tmp/var/@345.4:80")

@@ -175,6 +175,11 @@ def string_list(s):
 port_number = RangeCheckedConversion(integer, min=1, max=0xffff).__call__
 
 
+if sys.platform[:3] == "win":
+    DEFAULT_HOST = "localhost"
+else:
+    DEFAULT_HOST = ""
+
 def inet_address(s):
     # returns (host, port) tuple
     host = ''
@@ -191,6 +196,8 @@ def inet_address(s):
             if len(s.split()) != 1:
                 raise ValueError("not a valid host name: " + repr(s))
             host = s.lower()
+    if not host:
+        host = DEFAULT_HOST
     return host, port
 
 
