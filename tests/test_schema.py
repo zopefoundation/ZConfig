@@ -30,7 +30,6 @@ def appsection(value):
 class MySection:
     def __init__(self, value):
         self.conf = value
-        self.length = len(value)
 
 
 class SchemaTestCase(TestBase):
@@ -105,13 +104,9 @@ class SchemaTestCase(TestBase):
                                      </foo>
                                      """)
         self.assert_(isinstance(conf, MySection))
-        self.assertEqual(conf.length, 1)
-        o1 = conf.conf[0]
+        o1 = conf.conf.sect
         self.assert_(isinstance(o1, MySection))
-        self.assertEqual(o1.length, 1)
         self.assertEqual(o1.conf.sample, 42)
-        o2 = conf.conf.sect
-        self.assert_(o1 is o2)
 
     def test_empty_sections(self):
         schema = self.load_schema_text("""\
@@ -157,11 +152,8 @@ class SchemaTestCase(TestBase):
                                      """)
         eq = self.assertEqual
         eq(conf.sect.sect.sect.key, "type1-value")
-        eq(len(conf.sect.sect.sect), 1)
         eq(conf.sect.sect.key, "sect2-value")
-        eq(len(conf.sect.sect), 2)
         eq(conf.sect.key, "sect3-value")
-        eq(len(conf.sect), 2)
 
     def test_multivalued_keys(self):
         schema = self.load_schema_text("""\
@@ -492,7 +484,7 @@ class SchemaTestCase(TestBase):
         orig = conf.empty
         new = []
         conf.empty = new
-        self.assert_(conf[0] is new)
+        self.assert_(conf.empty is new)
 
     def test_simple_anonymous_section(self):
         schema = self.load_schema_text("""\
