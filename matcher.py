@@ -120,6 +120,8 @@ class BaseMatcher:
         object."""
         length = len(self.type)
         values = self._values
+        # XXX attrnames should be provided by the type, so it can be
+        # computed once per section type
         attrnames = [None] * length
         for i in range(length):
             key, ci = self.type[i]
@@ -167,7 +169,7 @@ class BaseMatcher:
                     v = []
                     for s in values[i]:
                         if s is not None:
-                            v.append(s._type.datatype(s))
+                            v.append(s.getSectionDefinition().datatype(s))
                         else:
                             v.append(None)
                 elif ci.name == '+':
@@ -178,7 +180,7 @@ class BaseMatcher:
                     v = [vi.convert(ci.datatype) for vi in values[i]]
             elif ci.issection():
                 if values[i] is not None:
-                    v = values[i]._type.datatype(values[i])
+                    v = values[i].getSectionDefinition().datatype(values[i])
                 else:
                     v = None
             elif name == '+':
@@ -195,7 +197,7 @@ class BaseMatcher:
         return self.createValue(attrnames)
 
     def createValue(self, attrnames):
-        return SectionValue(attrnames, self._values, None, self.type)
+        return SectionValue(attrnames, self._values, None, self)
 
 
 class SectionMatcher(BaseMatcher):
@@ -208,7 +210,7 @@ class SectionMatcher(BaseMatcher):
         BaseMatcher.__init__(self, info, type, handlers)
 
     def createValue(self, attrnames):
-        return SectionValue(attrnames, self._values, self.name, self.type)
+        return SectionValue(attrnames, self._values, self.name, self)
 
 
 class SchemaMatcher(BaseMatcher):
@@ -232,12 +234,12 @@ class SectionValue:
     before attempting to modify self.
     """
 
-    def __init__(self, attrnames, values, name, type):
+    def __init__(self, attrnames, values, name, matcher):
         d = self.__dict__
         d['_attrnames'] = attrnames
         d['_values'] = values
         d['_name'] = name
-        d['_type'] = type
+        d['_matcher'] = matcher
 
     def __repr__(self):
         if self._name:
@@ -247,7 +249,7 @@ class SectionValue:
             # identify uniquely
             name = "at %#x" % id(self)
         clsname = self.__class__.__name__
-        return "<%s for %s %s>" % (clsname, self._type.name, name)
+        return "<%s for %s %s>" % (clsname, self._matcher.type.name, name)
 
     def __len__(self):
         return len(self._values)
@@ -289,4 +291,10 @@ class SectionValue:
         return self._name
 
     def getSectionType(self):
-        return self._type.name
+        return self._matcher.type.name
+
+    def getSectionDefinition(self):
+        return self._matcher.type
+
+    def getSectionMatcher(self):
+        return self._matcher

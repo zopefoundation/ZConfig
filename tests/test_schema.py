@@ -399,10 +399,10 @@ class SchemaTestCase(BaseSchemaTest):
         eq(conf.g[3].k2, "value2")
 
         # white box:
-        self.assert_(conf.g[0]._type is t1)
-        self.assert_(conf.g[1]._type is t1)
-        self.assert_(conf.g[2]._type is t2)
-        self.assert_(conf.g[3]._type is t2)
+        self.assert_(conf.g[0].getSectionDefinition() is t1)
+        self.assert_(conf.g[1].getSectionDefinition() is t1)
+        self.assert_(conf.g[2].getSectionDefinition() is t2)
+        self.assert_(conf.g[3].getSectionDefinition() is t2)
 
     def test_abstracttype_extension(self):
         schema = self.load_schema_text("""\
