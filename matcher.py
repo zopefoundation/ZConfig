@@ -134,6 +134,10 @@ class BaseMatcher:
         object."""
         values = self._values
         for key, ci in self.type:
+            if key:
+                key = repr(key)
+            else:
+                key = "section type " + `ci.sectiontype.name`
             assert ci.attribute is not None
             attr = ci.attribute
             v = values[attr]
@@ -146,12 +150,8 @@ class BaseMatcher:
             if v is None and ci.minOccurs:
                 default = ci.getdefault()
                 if default is None:
-                    if key:
-                        s = `key`
-                    else:
-                        s = "section type " + `ci.sectiontype.name`
                     raise ZConfig.ConfigurationError(
-                        "no values for %s; %s required" % (s, ci.minOccurs))
+                        "no values for %s; %s required" % (key, ci.minOccurs))
                 else:
                     v = values[attr] = default[:]
             if ci.ismulti():
@@ -160,7 +160,7 @@ class BaseMatcher:
                 if len(v) < ci.minOccurs:
                     raise ZConfig.ConfigurationError(
                         "not enough values for %s; %d found, %d required"
-                        % (`key`, len(v), ci.minOccurs))
+                        % (key, len(v), ci.minOccurs))
             if v is None and not ci.issection():
                 if ci.ismulti():
                     v = ci.getdefault()[:]
