@@ -111,7 +111,8 @@ class Context:
     # internal helpers
 
     def _parse_url(self, url, section):
-        if urlparse.urlparse(url)[-1]:
+        url, fragment = urlparse.urldefrag(url)
+        if fragment:
             raise ConfigurationError(
                 "fragment identifiers are not currently supported")
         file = urllib2.urlopen(url)
