@@ -28,6 +28,9 @@ except NameError:
 
 here = os.path.abspath(here)
 
+StringType = type("")
+
+
 class DatatypeTestCase(unittest.TestCase):
     types = ZConfig.datatypes.Registry()
 
@@ -88,25 +91,75 @@ class DatatypeTestCase(unittest.TestCase):
         raises(ValueError, convert, "nan")
 
     def test_datatype_identifier(self):
-        def convert(value, self=self):
-            value = self.types.get("identifier")(value)
-            self.assert_(isinstance(value, type("")))
-            return value
-
-        eq = self.assertEqual
+        convert = self.types.get("identifier")
         raises = self.assertRaises
+        self.check_names(convert)
+        self.check_never_namelike(convert)
+        raises(ValueError, convert, ".abc")
 
-        eq(convert("AbcDef"), "AbcDef")
-        eq(convert("a________"), "a________")
-        eq(convert("abc_def"), "abc_def")
-        eq(convert("int123"), "int123")
-        eq(convert("_abc"), "_abc")
-        eq(convert("_123"), "_123")
-        eq(convert("__dict__"), "__dict__")
+    def check_names(self, convert):
+        eq = self.assert_ascii_equal
+        eq(convert, "AbcDef")
+        eq(convert, "a________")
+        eq(convert, "abc_def")
+        eq(convert, "int123")
+        eq(convert, "_abc")
+        eq(convert, "_123")
+        eq(convert, "__dict__")
+
+    def assert_ascii_equal(self, convert, value):
+        v = convert(value)
+        self.assertEqual(v, value)
+        self.assert_(isinstance(v, StringType))
+
+    def check_never_namelike(self, convert):
+        raises = self.assertRaises
         raises(ValueError, convert, "2345")
+        raises(ValueError, convert, "23.45")
+        raises(ValueError, convert, ".45")
+        raises(ValueError, convert, "23.")
+        raises(ValueError, convert, "abc.")
         raises(ValueError, convert, "-abc")
         raises(ValueError, convert, "-123")
+        raises(ValueError, convert, "abc-")
+        raises(ValueError, convert, "123-")
+        raises(ValueError, convert, "-")
+        raises(ValueError, convert, ".")
+        raises(ValueError, convert, "&%$*()")
         raises(ValueError, convert, "")
+
+    def test_datatype_dotted_name(self):
+        convert = self.types.get("dotted-name")
+        raises = self.assertRaises
+        self.check_names(convert)
+        self.check_dotted_names(convert)
+        self.check_never_namelike(convert)
+        raises(ValueError, convert, "abc.")
+        raises(ValueError, convert, ".abc.")
+        raises(ValueError, convert, "abc.def.")
+        raises(ValueError, convert, ".abc.def.")
+        raises(ValueError, convert, ".abc.def")
+
+    def test_datatype_dotted_suffix(self):
+        convert = self.types.get("dotted-suffix")
+        eq = self.assert_ascii_equal
+        raises = self.assertRaises
+        self.check_names(convert)
+        self.check_dotted_names(convert)
+        self.check_never_namelike(convert)
+        eq(convert, ".a")
+        eq(convert, ".a.b")
+        eq(convert, ".a.b.c.d.e.f.g.h.i.j.k.l.m.n.o")
+        raises(ValueError, convert, "abc.")
+        raises(ValueError, convert, ".abc.")
+        raises(ValueError, convert, "abc.def.")
+        raises(ValueError, convert, ".abc.def.")
+
+    def check_dotted_names(self, convert):
+        eq = self.assert_ascii_equal
+        eq(convert, "abc.def")
+        eq(convert, "abc.def.ghi")
+        eq(convert, "a.d.g.g.g.g.g.g.g")
 
     def test_datatype_inet_address(self):
         convert = self.types.get("inet-address")

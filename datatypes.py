@@ -108,15 +108,32 @@ class BasicKeyConversion(RegularExpressionConversion):
         return RegularExpressionConversion.__call__(self, value).lower()
 
 
-class IdentifierConversion(RegularExpressionConversion):
-    def __init__(self):
-        RegularExpressionConversion.__init__(self, "[_a-zA-Z][_a-zA-Z0-9]*")
-
+class ASCIIConversion(RegularExpressionConversion):
     def __call__(self, value):
         value = RegularExpressionConversion.__call__(self, value)
         if UnicodeType is not None and isinstance(value, UnicodeType):
             value = value.encode("ascii")
         return value
+
+
+_ident_re = "[_a-zA-Z][_a-zA-Z0-9]*"
+
+class IdentifierConversion(ASCIIConversion):
+    def __init__(self):
+        ASCIIConversion.__init__(self, _ident_re)
+
+
+class DottedNameConversion(ASCIIConversion):
+    def __init__(self):
+        ASCIIConversion.__init__(self,
+                                 r"%s(?:\.%s)*" % (_ident_re, _ident_re))
+
+
+class DottedNameSuffixConversion(ASCIIConversion):
+    def __init__(self):
+        ASCIIConversion.__init__(self,
+                                 r"(?:%s)(?:\.%s)*|(?:\.%s)+"
+                                 % (_ident_re, _ident_re, _ident_re))
 
 
 def integer(value):
@@ -252,6 +269,8 @@ class SuffixMultiplier:
 
 stock_datatypes = {
     "boolean":           asBoolean,
+    "dotted-name":       DottedNameConversion(),
+    "dotted-suffix":     DottedNameSuffixConversion(),
     "identifier":        IdentifierConversion(),
     "integer":           integer,
     "float":             float_conversion,
