@@ -51,12 +51,20 @@ class LoggerFactoryBase(Factory):
         self()
 
     def getLowestHandlerLevel(self):
-        """Return the lowest log level provided by any configured handler."""
+        """Return the lowest log level provided by any configured handler.
+
+        If all handlers and the logger itself have level==NOTSET, this
+        returns NOTSET.
+        """
+        import logging
         lowest = self.level
         for factory in self.handler_factories:
-            handler_level = factory.getLevel()
-            if handler_level < lowest:
-                lowest = factory.getLevel()
+            level = factory.getLevel()
+            if level != logging.NOTSET:
+                if lowest == logging.NOTSET:
+                    lowest = level
+                else:
+                    lowest = min(lowest, level)
         return lowest
 
     def reopen(self):
