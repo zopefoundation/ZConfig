@@ -8,7 +8,7 @@ import unittest
 from types import StringType
 from UserDict import UserDict
 
-from ZConfig.Substitution import get, getnames, substitute
+from ZConfig.Substitution import get, getnames, isname, substitute
 from ZConfig.Substitution import SubstitutionRecursionError
 from ZConfig.Substitution import SubstitutionSyntaxError
 
@@ -134,6 +134,16 @@ class SubstitutionTestCase(unittest.TestCase):
         self.assertRaises(SubstitutionSyntaxError, getnames, "${name")
         self.assertRaises(SubstitutionSyntaxError, getnames, "${1name}")
         self.assertRaises(SubstitutionSyntaxError, getnames, "${ name}")
+
+    def test_isname(self):
+        self.assert_(isname("abc"))
+        self.assert_(isname("abc_def"))
+        self.assert_(isname("_abc"))
+        self.assert_(isname("abc_"))
+        self.assert_(not isname("abc-def"))
+        self.assert_(not isname("-def"))
+        self.assert_(not isname("abc-"))
+        self.assert_(not isname(""))
 
 
 def test_suite():

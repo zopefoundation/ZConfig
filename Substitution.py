@@ -1,5 +1,10 @@
 """Substitution support for ZConfig values."""
 
+try:
+    False
+except NameError:
+    False = 0
+
 class SubstitutionError(Exception):
     """Base exception for string substitution errors."""
 
@@ -61,6 +66,15 @@ def getnames(s):
         return L
     else:
         return []
+
+
+def isname(s):
+    """Return True iff s is a valid substitution name."""
+    m = _name_match(s)
+    if m:
+        return m.group() == s
+    else:
+        return False
 
 
 def _interp(accum, rest, section, context):
