@@ -454,31 +454,25 @@ class BaseComponentParser(BaseParser):
             self._stack[-1].description = data
 
     def start_key(self, attrs):
-        if not self._stack:
-            self.error(
-                "cannot define top-level keys in a schema " + self._top_level)
+        self._check_not_toplevel("key")
         BaseParser.start_key(self, attrs)
 
     def start_multikey(self, attrs):
-        if not self._stack:
-            self.error(
-                "cannot define top-level multikeys in a schema "
-                + self._top_level)
+        self._check_not_toplevel("multikey")
         BaseParser.start_multikey(self, attrs)
 
     def start_section(self, attrs):
-        if not self._stack:
-            self.error(
-                "cannot define top-level sections in a schema "
-                + self._top_level)
+        self._check_not_toplevel("section")
         BaseParser.start_section(self, attrs)
 
     def start_multisection(self, attrs):
-        if not self._stack:
-            self.error(
-                "cannot define top-level multisections in a schema "
-                + self._top_level)
+        self._check_not_toplevel("multisection")
         BaseParser.start_multisection(self, attrs)
+
+    def _check_not_toplevel(self, what):
+        if not self._stack:
+            self.error("cannot define top-level %s in a schema %s"
+                       % (what, self._top_level))
 
 
 class ComponentParser(BaseComponentParser):
