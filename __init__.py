@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.10 2003/08/01 20:41:59 fdrake Exp $
+$Id: __init__.py,v 1.11 2003/10/02 18:17:24 jeremy Exp $
 """
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
