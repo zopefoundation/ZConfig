@@ -131,7 +131,7 @@ class LoaderTestCase(unittest.TestCase):
             ZConfig.url.urldefrag("file:/abc/def#frag"),
             ("file:///abc/def", "frag"))
 
-class TestNonExistantResources(unittest.TestCase):
+class TestNonExistentResources(unittest.TestCase):
 
     # XXX Not sure if this is the best approach for these.  These
     # tests make sure that the error reported by ZConfig for missing
@@ -153,15 +153,15 @@ class TestNonExistantResources(unittest.TestCase):
     def fake_urlopen(self, url):
         raise self.error()
 
-    def test_nonexistant_file_ioerror(self):
+    def test_nonexistent_file_ioerror(self):
         self.error = IOError
-        self.check_nonexistant_file()
+        self.check_nonexistent_file()
 
-    def test_nonexistant_file_oserror(self):
+    def test_nonexistent_file_oserror(self):
         self.error = OSError
-        self.check_nonexistant_file()
+        self.check_nonexistent_file()
 
-    def check_nonexistant_file(self):
+    def check_nonexistent_file(self):
         fn = tempfile.mktemp()
         schema = ZConfig.loadSchemaFile(StringIO("<schema/>"))
         self.assertRaises(ZConfig.ConfigurationError,
@@ -181,7 +181,7 @@ class TestNonExistantResources(unittest.TestCase):
 
 def test_suite():
     suite = unittest.makeSuite(LoaderTestCase)
-    suite.addTest(unittest.makeSuite(TestNonExistantResources))
+    suite.addTest(unittest.makeSuite(TestNonExistentResources))
     return suite
 
 if __name__ == '__main__':
