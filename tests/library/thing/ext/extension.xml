@@ -1,5 +1,5 @@
 <extension>
-  <sectiontype type='thing-ext' group='thing'>
+  <sectiontype name='thing-ext' implements='thing'>
     <key name='thing-ext-key' default='thing-ext-default'/>
   </sectiontype>
 </extension>

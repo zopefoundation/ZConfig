@@ -1,5 +1,5 @@
 <component>
-  <sectiontype type='widget-a'>
+  <sectiontype name='widget-a'>
     <key name='widget-a-key' default='widget-a-default'/>
   </sectiontype>
 </component>

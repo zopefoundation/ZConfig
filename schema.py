@@ -47,7 +47,7 @@ def parseResource(resource, registry, loader):
 class BaseParser(xml.sax.ContentHandler):
 
     _cdata_tags = "description", "metadefault", "example", "default"
-    _handled_tags = ("import", "sectiongroup", "sectiontype",
+    _handled_tags = ("import", "abstracttype", "sectiontype",
                      "key", "multikey", "section", "multisection")
 
     def __init__(self, registry, loader, url):
@@ -60,7 +60,6 @@ class BaseParser(xml.sax.ContentHandler):
         self._prefixes = []
         self._schema = None
         self._stack = []
-        self._group = None
         self._url = url
         self._components = {}
 
@@ -285,9 +284,9 @@ class BaseParser(xml.sax.ContentHandler):
         pass
 
     def start_sectiontype(self, attrs):
-        name = attrs.get("type")
+        name = attrs.get("name")
         if not name:
-            self.error("sectiontype type must not be omitted or empty")
+            self.error("sectiontype name must not be omitted or empty")
         name = self.basic_key(name)
         self.push_prefix(attrs)
         keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
@@ -296,7 +295,7 @@ class BaseParser(xml.sax.ContentHandler):
             base = self._schema.gettype(basename)
             if not self._localtypes.has_key(basename):
                 self.error("cannot extend type derived outside component")
-            if base.istypegroup():
+            if base.isabstract():
                 self.error("sectiontype cannot extend an abstract type")
             if attrs.has_key("keytype"):
                 self.error("derived sectiontype may not specify a keytype")
@@ -305,17 +304,13 @@ class BaseParser(xml.sax.ContentHandler):
         else:
             sectinfo = self._schema.createSectionType(
                 name, keytype, valuetype, datatype)
-        if self._group is not None:
-            if attrs.has_key("group"):
-                self.error("sectiontype cannot specify group"
-                           " if nested in a sectiongroup")
-            self._group.addsubtype(sectinfo)
-        elif attrs.has_key("group"):
-            groupname = self.basic_key(attrs["group"])
-            group = self._schema.gettype(groupname)
-            if not group.istypegroup():
-                self.error("type specified as group is not a sectiongroup")
-            group.addsubtype(sectinfo)
+        if attrs.has_key("implements"):
+            ifname = self.basic_key(attrs["implements"])
+            interface = self._schema.gettype(ifname)
+            if not interface.isabstract():
+                self.error(
+                    "type specified by implements is not an abstracttype")
+            interface.addsubtype(sectinfo)
         self._stack.append(sectinfo)
 
     def end_sectiontype(self):
@@ -353,21 +348,16 @@ class BaseParser(xml.sax.ContentHandler):
     def end_multisection(self):
         self._stack.pop()
 
-    def start_sectiongroup(self, attrs):
-        if self._group is not None:
-            self.error("sectiongroup elements cannot be nested")
-        self.push_prefix(attrs)
-        name = attrs.get("type")
+    def start_abstracttype(self, attrs):
+        name = attrs.get("name")
         if not name:
-            self.error("sectiongroup must be named")
+            self.error("abstracttype name must not be omitted or empty")
         name = self.basic_key(name)
-        self._group = info.GroupType(name)
-        self._schema.addtype(self._group)
-        self._stack.append(self._group)
+        abstype = info.AbstractType(name)
+        self._schema.addtype(abstype)
+        self._stack.append(abstype)
 
-    def end_sectiongroup(self):
-        self.pop_prefix()
-        self._group = None
+    def end_abstracttype(self):
         self._stack.pop()
 
     def start_key(self, attrs):

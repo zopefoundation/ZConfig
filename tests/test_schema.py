@@ -126,7 +126,7 @@ class SchemaTestCase(BaseSchemaTest):
     def test_app_sectiontype(self):
         schema = self.load_schema_text(
             "<schema datatype='.appsection' prefix='%s'>"
-            "  <sectiontype type='foo' datatype='.MySection'>"
+            "  <sectiontype name='foo' datatype='.MySection'>"
             "    <key name='sample' datatype='integer' default='345'/>"
             "    </sectiontype>"
             "  <section name='sect' type='foo' />"
@@ -148,7 +148,7 @@ class SchemaTestCase(BaseSchemaTest):
     def test_empty_sections(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiontype type='section'/>"
+            "  <sectiontype name='section'/>"
             "  <section type='section' name='s1'/>"
             "  <section type='section' name='s2'/>"
             "</schema>")
@@ -162,17 +162,17 @@ class SchemaTestCase(BaseSchemaTest):
     def test_deeply_nested_sections(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiontype type='type1'>"
+            "  <sectiontype name='type1'>"
             "    <key name='key' default='type1-value'/>"
-            "    </sectiontype>"
-            "  <sectiontype type='type2'>"
+            "  </sectiontype>"
+            "  <sectiontype name='type2'>"
             "    <key name='key' default='type2-value'/>"
             "    <section name='sect' type='type1'/>"
-            "    </sectiontype>"
-            "  <sectiontype type='type3'>"
+            "  </sectiontype>"
+            "  <sectiontype name='type3'>"
             "    <key name='key' default='type3-value'/>"
             "    <section name='sect' type='type2'/>"
-            "    </sectiontype>"
+            "  </sectiontype>"
             "  <section name='sect' type='type3'/>"
             "</schema>")
         conf = self.load_config_text(schema,
@@ -250,9 +250,9 @@ class SchemaTestCase(BaseSchemaTest):
     def test_handler_ordering(self):
         schema = self.load_schema_text(
             "<schema handler='c'>"
-            "  <sectiontype type='inner'>"
+            "  <sectiontype name='inner'>"
             "  </sectiontype>"
-            "  <sectiontype type='outer'>"
+            "  <sectiontype name='outer'>"
             "    <section type='inner' name='sect-inner' handler='a'/>"
             "  </sectiontype>"
             "  <section type='outer' name='sect-outer' handler='b'/>"
@@ -273,10 +273,10 @@ class SchemaTestCase(BaseSchemaTest):
     def test_duplicate_section_names(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiontype type='sect'/>"
-            "  <sectiontype type='nesting'>"
+            "  <sectiontype name='sect'/>"
+            "  <sectiontype name='nesting'>"
             "    <section name='a' type='sect'/>"
-            "    </sectiontype>"
+            "  </sectiontype>"
             "  <section name='a' type='nesting'/>"
             "</schema>")
         self.assertRaises(ZConfig.ConfigurationError,
@@ -299,27 +299,26 @@ class SchemaTestCase(BaseSchemaTest):
         self.assertRaises(ZConfig.SchemaError,
                           self.load_schema_text, "<schema datatype='foobar'/>")
 
-    def test_load_sectiongroup(self):
+    def test_load_abstracttype(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiongroup type='group'>"
-            "    <sectiontype type='t1'>"
-            "      <key name='k1' default='default1'/>"
-            "      </sectiontype>"
-            "    <sectiontype type='t2'>"
-            "      <key name='k2' default='default2'/>"
-            "      </sectiontype>"
-            "    </sectiongroup>"
+            "  <abstracttype name='group'/>"
+            "  <sectiontype name='t1' implements='group'>"
+            "    <key name='k1' default='default1'/>"
+            "  </sectiontype>"
+            "  <sectiontype name='t2' implements='group'>"
+            "    <key name='k2' default='default2'/>"
+            "  </sectiontype>"
             "  <multisection name='*' type='group' attribute='g'/>"
             "</schema>")
         # check the types that get defined
         t = schema.gettype("group")
-        self.assert_(t.istypegroup())
+        self.assert_(t.isabstract())
         t1 = schema.gettype("t1")
-        self.assert_(not t1.istypegroup())
+        self.assert_(not t1.isabstract())
         self.assert_(t.getsubtype("t1") is t1)
         t2 = schema.gettype("t2")
-        self.assert_(not t2.istypegroup())
+        self.assert_(not t2.isabstract())
         self.assert_(t.getsubtype("t2") is t2)
         self.assertRaises(ZConfig.ConfigurationError, t.getsubtype, "group")
         self.assert_(t1 is not t2)
@@ -342,38 +341,31 @@ class SchemaTestCase(BaseSchemaTest):
         self.assert_(conf.g[2]._type is t2)
         self.assert_(conf.g[3]._type is t2)
 
-    def test_sectiongroup_extension(self):
+    def test_abstracttype_extension(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiongroup type='group'/>"
-            "  <sectiontype type='extra' group='group'/>"
+            "  <abstracttype name='group'/>"
+            "  <sectiontype name='extra' implements='group'/>"
             "  <section name='thing' type='group'/>"
             "</schema>")
-        group = schema.gettype("group")
-        self.assert_(schema.gettype("extra") is group.getsubtype("extra"))
+        abstype = schema.gettype("group")
+        self.assert_(schema.gettype("extra") is abstype.getsubtype("extra"))
 
         # make sure we can use the extension in a config:
         conf = self.load_config_text(schema, "<extra thing/>")
         self.assertEqual(conf.thing.getSectionType(), "extra")
 
-    def test_sectiongroup_extension_errors(self):
-        # specifying a non-existant group
+    def test_abstracttype_extension_errors(self):
+        # specifying a non-existant abstracttype
         self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
                           "<schema>"
-                          "  <sectiontype type='s' group='group'/>"
+                          "  <sectiontype name='s' implements='group'/>"
                           "</schema>")
-        # specifying something that isn't a group
+        # specifying something that isn't an abstracttype
         self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
                           "<schema>"
-                          "  <sectiontype type='t1'/>"
-                          "  <sectiontype type='t2' group='t1'/>"
-                          "</schema>")
-        # specifying a group from w/in a group
-        self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
-                          "<schema>"
-                          "  <sectiongroup type='group'>"
-                          "    <sectiontype type='t' group='group'/>"
-                          "  </sectiongroup>"
+                          "  <sectiontype name='t1'/>"
+                          "  <sectiontype name='t2' implements='t1'/>"
                           "</schema>")
 
     def test_arbitrary_key(self):
@@ -429,8 +421,8 @@ class SchemaTestCase(BaseSchemaTest):
 
         schema = self.load_schema_text(
             "<schema type='top'>"
-            "  <sectiontype type='used'/>"
-            "  <sectiontype type='unused'/>"
+            "  <sectiontype name='used'/>"
+            "  <sectiontype name='unused'/>"
             "  <section type='used' name='a'/>"
             "</schema>")
         L = schema.getrequiredtypes()
@@ -445,8 +437,8 @@ class SchemaTestCase(BaseSchemaTest):
 
         schema = self.load_schema_text(
             "<schema type='top'>"
-            "  <sectiontype type='used'/>"
-            "  <sectiontype type='unused'/>"
+            "  <sectiontype name='used'/>"
+            "  <sectiontype name='unused'/>"
             "  <section type='used' name='a'/>"
             "</schema>")
         self.assertEqual(schema.getunusedtypes(), ["unused"])
@@ -461,7 +453,7 @@ class SchemaTestCase(BaseSchemaTest):
     def test_simple_anonymous_section(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiontype type='sect'>"
+            "  <sectiontype name='sect'>"
             "    <key name='key' default='value'/>"
             "  </sectiontype>"
             "  <section name='*' type='sect' attribute='attr'/>"
@@ -472,7 +464,7 @@ class SchemaTestCase(BaseSchemaTest):
     def test_simple_anynamed_section(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiontype type='sect'>"
+            "  <sectiontype name='sect'>"
             "    <key name='key' default='value'/>"
             "  </sectiontype>"
             "  <section name='+' type='sect' attribute='attr'/>"
@@ -488,19 +480,18 @@ class SchemaTestCase(BaseSchemaTest):
     def test_nested_abstract_sectiontype(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiongroup type='abstract'>"
-            "    <sectiontype type='t1'/>"
-            "    <sectiontype type='t2'>"
-            "      <section type='abstract' name='s1'/>"
-            "    </sectiontype>"
-            "  </sectiongroup>"
+            "  <abstracttype name='abstract'/>"
+            "  <sectiontype name='t1' implements='abstract'/>"
+            "  <sectiontype name='t2' implements='abstract'>"
+            "    <section type='abstract' name='s1'/>"
+            "  </sectiontype>"
             "  <section type='abstract' name='*' attribute='s2'/>"
             "</schema>")
         conf = self.load_config_text(schema, "<t2>\n <t1 s1/>\n</t2>")
 
     def test_reserved_attribute_prefix(self):
         template = ("<schema>\n"
-                    "  <sectiontype type='s'/>\n"
+                    "  <sectiontype name='s'/>\n"
                     "  %s\n"
                     "</schema>")
         def check(thing, self=self, template=template):
@@ -520,10 +511,10 @@ class SchemaTestCase(BaseSchemaTest):
     def test_sectiontype_as_schema(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <sectiontype type='s'>"
+            "  <sectiontype name='s'>"
             "    <key name='skey' default='skey-default'/>"
             "  </sectiontype>"
-            "  <sectiontype type='t'>"
+            "  <sectiontype name='t'>"
             "    <key name='tkey' default='tkey-default'/>"
             "    <section name='*' type='s' attribute='section'/>"
             "  </sectiontype>"
@@ -560,7 +551,7 @@ class SchemaTestCase(BaseSchemaTest):
 
     def test_numeric_section_name(self):
         schema = self.load_schema_text("<schema>"
-                                       "  <sectiontype type='sect'/>"
+                                       "  <sectiontype name='sect'/>"
                                        "  <multisection name='*' type='sect'"
                                        "                attribute='things'/>"
                                        "</schema>")
@@ -570,10 +561,10 @@ class SchemaTestCase(BaseSchemaTest):
 
     def test_sectiontype_extension(self):
         schema = self.load_schema_text("<schema>"
-                                       "  <sectiontype type='t1'>"
+                                       "  <sectiontype name='t1'>"
                                        "    <key name='k1'/>"
                                        "  </sectiontype>"
-                                       "  <sectiontype type='t2' extends='t1'>"
+                                       "  <sectiontype name='t2' extends='t1'>"
                                        "    <key name='k2'/>"
                                        "  </sectiontype>"
                                        "  <section name='s' type='t2'/>"
@@ -590,30 +581,29 @@ class SchemaTestCase(BaseSchemaTest):
         # cannot override key from base
         self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
                           "<schema>"
-                          "  <sectiontype type='t1'>"
+                          "  <sectiontype name='t1'>"
                           "    <key name='k1'/>"
                           "  </sectiontype>"
-                          "  <sectiontype type='t2' extends='t1'>"
+                          "  <sectiontype name='t2' extends='t1'>"
                           "    <key name='k1'/>"
                           "  </sectiontype>"
                           "</schema>")
         # cannot extend non-existing section
         self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
                           "<schema>"
-                          "  <sectiontype type='t2' extends='t1'/>"
+                          "  <sectiontype name='t2' extends='t1'/>"
                           "</schema>")
         # cannot extend abstract type
         self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
                           "<schema>"
-                          "  <sectiongroup type='t1'>"
-                          "    <sectiontype type='t2' extends='t1'/>"
-                          "  </sectiongroup>"
+                          "  <abstracttype name='t1'/>"
+                          "  <sectiontype name='t2' extends='t1'/>"
                           "</schema>")
         # cannot specify keytype
         self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
                           "<schema>"
-                          "  <sectiontype type='t1' keytype='string'/>"
-                          "  <sectiontype type='t2' extends='t1'"
+                          "  <sectiontype name='t1' keytype='string'/>"
+                          "  <sectiontype name='t2' extends='t1'"
                           "               keytype='integer'/>"
                           "</schema>")
 

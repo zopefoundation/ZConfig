@@ -168,7 +168,7 @@ class SchemaLoader(BaseLoader):
 
 class ConfigLoader(BaseLoader):
     def __init__(self, schema):
-        if schema.istypegroup():
+        if schema.isabstract():
             raise ZConfig.SchemaError(
                 "cannot check a configuration an abstract type")
         BaseLoader.__init__(self)
@@ -186,12 +186,12 @@ class ConfigLoader(BaseLoader):
         if delegatename:
             raise NotImpementedError("section delegation is not yet supported")
         t = self.schema.gettype(type)
-        if t.istypegroup():
+        if t.isabstract():
             raise ZConfig.ConfigurationError(
                 "concrete sections cannot match abstract section types;"
                 " found abstract type " + `type`)
         ci = parent.type.getsectioninfo(type, name)
-        assert not ci.istypegroup()
+        assert not ci.isabstract()
         if not ci.isAllowedName(name):
             raise ZConfig.ConfigurationError(
                 "%s is not an allowed name for %s sections"

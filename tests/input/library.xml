@@ -2,6 +2,6 @@
   <description>
     Sample library of reusable data types.
   </description>
-  <sectiontype type="type-a"/>
-  <sectiontype type="type-b"/>
+  <sectiontype name="type-a"/>
+  <sectiontype name="type-b"/>
 </schema>

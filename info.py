@@ -88,7 +88,7 @@ class BaseInfo:
         clsname = self.__class__.__name__
         return "<%s for %s>" % (clsname, `self.name`)
 
-    def istypegroup(self):
+    def isabstract(self):
         return False
 
     def ismulti(self):
@@ -160,7 +160,7 @@ class SectionInfo(BaseInfo):
                 raise ZConfig.SchemaError(
                     "sections which can occur more than once must"
                     " specify a target attribute name")
-        if sectiontype.istypegroup():
+        if sectiontype.isabstract():
             datatype = None
         else:
             datatype = sectiontype.datatype
@@ -197,7 +197,7 @@ class SectionInfo(BaseInfo):
             return None
 
 
-class GroupType:
+class AbstractType:
     def __init__(self, name):
         self._subtypes = {}
         self.name = name
@@ -209,7 +209,7 @@ class GroupType:
         try:
             return self._subtypes[name]
         except KeyError:
-            raise ZConfig.SchemaError("no subtype %s in group %s"
+            raise ZConfig.SchemaError("no sectiontype %s in abstracttype %s"
                                       % (`name`, `self.name`))
 
     def getsubtypenames(self):
@@ -217,7 +217,7 @@ class GroupType:
         L.sort()
         return L
 
-    def istypegroup(self):
+    def isabstract(self):
         return True
 
 
@@ -315,7 +315,7 @@ class SectionType:
                         raise ZConfig.ConfigurationError(
                             "section name %s already in use for key" % key)
                     st = info.sectiontype
-                    if st.istypegroup():
+                    if st.isabstract():
                         try:
                             st = st.getsubtype(type)
                         except ZConfig.ConfigurationError:
@@ -327,17 +327,17 @@ class SectionType:
                             "name %s must be used for a %s section"
                             % (`name`, `st.name`))
                     return index
-            # else must be a section or a sectiongroup:
+            # else must be a sectiontype or an abstracttype:
             elif info.sectiontype.name == type:
                 if not (name or info.allowUnnamed()):
                     raise ZConfig.ConfigurationError(
                         `type` + " sections must be named")
                 return index
-            elif info.sectiontype.istypegroup():
+            elif info.sectiontype.isabstract():
                 st = info.sectiontype
                 if st.name == type:
                     raise ZConfig.ConfigurationError(
-                        "cannot define section with a sectiongroup type")
+                        "cannot define section with an abstract type")
                 try:
                     st = st.getsubtype(type)
                 except ZConfig.ConfigurationError:
@@ -350,11 +350,11 @@ class SectionType:
     def getsectioninfo(self, type, name):
         i = self.getsectionindex(type, name)
         st = self._children[i][1]
-        if st.istypegroup():
+        if st.isabstract():
             st = st.gettype(type)
         return st
 
-    def istypegroup(self):
+    def isabstract(self):
         return False
 
 
