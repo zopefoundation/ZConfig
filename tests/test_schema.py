@@ -26,6 +26,9 @@ def uppercase(value):
 def appsection(value):
     return MySection(value)
 
+def get_foo(section):
+    return section.foo
+
 class MySection:
     def __init__(self, value):
         self.conf = value
@@ -666,6 +669,8 @@ class SchemaTestCase(TestBase):
                           """)
 
     def test_sectiontype_derived_keytype(self):
+        # make sure that a derived section type inherits the keytype
+        # of its base
         schema = self.load_schema_text("""\
             <schema>
               <sectiontype name='sect' keytype='identifier'/>
@@ -684,6 +689,23 @@ class SchemaTestCase(TestBase):
             """)
         self.assertEqual(conf.foo.foo, "bar")
         self.assertEqual(conf.foo.Foo, "BAR")
+
+    def test_sectiontype_inherited_datatype(self):
+        schema = self.load_schema_text("""\
+            <schema prefix='ZConfig.tests.test_schema'>
+              <sectiontype name='base' datatype='.get_foo'>
+                <key name="foo"/>
+              </sectiontype>
+              <sectiontype name='derived' extends='base'/>
+              <section name='*' type='derived' attribute='splat'/>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, """\
+            <derived>
+              foo bar
+            </derived>
+            """)
+        self.assertEqual(conf.splat, "bar")
 
     def test_schema_keytype(self):
         schema = self.load_schema_text("""\

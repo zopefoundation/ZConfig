@@ -190,10 +190,13 @@ class BaseParser(xml.sax.ContentHandler):
         else:
             return name
 
-    def get_datatype(self, attrs, attrkey, default):
+    def get_datatype(self, attrs, attrkey, default, base=None):
         if attrs.has_key(attrkey):
             dtname = self.get_classname(attrs[attrkey])
         else:
+            convert = getattr(base, attrkey, None)
+            if convert is not None:
+                return convert
             dtname = default
 
         try:
@@ -201,10 +204,10 @@ class BaseParser(xml.sax.ContentHandler):
         except ValueError, e:
             self.error(e[0])
 
-    def get_sect_typeinfo(self, attrs):
+    def get_sect_typeinfo(self, attrs, base=None):
         keytype = self.get_datatype(attrs, "keytype", "basic-key")
         valuetype = self.get_datatype(attrs, "valuetype", "string")
-        datatype = self.get_datatype(attrs, "datatype", "null")
+        datatype = self.get_datatype(attrs, "datatype", "null", base)
         return keytype, valuetype, datatype
 
     def get_required(self, attrs):
@@ -325,7 +328,6 @@ class BaseParser(xml.sax.ContentHandler):
             self.error("sectiontype name must not be omitted or empty")
         name = self.basic_key(name)
         self.push_prefix(attrs)
-        keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
         if attrs.has_key("extends"):
             basename = self.basic_key(attrs["extends"])
             base = self._schema.gettype(basename)
@@ -333,9 +335,11 @@ class BaseParser(xml.sax.ContentHandler):
                 self.error("sectiontype cannot extend an abstract type")
             if attrs.has_key("keytype"):
                 self.error("derived sectiontype may not specify a keytype")
+            keytype, valuetype, datatype = self.get_sect_typeinfo(attrs, base)
             sectinfo = self._schema.deriveSectionType(
                 base, name, valuetype, datatype)
         else:
+            keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
             sectinfo = self._schema.createSectionType(
                 name, keytype, valuetype, datatype)
         if attrs.has_key("implements"):
