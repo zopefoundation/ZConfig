@@ -57,11 +57,15 @@ class BaseMatcher:
                 "too many instances of %s section" % `ci.sectiontype.name`)
 
     def addValue(self, key, value, position):
+        try:
+            realkey = self.type.keytype(key)
+        except ValueError, e:
+            raise ZConfig.DataConversionError(e, key, position)
         length = len(self.type)
         arbkey_info = None
         for i in range(length):
             k, ci = self.type[i]
-            if k == key:
+            if k == realkey:
                 break
             if ci.name == "+" and not ci.issection():
                 arbkey_info = i, k, ci
@@ -97,15 +101,15 @@ class BaseMatcher:
         value = ValueInfo(value, position)
         if k == '+':
             if ismulti:
-                if v.has_key(key):
-                    v[key].append(value)
+                if v.has_key(realkey):
+                    v[realkey].append(value)
                 else:
-                    v[key] = [value]
+                    v[realkey] = [value]
             else:
-                if v.has_key(key):
+                if v.has_key(realkey):
                     raise ZConfig.ConfigurationError(
                         "too many values for " + `key`)
-                v[key] = value
+                v[realkey] = value
         elif ismulti:
             v.append(value)
         else:

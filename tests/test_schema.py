@@ -226,6 +226,38 @@ class SchemaTestCase(BaseSchemaTest):
         self.assertEqual(conf.c, [41, 42, 43])
         self.assertEqual(conf.d, [])
 
+    def test_multikey_required(self):
+        schema = self.load_schema_text("<schema>"
+                                       "  <multikey name='k' required='yes'/>"
+                                       "</schema>")
+        self.assertRaises(ZConfig.ConfigurationError,
+                          self.load_config_text, schema, "")
+
+    def test_multisection_required(self):
+        schema = self.load_schema_text(
+            "<schema>"
+            "  <sectiontype name='s'/>"
+            "  <multisection name='*' attribute='s' type='s' required='yes'/>"
+            "</schema>")
+        self.assertRaises(ZConfig.ConfigurationError,
+                          self.load_config_text, schema, "")
+
+    def test_key_required_but_missing(self):
+        schema = self.load_schema_text("<schema>"
+                                       "  <key name='k' required='yes'/>"
+                                       "</schema>")
+        self.assertRaises(ZConfig.ConfigurationError,
+                          self.load_config_text, schema, "")
+
+    def test_section_required_but_missing(self):
+        schema = self.load_schema_text("<schema>"
+                                       "  <sectiontype name='k'/>"
+                                       "  <section name='k' type='k'"
+                                       "           required='yes'/>"
+                                       "</schema>")
+        self.assertRaises(ZConfig.ConfigurationError,
+                          self.load_config_text, schema, "")
+
     def test_key_default_element(self):
         self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
                           "<schema>"
@@ -606,6 +638,24 @@ class SchemaTestCase(BaseSchemaTest):
                           "  <sectiontype name='t2' extends='t1'"
                           "               keytype='integer'/>"
                           "</schema>")
+
+    def test_schema_keytype(self):
+        schema = self.load_schema_text("<schema keytype='ipaddr-or-hostname'>"
+                                       "  <key name='+' attribute='table'"
+                                       "       datatype='ipaddr-or-hostname'/>"
+                                       "</schema>")
+        conf = self.load_config_text(schema,
+                                     "host.example.com 127.0.0.1\n"
+                                     "www.example.org 127.0.0.2\n")
+        table = conf.table
+        self.assertEqual(len(table), 2)
+        L = table.items()
+        L.sort()
+        self.assertEqual(L, [("host.example.com", "127.0.0.1"),
+                             ("www.example.org", "127.0.0.2")])
+
+        self.assertRaises(ZConfig.ConfigurationError,
+                          self.load_config_text, schema, "abc.  127.0.0.1")
 
 
 def test_suite():

@@ -218,11 +218,14 @@ class BaseParser(xml.sax.ContentHandler):
             return name, None, aname
         else:
             # run the keytype converter to make sure this is a valid key
-            name = self._stack[-1].keytype(name)
+            try:
+                name = self._stack[-1].keytype(name)
+            except ValueError, e:
+                self.error("could not convert key name to keytype: " + str(e))
             if not aname:
                 aname = self.basic_key(name)
                 aname = self.identifier(aname.replace('-', '_'))
-            return None, self.basic_key(name), aname
+            return None, name, aname
 
     # schema loading logic
 
