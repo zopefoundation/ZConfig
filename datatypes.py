@@ -111,14 +111,13 @@ class IdentifierConversion(RegularExpressionConversion):
         RegularExpressionConversion.__init__(self, "[_a-zA-Z][_a-zA-Z0-9]*")
 
 
-if sys.version[:3] < "2.3":
-    def integer(value):
-        try:
-            return int(value)
-        except ValueError:
-            return long(value)
-else:
-    integer = int
+def integer(value):
+    try:
+        return int(value)
+    except ValueError:
+        return long(value)
+    except OverflowError:
+        return long(value)
 
 
 def null_conversion(value):
