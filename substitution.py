@@ -28,12 +28,12 @@ def substitute(s, mapping):
         result = ''
         rest = s
         while rest:
-            p, name, rest = _split(rest)
+            p, name, namecase, rest = _split(rest)
             result += p
             if name:
                 v = mapping.get(name)
                 if v is None:
-                    raise ZConfig.SubstitutionReplacementError(s, name)
+                    raise ZConfig.SubstitutionReplacementError(s, namecase)
                 result += v
         return result
     else:
@@ -81,7 +81,7 @@ def _split(s):
                     "'$' not followed by '$' or name")
             name = m.group(0)
             i = m.end()
-        return prefix, name.lower(), s[i:]
+        return prefix, name.lower(), name, s[i:]
     else:
         return s, None, None
 
