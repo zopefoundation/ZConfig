@@ -36,7 +36,7 @@ class LoggingTestBase(unittest.TestCase):
         self._old_logger = logging.getLogger()
         self._old_level = self._old_logger.level
         self._old_handlers = self._old_logger.handlers[:]
-        self._old_logger.handlers[:] = [loghandler.NullHandler()]
+        self._old_logger.handlers[:] = []
         self._old_logger.setLevel(logging.WARN)
 
     def tearDown(self):
