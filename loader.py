@@ -234,8 +234,7 @@ class ConfigLoader(BaseLoader):
         parser.parse(matcher)
 
 
-class CompositeHandler:
-    __metatype__ = type
+class CompositeHandler(object):
     __slots__ = '_handlers', '_convert'
 
     def __init__(self, handlers, schema):

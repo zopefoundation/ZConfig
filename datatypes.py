@@ -271,8 +271,7 @@ stock_datatypes = {
                                            }),
     }
 
-class Registry:
-    __metatype__ = type
+class Registry(object):
     __slots__ = '_stock', '_other', '_basic_key'
 
     def __init__(self, stock=None):
