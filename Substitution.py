@@ -1,21 +1,12 @@
 """Substitution support for ZConfig values."""
 
-from Common import *
+import ZConfig
 
-class SubstitutionError(ConfigurationError):
-    """Base class for exceptions raised by ZConfig.Substitution."""
-
-class SubstitutionSyntaxError(SubstitutionError):
-    """Raised when interpolation source text contains syntactical errors."""
-
-class SubstitutionReplacementError(SubstitutionError, LookupError):
-    """Raised when no replacement is available for a reference."""
-
-    def __init__(self, source, name):
-        self.source = source
-        self.name = name
-        SubstitutionError.__init__(
-            self, "no replacement for " + `name`)
+try:
+    True
+except NameError:
+    True = 1
+    False = 0
 
 
 def substitute(s, mapping):
@@ -29,7 +20,7 @@ def substitute(s, mapping):
             if name:
                 v = mapping.get(name)
                 if v is None:
-                    raise SubstitutionReplacementError(s, name)
+                    raise ZConfig.SubstitutionReplacementError(s, name)
                 result += v
         return result
     else:
@@ -55,7 +46,7 @@ def _split(s):
         i = s.find("$")
         c = s[i+1:i+2]
         if c == "":
-            raise SubstitutionSyntaxError(
+            raise ZConfig.SubstitutionSyntaxError(
                 "illegal lone '$' at end of source")
         if c == "$":
             return s[:i+1], None, s[i+2:]
@@ -63,16 +54,17 @@ def _split(s):
         if c == "{":
             m = _name_match(s, i + 2)
             if not m:
-                raise SubstitutionSyntaxError("'${' not followed by name")
+                raise ZConfig.SubstitutionSyntaxError(
+                    "'${' not followed by name")
             name = m.group(0)
             i = m.end() + 1
             if not s.startswith("}", i - 1):
-                raise SubstitutionSyntaxError(
+                raise ZConfig.SubstitutionSyntaxError(
                     "'${%s' not followed by '}'" % name)
         else:
             m = _name_match(s, i+1)
             if not m:
-                raise SubstitutionSyntaxError(
+                raise ZConfig.SubstitutionSyntaxError(
                     "'$' not followed by '$' or name")
             name = m.group(0)
             i = m.end()

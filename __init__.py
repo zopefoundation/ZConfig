@@ -13,8 +13,10 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.2 2002/11/07 20:05:24 fdrake Exp $
+$Id: __init__.py,v 1.3 2002/12/05 05:17:45 fdrake Exp $
 """
+
+from ZConfig.Exceptions import *
 
 def load(url):
     import Context

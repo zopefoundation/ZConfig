@@ -2,7 +2,7 @@
 
 import urlparse
 
-from Common import *
+from ZConfig import ConfigurationError, ConfigurationSyntaxError
 
 
 def Parse(resource, context, section):

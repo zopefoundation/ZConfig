@@ -5,9 +5,8 @@ from __future__ import nested_scopes
 
 import unittest
 
+from ZConfig import SubstitutionReplacementError, SubstitutionSyntaxError
 from ZConfig.Substitution import isname, substitute
-from ZConfig.Substitution import SubstitutionReplacementError
-from ZConfig.Substitution import SubstitutionSyntaxError
 
 
 class SubstitutionTestCase(unittest.TestCase):

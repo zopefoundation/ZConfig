@@ -4,12 +4,6 @@ Since some names are only defined if needed, this module should be
 imported using the from-import-* syntax.
 """
 
-try:
-    True
-except NameError:
-    True = 1
-    False = 0
-
 
 class ConfigurationError(Exception):
     def __init__(self, msg):
@@ -55,3 +49,16 @@ class ConfigurationTypeError(ConfigurationError):
         self.found = found
         self.expected = expected
         ConfigurationError.__init__(self, msg)
+
+
+class SubstitutionSyntaxError(ConfigurationError):
+    """Raised when interpolation source text contains syntactical errors."""
+
+
+class SubstitutionReplacementError(ConfigurationError, LookupError):
+    """Raised when no replacement is available for a reference."""
+
+    def __init__(self, source, name):
+        self.source = source
+        self.name = name
+        ConfigurationError.__init__(self, "no replacement for " + `name`)

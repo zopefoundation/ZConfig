@@ -1,6 +1,12 @@
 """Configuration data structure."""
 
-from Common import *
+import ZConfig
+
+try:
+    True
+except NameError:
+    True = 1
+    False = 0
 
 class Configuration:
     def __init__(self, container, type, name, url):
@@ -31,7 +37,7 @@ class Configuration:
 
     def setDelegate(self, section):
         if self.delegate is not None:
-            raise ConfigurationError("cannot modify delegation")
+            raise ZConfig.ConfigurationError("cannot modify delegation")
         self.delegate = section
 
     def addChildSection(self, section):
@@ -53,7 +59,7 @@ class Configuration:
         if child is None or child.url != self.url:
             self._sections_by_name[key] = section
         else:
-            raise ConfigurationError(
+            raise ZConfig.ConfigurationError(
                 "cannot replace existing named section")
 
     def getSection(self, type, name=None):
@@ -64,14 +70,14 @@ class Configuration:
             try:
                 return self._sections_by_name[key]
             except KeyError:
-                raise ConfigurationMissingSectionError(type, name)
+                raise ZConfig.ConfigurationMissingSectionError(type, name)
         else:
             L = []
             for sect in self._sections:
                 if sect.type == type:
                     L.append(sect)
             if len(L) > 1:
-                raise ConfigurationConflictingSectionError(type, name)
+                raise ZConfig.ConfigurationConflictingSectionError(type, name)
             if L:
                 return L[0]
             elif self.delegate:
@@ -93,7 +99,7 @@ class Configuration:
         except KeyError:
             self._data[key] = value
         else:
-            raise ConfigurationError("cannot add existing key")
+            raise ZConfig.ConfigurationError("cannot add existing key")
 
     def has_key(self, key):
         key = key.lower()

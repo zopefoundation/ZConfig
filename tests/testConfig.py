@@ -23,9 +23,6 @@ import urlparse
 import ZConfig
 
 from ZConfig.Context import Context
-from ZConfig.Common import ConfigurationError, ConfigurationTypeError
-from ZConfig.Common import ConfigurationMissingSectionError
-from ZConfig.Common import ConfigurationSyntaxError
 
 try:
     __file__
@@ -138,7 +135,7 @@ class ConfigurationTestCase(TestBase):
 
     def test_missing_named_section(self):
         conf = self.load("simplesections.conf")
-        self.assertRaises(ConfigurationMissingSectionError,
+        self.assertRaises(ZConfig.ConfigurationMissingSectionError,
                           conf.getSection, "section", "does-not-exist")
 
     def test_keys(self):
@@ -224,7 +221,7 @@ class ConfigurationTestCase(TestBase):
     def test_no_delegation(self):
         url = urlparse.urljoin(CONFIG_BASE, "simplesections.conf")
         context = NoDelegationContext()
-        self.assertRaises(ConfigurationTypeError, context.load, url)
+        self.assertRaises(ZConfig.ConfigurationTypeError, context.load, url)
 
     def test_include(self):
         conf = self.load("include.conf")
@@ -244,15 +241,15 @@ class ConfigurationTestCase(TestBase):
         self.assertEqual(conf.get("getwords"), "abc two words def")
 
     def test_define_errors(self):
-        self.assertRaises(ConfigurationSyntaxError,
+        self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define\n")
-        self.assertRaises(ConfigurationSyntaxError,
+        self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define abc-def\n")
-        self.assertRaises(ConfigurationSyntaxError,
+        self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define a value\n%define a value\n")
 
     def test_fragment_ident_disallowed(self):
-        self.assertRaises(ConfigurationError,
+        self.assertRaises(ZConfig.ConfigurationError,
                           self.load, "simplesections.conf#another")
 
     def test_load_from_abspath(self):

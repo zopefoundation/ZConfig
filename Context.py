@@ -5,7 +5,8 @@ import urllib
 import urllib2
 import urlparse
 
-from Common import *
+import ZConfig
+
 from Config import Configuration, ImportingConfiguration
 from Substitution import isname, substitute
 
@@ -116,10 +117,10 @@ class Context:
             # another resource.
             oldsect = self._named_sections[name]
             if oldsect.url == section.url:
-                raise ConfigurationError(
+                raise ZConfig.ConfigurationError(
                     "named section cannot be defined twice in same resource")
             if oldsect.type != type:
-                raise ConfigurationError(
+                raise ZConfig.ConfigurationError(
                     "named section cannot change type")
         newsect = self.createNestedSection(section, type, name, delegatename)
         self._all_sections.append(newsect)
@@ -148,7 +149,7 @@ class Context:
     def _parse_url(self, url, section):
         url, fragment = urlparse.urldefrag(url)
         if fragment:
-            raise ConfigurationError(
+            raise ZConfig.ConfigurationError(
                 "fragment identifiers are not currently supported")
         file = urllib2.urlopen(url)
         self._current_imports.append(section)
@@ -166,14 +167,14 @@ class Context:
             for referrer in L:
                 type = self.getDelegateType(referrer.type)
                 if type is None:
-                    raise ConfigurationTypeError(
+                    raise ZConfig.ConfigurationTypeError(
                         "%s sections are not allowed to specify delegation\n"
                         "(in %s)"
                         % (repr(referrer.type), referrer.url),
                         referrer.type, None)
                 type = type.lower()
                 if type != section.type:
-                    raise ConfigurationTypeError(
+                    raise ZConfig.ConfigurationTypeError(
                         "%s sections can only inherit from %s sections\n"
                         "(in %s)"
                         % (repr(referrer.type), repr(type), referrer.url),
@@ -205,9 +206,9 @@ class Resource:
     def define(self, name, value):
         key = name.lower()
         if self._definitions.has_key(key):
-            raise ConfigurationError("cannot redefine " + `name`)
+            raise ZConfig.ConfigurationError("cannot redefine " + `name`)
         if not isname(name):
-            raise ConfigurationError(
+            raise ZConfig.ConfigurationError(
                 "not a substitution legal name: " + `name`)
         self._definitions[key] = value
 
