@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.14 2004/02/11 21:06:58 fdrake Exp $
+$Id: __init__.py,v 1.15 2004/02/11 21:18:54 fdrake Exp $
 """
 version_info = (2, 1)
 __version__ = ".".join([str(n) for n in version_info])
@@ -85,26 +85,6 @@ class SchemaResourceError(SchemaError):
         if self.package is not None:
             s += "\n  Package path: " + repr(self.path)
         return s
-
-
-class ConfigurationMissingSectionError(ConfigurationError):
-    def __init__(self, type, name=None):
-        self.type = type
-        self.name = name
-        details = 'Missing section (type: %s' % type
-        if name is not None:
-            details += ', name: %s' % name
-        ConfigurationError.__init__(self, details + ')')
-
-
-class ConfigurationConflictingSectionError(ConfigurationError):
-    def __init__(self, type, name=None):
-        self.type = type
-        self.name = name
-        details = 'Conflicting sections (type: %s' % type
-        if name is not None:
-            details += ', name: %s' % name
-        ConfigurationError.__init__(self, details + ')')
 
 
 class ConfigurationSyntaxError(_ParseError):
