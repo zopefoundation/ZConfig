@@ -141,6 +141,37 @@ class CommandLineTest(TestBase):
         self.assertEqual(conf.k2, None)
         self.assertEqual(conf.k3, 42)
 
+    def test_section_contents(self):
+        schema = self.load_schema_text("""\
+            <schema>
+              <sectiontype name='st'>
+                <key name='k1'/>
+                <key name='k2' default='3' datatype='integer'/>
+                <multikey name='k3'>
+                  <default>k3-v1</default>
+                  <default>k3-v2</default>
+                  <default>k3-v3</default>
+                </multikey>
+              </sectiontype>
+              <section name='s1' type='st'/>
+              <section name='s2' type='st'/>
+            </schema>
+            """)
+        self.clopts = [("s1/k1=foo", None),
+                       ("s2/k3=value1", None),
+                       ("s2/k3=value2", None),
+                       ("s1/k2=99", None),
+                       ("s2/k3=value3", None),
+                       ("s2/k3=value4", None),
+                       ]
+        conf = self.load_config_text(schema, "<st s1/>\n<st s2/>")
+        self.assertEqual(conf.s1.k1, "foo")
+        self.assertEqual(conf.s1.k2, 99)
+        self.assertEqual(conf.s1.k3, ["k3-v1", "k3-v2", "k3-v3"])
+        self.assertEqual(conf.s2.k1, None)
+        self.assertEqual(conf.s2.k2, 3)
+        self.assertEqual(conf.s2.k3, ["value1", "value2", "value3", "value4"])
+
 
 def test_suite():
     return unittest.makeSuite(CommandLineTest)
