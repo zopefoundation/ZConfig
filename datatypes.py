@@ -200,8 +200,11 @@ class IpaddrOrHostname(RegularExpressionConversion):
                 r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr cont'd
                 r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr cont'd
                 r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])$)" #ipaddr cont'd
-                r"|([^0-9][A-Za-z0-9-_.]+)") # or hostname
+                r"|([A-Za-z_][-A-Za-z0-9_.]*[-A-Za-z0-9_])") # or hostname
         RegularExpressionConversion.__init__(self, expr)
+
+    def __call__(self, value):
+        return RegularExpressionConversion.__call__(self, value).lower()
 
 def existing_directory(v):
     if os.path.isdir(v):
