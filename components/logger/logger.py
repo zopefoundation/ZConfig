@@ -51,6 +51,15 @@ class LoggerFactoryBase(Factory):
         # make sure we've instantiated the logger
         self()
 
+    def getLowestHandlerLevel(self):
+        """Return the lowest log level provided by any configured handler."""
+        lowest = self.level
+        for factory in self.handler_factories:
+            handler_level = factory.getLevel()
+            if handler_level < lowest:
+                lowest = factory.getLevel()
+        return lowest
+
 
 class EventLogFactory(LoggerFactoryBase):
     """Logger factory that returns the root logger."""
