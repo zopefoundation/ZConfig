@@ -60,7 +60,11 @@ class Configuration:
         # get section by name, relative to this section
         type = type.lower()
         if name:
-            return self._sections_by_name[(type, name.lower())]
+            key = (type, name.lower())
+            try:
+                return self._sections_by_name[key]
+            except KeyError:
+                raise ConfigurationMissingSectionError(type, name)
         else:
             L = []
             for sect in self._sections:

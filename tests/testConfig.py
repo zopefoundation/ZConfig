@@ -24,6 +24,7 @@ import ZConfig
 
 from ZConfig.Context import Context
 from ZConfig.Common import ConfigurationError, ConfigurationTypeError
+from ZConfig.Common import ConfigurationMissingSectionError
 
 try:
     __file__
@@ -131,13 +132,18 @@ class ConfigurationTestCase(TestBase):
                          [("var", "bar"), ("var-one", "splat"),
                           ("var-two", "stuff")])
 
-    def has_key(self):
+    def test_has_key(self):
         conf = self.load("simplesections.conf")
         sect = conf.getSection("section", "name")
         for key in ("var", "var-one", "var-two"):
             self.assert_(sect.has_key(key))
             self.assert_(sect.has_key(key.upper()))
         self.assert_(not sect.has_key("var-three"))
+
+    def test_missing_named_section(self):
+        conf = self.load("simplesections.conf")
+        self.assertRaises(ConfigurationMissingSectionError,
+                          conf.getSection, "section", "does-not-exist")
 
     def test_keys(self):
         conf = self.load("simplesections.conf")
