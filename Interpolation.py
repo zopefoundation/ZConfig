@@ -62,7 +62,8 @@ def _interp(accum, rest, section, context):
         accum.append(rest[:i])
         rest = rest[i+1:]
         if not rest:
-            raise InterpolationSyntaxError("lone '$' at end of text", context)
+            accum.append("$")
+            break
         if rest[0] == "$":
             accum.append("$")
             rest = rest[1:]
@@ -88,8 +89,8 @@ def _interp(accum, rest, section, context):
         else:
             m = _name_match(rest)
             if not m:
-                raise InterpolationSyntaxError("'$' not followed by name",
-                                               context)
+                accum.append("$")
+                continue
             name = m.group(0)
             v = section.get(name, "")
             if "$" in v and context:

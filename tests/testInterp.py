@@ -42,13 +42,19 @@ class InterpolationTestCase(unittest.TestCase):
         def check(s):
             self.assertRaises(InterpolationSyntaxError,
                               interpolate, s, d)
-        check("$")
-        check("$ stuff")
         check("$1")
         check("${")
         check("${name")
         check("${1name}")
         check("${ name}")
+
+    def test_edge_cases(self):
+        # It's debatable what should happen for these cases, so we'll
+        # follow the lead of the Bourne shell here.
+        def check(s, value):
+            self.assertEqual(interpolate(s, {}), value)
+        check("$", "$")
+        check("$ stuff", "$ stuff")
 
     def test_non_nesting(self):
         d = {"name": "$value"}
