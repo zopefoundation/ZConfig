@@ -1,6 +1,8 @@
 """Top-level configuration handle."""
 
+import os
 import urllib2
+import urlparse
 
 from Common import *
 from Config import Configuration, ImportingConfiguration
@@ -40,6 +42,14 @@ class Context:
     # public API
 
     def load(self, url):
+        """Load a resource from a URL or pathname."""
+        parts = urlparse.urlsplit(url)
+        if not parts[0]:
+            # must be a filename
+            path = os.path.abspath(url)
+            if os.sep != "/":
+                path = path.replace(os.sep, "/")
+            url = "file://" + path
         top = self.createToplevelSection(url)
         self._imports = [top]
         self._parse_url(url, top)

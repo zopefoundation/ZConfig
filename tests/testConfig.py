@@ -13,14 +13,19 @@
 ##############################################################################
 """Tests of the configuration data structures and loader."""
 
-import os.path
+import os
 import sys
+import tempfile
 import unittest
 import urlparse
+import warnings
 
 import ZConfig
 from ZConfig.Context import Context
 from ZConfig.Common import ConfigurationTypeError
+
+warnings.filterwarnings("ignore", r".*\bmktemp\b.*",
+                        RuntimeWarning, __name__)
 
 if __name__ == "__main__":
     __file__ = sys.argv[0]
@@ -181,6 +186,35 @@ class ConfigurationTestCase(TestBase):
         self.assertEqual(conf.get("var1"), "abc")
         self.assertEqual(conf.get("var2"), "value2")
         self.assertEqual(conf.get("var3"), "value3")
+
+    def test_load_from_abspath(self):
+        fn = self.write_tempfile()
+        try:
+            self.check_load_from_path(fn)
+        finally:
+            os.unlink(fn)
+
+    def test_load_from_relpath(self):
+        fn = self.write_tempfile()
+        dir, name = os.path.split(fn)
+        pwd = os.getcwd()
+        try:
+            os.chdir(dir)
+            self.check_load_from_path(name)
+        finally:
+            os.chdir(pwd)
+            os.unlink(fn)
+
+    def write_tempfile(self):
+        fn = tempfile.mktemp()
+        fp = open(fn, "w")
+        fp.write("key value\n")
+        fp.close()
+        return fn
+
+    def check_load_from_path(self, path):
+        context = Context()
+        context.load(path)
 
 
 class NoDelegationContext(Context):
