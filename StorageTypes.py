@@ -23,9 +23,9 @@ def asBoolean(s):
     if not s:
         return 0
     ss = str(s).lower()
-    if ss in ('1', 'y', 't', 'yes', 'true', 'on'):
+    if ss in ('yes', 'true', 'on'):
         return 1
-    elif ss in ('0', 'n', 'f', 'no', 'false', 'off'):
+    elif ss in ('no', 'false', 'off'):
         return 0
     else:
         raise ValueError, 'Not a boolean value: %s' % s
