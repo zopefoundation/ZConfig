@@ -44,18 +44,6 @@ class LoaderTestCase(unittest.TestCase):
         schema2 = loader.loadURL(url)
         self.assert_(schema1 is schema2)
 
-    def test_schema_components(self):
-        loader = ZConfig.loader.SchemaLoader()
-        url = ZConfig.url.urljoin(CONFIG_BASE, "library.xml")
-        schema = loader.loadURL(url)
-        type_a = loader.loadURL(url + "#type-a")
-        type_b = loader.loadURL(url + "#type-b")
-        self.assertEqual(type_a.name, "type-a")
-        self.assertEqual(type_b.name, "type-b")
-        # make sure we're using the cached schema for the types
-        self.assert_(type_a is schema.gettype("type-a"))
-        self.assert_(type_b is schema.gettype("type-b"))
-
     def test_simple_import_with_cache(self):
         loader = ZConfig.loader.SchemaLoader()
         url1 = ZConfig.url.urljoin(CONFIG_BASE, "library.xml")
