@@ -52,7 +52,7 @@ def substitute(s, section):
 
 def _interp(accum, rest, section, context):
     while 1:
-        s, name, rest = _split(rest)
+        s, name, rest = _split(rest, context)
         if s:
             accum.append(s)
         if name:
@@ -76,7 +76,7 @@ def _interp(accum, rest, section, context):
             return
 
 
-def _split(s, context=None):
+def _split(s, context):
     # Return a triple:  prefix, name, suffix
     # - prefix is text that can be used literally in the result (may be '')
     # - name is a referenced name, or None
