@@ -122,6 +122,17 @@ class LoaderTestCase(unittest.TestCase):
                        "</schema>")
         self.assertRaises(ZConfig.SchemaError, loader.loadFile, sio)
 
+    def test_import_two_components_one_package(self):
+        loader = ZConfig.loader.SchemaLoader()
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.library.widget' />"
+                       "  <import package='ZConfig.tests.library.widget'"
+                       "          file='extra.xml' />"
+                       "</schema>")
+        schema = loader.loadFile(sio)
+        schema.gettype("widget-a")
+        schema.gettype("extra-type")
+
     def test_urlsplit_urlunsplit(self):
         # Extracted from Python's test.test_urlparse module:
         for url, parsed, split in [

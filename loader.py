@@ -207,8 +207,6 @@ class ConfigLoader(BaseLoader):
 
     def importSchemaComponent(self, pkgname):
         schema = self.schema
-        if schema.hasComponent(pkgname):
-            return
         if not self._private_schema:
             # replace the schema with an extended schema on the first %import
             self._loader = SchemaLoader(self.schema.registry)
@@ -216,8 +214,10 @@ class ConfigLoader(BaseLoader):
             self._private_schema = True
             self.schema = schema
         url = self._loader.schemaComponentSource(pkgname, '')
+        if schema.hasComponent(url):
+            return
         resource = self.openResource(url)
-        schema.addComponent(pkgname)
+        schema.addComponent(url)
         try:
             ZConfig.schema.parseComponent(resource, self._loader, schema)
         finally:
