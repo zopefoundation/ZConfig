@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.5 2003/01/06 19:35:41 fdrake Exp $
+$Id: __init__.py,v 1.6 2003/01/06 20:02:56 fdrake Exp $
 """
 
 from ZConfig.loader import loadConfig, loadConfigFile
@@ -109,7 +109,6 @@ class DataConversionError(ConfigurationError, ValueError):
         ConfigurationError.__init__(self, str(exception))
         self.exception = exception
         self.value = value
-        self.position = position
         self.lineno, self.colno, self.url = position
 
     def __str__(self):
