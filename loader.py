@@ -78,11 +78,19 @@ class BaseLoader:
         # change and provide the cached resource when the remote
         # resource is not accessible.
         url = str(url)
-        file = urllib2.urlopen(url)
+        try:
+            file = urllib2.urlopen(url)
+        except (IOError, OSError), e:
+            # Python 2.1 raises a different error from Python 2.2+,
+            # so we catch both to make sure we detect the situation.
+            error = ZConfig.ConfigurationError("error opening resource %s: %s"
+                                               % (url, str(e)))
+            error.url = url
+            raise error
         return self.createResource(file, url)
 
     def normalizeURL(self, url):
-        if os.path.exists(url):
+        if os.path.exists(url) or ":" not in url:
             url = "file://" + urllib.pathname2url(os.path.abspath(url))
         url, fragment = ZConfig.url.urldefrag(url)
         if fragment:
@@ -186,6 +194,7 @@ class ConfigLoader(BaseLoader):
         parent.addSection(type, name, sectvalue)
 
     def includeConfiguration(self, section, url, defines):
+        url = self.normalizeURL(url)
         r = self.openResource(url)
         self._parse_resource(section, r, defines)
 

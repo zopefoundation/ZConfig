@@ -15,6 +15,7 @@
 
 import os.path
 import sys
+import tempfile
 import unittest
 
 from StringIO import StringIO
@@ -128,6 +129,23 @@ class LoaderTestCase(unittest.TestCase):
         self.assertEqual(
             ZConfig.url.urldefrag("file:/abc/def#frag"),
             ("file:///abc/def", "frag"))
+
+    def test_nonexistant_file(self):
+        fn = tempfile.mktemp()
+        schema = ZConfig.loadSchemaFile(StringIO("<schema/>"))
+        self.assertRaises(ZConfig.ConfigurationError,
+                          ZConfig.loadSchema, fn)
+        self.assertRaises(ZConfig.ConfigurationError,
+                          ZConfig.loadConfig, schema, fn)
+        self.assertRaises(ZConfig.ConfigurationError,
+                          ZConfig.loadConfigFile, schema,
+                          StringIO("%include " + fn))
+        self.assertRaises(ZConfig.ConfigurationError,
+                          ZConfig.loadSchema,
+                          "http://www.zope.org/no-such-document/")
+        self.assertRaises(ZConfig.ConfigurationError,
+                          ZConfig.loadConfig, schema,
+                          "http://www.zope.org/no-such-document/")
 
 
 def test_suite():
