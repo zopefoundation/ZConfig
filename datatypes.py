@@ -22,8 +22,10 @@ try:
     unicode
 except NameError:
     StringTypes = type(''), type(unicode(''))
+    UnicodeType = StringTypes[1]
 else:
     StringTypes = type(''),
+    UnicodeType = None
 
 try:
     True
@@ -109,6 +111,12 @@ class BasicKeyConversion(RegularExpressionConversion):
 class IdentifierConversion(RegularExpressionConversion):
     def __init__(self):
         RegularExpressionConversion.__init__(self, "[_a-zA-Z][_a-zA-Z0-9]*")
+
+    def __call__(self, value):
+        value = RegularExpressionConversion.__call__(self, value)
+        if UnicodeType is not None and isinstance(value, UnicodeType):
+            value = value.encode("ascii")
+        return value
 
 
 def integer(value):

@@ -88,7 +88,11 @@ class DatatypeTestCase(unittest.TestCase):
         raises(ValueError, convert, "nan")
 
     def test_datatype_identifier(self):
-        convert = self.types.get("identifier")
+        def convert(value, self=self):
+            value = self.types.get("identifier")(value)
+            self.assert_(isinstance(value, type("")))
+            return value
+
         eq = self.assertEqual
         raises = self.assertRaises
 
