@@ -16,7 +16,7 @@
 
 This module provides an extension of the ConfigLoader class which adds
 a way to add configuration settings from an alternate source.  Each
-setting is described by a string of the form
+setting is described by a string of the form::
 
     some/path/to/key=value
 """
