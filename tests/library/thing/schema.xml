@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<schema>
+  <sectiongroup type='thing'>
+    <sectiontype type='thing-a'>
+      <key name='thing-a-key' default='thing-a-default'/>
+    </sectiontype>
+    <sectiontype type='thing-b'>
+      <key name='thing-b-key' default='thing-b-default'/>
+    </sectiontype>
+  </sectiongroup>
+</schema>

@@ -1,0 +1,5 @@
+<schema>
+  <sectiontype type='widget-a'>
+    <key name='widget-a-key' default='widget-a-default'/>
+  </sectiontype>
+</schema>
