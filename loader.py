@@ -145,7 +145,7 @@ class SchemaLoader(BaseLoader):
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + `package`)
         for dir in sys.path:
-            dirname = os.path.join(dir, *parts)
+            dirname = os.path.join(os.path.abspath(dir), *parts)
             fn = os.path.join(dirname, "component.xml")
             if os.path.exists(fn):
                 break
