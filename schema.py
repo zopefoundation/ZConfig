@@ -457,13 +457,75 @@ class SchemaParser(BaseParser):
     _handled_tags = BaseParser._handled_tags + ("schema",)
     _top_level = "schema"
 
+    def __init__(self, loader, url, extending_parser=None):
+        BaseParser.__init__(self, loader, url)
+        self._extending_parser = extending_parser
+        self._base_keytypes = []
+        self._base_datatypes = []
+
     def start_schema(self, attrs):
         self.push_prefix(attrs)
         handler = self.get_handler(attrs)
         keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
-        self._schema = info.SchemaType(keytype, valuetype, datatype,
-                                       handler, self._url, self._registry)
+
+        if self._extending_parser is None:
+            # We're not being inherited, so we need to create the schema
+            self._schema = info.SchemaType(keytype, valuetype, datatype,
+                                           handler, self._url, self._registry)
+        else:
+            # Parse into the extending ("subclass") parser's schema
+            self._schema = self._extending_parser._schema
+
         self._stack = [self._schema]
+
+        if attrs.has_key("extends"):
+            sources = attrs["extends"].split()
+            sources.reverse()
+
+            for src in sources:
+                src = url.urljoin(self._url, src)
+                src, fragment = url.urldefrag(src)
+                if fragment:
+                    self.error("schema extends many not include"
+                               " a fragment identifier")
+                self.extendSchema(src)
+
+            # Inherit keytype from bases, if unspecified and not conflicting
+            if self._base_keytypes and not attrs.has_key("keytype"):
+                keytype = self._base_keytypes[0]
+                for kt in self._base_keytypes[1:]:
+                    if kt is not keytype:
+                        self.error("base schemas have conflicting keytypes,"
+                                   " but no keytype was specified in the"
+                                   " extending schema")
+
+            # Inherit datatype from bases, if unspecified and not conflicting
+            if self._base_datatypes and not attrs.has_key("datatype"):
+                datatype = self._base_datatypes[0]
+                for dt in self._base_datatypes[1:]:
+                    if dt is not datatype:
+                        self.error("base schemas have conflicting datatypes,"
+                                   " but no datatype was specified in the"
+                                   " extending schema")
+
+        # Reset the schema types to our own, while we parse the schema body
+        self._schema.keytype = keytype
+        self._schema.valuetype = valuetype
+        self._schema.datatype = datatype
+
+        # Update base key/datatypes for the "extending" parser
+        if self._extending_parser is not None:
+            self._extending_parser._base_keytypes.append(keytype)
+            self._extending_parser._base_datatypes.append(datatype)
+
+
+    def extendSchema(self,src):
+        parser = SchemaParser(self._loader, src, self)
+        r = self._loader.openResource(src)
+        try:
+            xml.sax.parse(r.file, parser)
+        finally:
+            r.close()
 
     def end_schema(self):
         del self._stack[-1]
