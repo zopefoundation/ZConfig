@@ -33,7 +33,7 @@ class StorageTestCase(unittest.TestCase):
         <Storage>
         type       FileStorage
         file_name  %s
-        create     1
+        create     yes
         </Storage>
         """ % self.tmpfn
         io = StringIO(sample)
@@ -51,7 +51,7 @@ class StorageTestCase(unittest.TestCase):
         <Storage>
         type       ClientStorage
         addr       %s
-        wait       0
+        wait       no
         </Storage>
         """ % self.tmpfn
         io = StringIO(sample)
