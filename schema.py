@@ -70,10 +70,10 @@ class BaseParser(xml.sax.ContentHandler):
 
     def startElement(self, name, attrs):
         attrs = dict(attrs)
-        if name == "schema":
+        if name == self._top_level:
             if self._schema is not None:
                 self.error("schema element improperly nested")
-            self.start_schema(attrs)
+            getattr(self, "start_" + name)(attrs)
         elif name in self._handled_tags:
             if self._schema is None:
                 self.error(name + " element outside of schema")
@@ -107,7 +107,122 @@ class BaseParser(xml.sax.ContentHandler):
 
     def endDocument(self):
         if self._schema is None:
-            self.error("no schema found")
+            self.error("no %s found" % self._top_level)
+
+    # helper methods
+
+    def get_position(self):
+        if self._locator:
+            return (self._locator.getLineNumber(),
+                    self._locator.getColumnNumber(),
+                    (self._locator.getSystemId() or self._url))
+        else:
+            return None, None, self._url
+
+    def get_handler(self, attrs):
+        v = attrs.get("handler")
+        if v is None:
+            return v
+        else:
+            return self.basic_key(v)
+
+    def push_prefix(self, attrs):
+        name = attrs.get("prefix")
+        if name:
+            if name.startswith(".") and self._prefixes:
+                prefix = self._prefixes[-1] + name
+            elif name.startswith("."):
+                self.error("prefix may not begin with '.'")
+            else:
+                prefix = name
+        elif self._prefixes:
+            prefix = self._prefixes[-1]
+        else:
+            prefix = ''
+        self._prefixes.append(prefix)
+
+    def pop_prefix(self):
+        del self._prefixes[-1]
+
+    def get_classname(self, name):
+        if name.startswith("."):
+            return self._prefixes[-1] + name
+        else:
+            return name
+
+    def get_datatype(self, attrs, attrkey, default):
+        if attrs.has_key(attrkey):
+            dtname = self.get_classname(attrs[attrkey])
+        else:
+            dtname = default
+
+        try:
+            return self._registry.get(dtname)
+        except ValueError, e:
+            self.error(e[0])
+
+    def get_sect_typeinfo(self, attrs):
+        keytype = self.get_datatype(attrs, "keytype", "basic-key")
+        valuetype = self.get_datatype(attrs, "valuetype", "string")
+        datatype = self.get_datatype(attrs, "datatype", "null")
+        return keytype, valuetype, datatype
+
+    def get_required(self, attrs):
+        if attrs.has_key("required"):
+            v = attrs["required"]
+            if v == "yes":
+                return True
+            elif v == "no":
+                return False
+            self.error("value for 'required' must be 'yes' or 'no'")
+        else:
+            return False
+
+    def get_ordinality(self, attrs):
+        min, max = 0, info.Unbounded
+        if self.get_required(attrs):
+            min = 1
+        return min, max
+
+    def get_sectiontype(self, attrs):
+        type = attrs.get("type")
+        if not type:
+            self.error("section must specify type")
+        return self._schema.gettype(type)
+
+    def get_key_info(self, attrs, element):
+        any, name, attribute = self.get_name_info(attrs, element)
+        if any == '*':
+            self.error(element + " may not specify '*' for name")
+        if not name and any != '+':
+            self.error(element + " name may not be omitted or empty")
+        datatype = self.get_datatype(attrs, "datatype", "string")
+        handler = self.get_handler(attrs)
+        return name or any, datatype, handler, attribute
+
+    def get_name_info(self, attrs, element):
+        name = attrs.get("name")
+        if not name:
+            self.error(element + " name must be specified and non-empty")
+        aname = attrs.get("attribute")
+        if aname:
+            aname = self.identifier(aname)
+            if aname.startswith("getSection"):
+                # reserved; used for SectionValue methods to get meta-info
+                self.error("attribute names may not start with 'getSection'")
+        if name in ("*", "+"):
+            if not aname:
+                self.error(
+                    "container attribute must be specified and non-empty"
+                    " when using '*' or '+' for a section name")
+            return name, None, aname
+        else:
+            # run the keytype converter to make sure this is a valid key
+            name = self._stack[-1].keytype(name)
+            if not aname:
+                aname = self.basic_key(name)
+                aname = self.identifier(aname.replace('-', '_'))
+            return None, self.basic_key(name), aname
 
     # schema loading logic
 
@@ -148,59 +263,6 @@ class BaseParser(xml.sax.ContentHandler):
     def end_import(self):
         pass
 
-    def get_position(self):
-        if self._locator:
-            return (self._locator.getLineNumber(),
-                    self._locator.getColumnNumber(),
-                    (self._locator.getSystemId() or self._url))
-        else:
-            return None, None, self._url
-
-    def get_handler(self, attrs):
-        v = attrs.get("handler")
-        if v is None:
-            return v
-        else:
-            return self.basic_key(v)
-
-    def push_prefix(self, attrs):
-        name = attrs.get("prefix")
-        if name:
-            if name.startswith(".") and self._prefixes:
-                prefix = self._prefixes[-1] + name
-            elif name.startswith("."):
-                self.error("prefix may not begin with '.'")
-            else:
-                prefix = name
-        elif self._prefixes:
-            prefix = self._prefixes[-1]
-        else:
-            prefix = ''
-        self._prefixes.append(prefix)
-
-    def get_classname(self, name):
-        if name.startswith("."):
-            return self._prefixes[-1] + name
-        else:
-            return name
-
-    def get_datatype(self, attrs, attrkey, default):
-        if attrs.has_key(attrkey):
-            dtname = self.get_classname(attrs[attrkey])
-        else:
-            dtname = default
-
-        try:
-            return self._registry.get(dtname)
-        except ValueError, e:
-            self.error(e[0])
-
-    def get_sect_typeinfo(self, attrs):
-        keytype = self.get_datatype(attrs, "keytype", "basic-key")
-        valuetype = self.get_datatype(attrs, "valuetype", "string")
-        datatype = self.get_datatype(attrs, "datatype", "null")
-        return keytype, valuetype, datatype
-
     def start_sectiontype(self, attrs):
         name = attrs.get("type")
         if not name:
@@ -236,31 +298,8 @@ class BaseParser(xml.sax.ContentHandler):
         self._stack.append(sectinfo)
 
     def end_sectiontype(self):
-        del self._prefixes[-1]
+        self.pop_prefix()
         self._stack.pop()
-
-    def get_required(self, attrs):
-        if attrs.has_key("required"):
-            v = attrs["required"]
-            if v == "yes":
-                return True
-            elif v == "no":
-                return False
-            self.error("value for 'required' must be 'yes' or 'no'")
-        else:
-            return False
-
-    def get_ordinality(self, attrs):
-        min, max = 0, info.Unbounded
-        if self.get_required(attrs):
-            min = 1
-        return min, max
-
-    def get_sectiontype(self, attrs):
-        type = attrs.get("type")
-        if not type:
-            self.error("section must specify type")
-        return self._schema.gettype(type)
 
     def start_section(self, attrs):
         sectiontype = self.get_sectiontype(attrs)
@@ -306,19 +345,9 @@ class BaseParser(xml.sax.ContentHandler):
         self._stack.append(self._group)
 
     def end_sectiongroup(self):
-        del self._prefixes[-1]
+        self.pop_prefix()
         self._group = None
         self._stack.pop()
-
-    def get_key_info(self, attrs, element):
-        any, name, attribute = self.get_name_info(attrs, element)
-        if any == '*':
-            self.error(element + " may not specify '*' for name")
-        if not name and any != '+':
-            self.error(element + " name may not be omitted or empty")
-        datatype = self.get_datatype(attrs, "datatype", "string")
-        handler = self.get_handler(attrs)
-        return name or any, datatype, handler, attribute
 
     def start_key(self, attrs):
         name, datatype, handler, attribute = self.get_key_info(attrs, "key")
@@ -350,30 +379,6 @@ class BaseParser(xml.sax.ContentHandler):
     def end_multikey(self):
         self._stack.pop().finish()
 
-    def get_name_info(self, attrs, element):
-        name = attrs.get("name")
-        if not name:
-            self.error(element + " name must be specified and non-empty")
-        aname = attrs.get("attribute")
-        if aname:
-            aname = self.identifier(aname)
-            if aname.startswith("getSection"):
-                # reserved; used for SectionValue methods to get meta-info
-                self.error("attribute names may not start with 'getSection'")
-        if name in ("*", "+"):
-            if not aname:
-                self.error(
-                    "container attribute must be specified and non-empty"
-                    " when using '*' or '+' for a section name")
-            return name, None, aname
-        else:
-            # run the keytype converter to make sure this is a valid key
-            name = self._stack[-1].keytype(name)
-            if not aname:
-                aname = self.basic_key(name)
-                aname = self.identifier(aname.replace('-', '_'))
-            return None, self.basic_key(name), aname
-
     # datatype conversion wrappers
 
     def basic_key(self, s):
@@ -381,18 +386,12 @@ class BaseParser(xml.sax.ContentHandler):
             return self._basic_key(s)
         except ValueError, e:
             self.error(e[0])
-        except ZConfig.SchemaError, e:
-            self.initerror(e)
-            raise
 
     def identifier(self, s):
         try:
             return self._identifier(s)
         except ValueError, e:
             self.error(e[0])
-        except ZConfig.SchemaError, e:
-            self.initerror(e)
-            raise
 
     # exception setup helpers
 
@@ -411,6 +410,7 @@ class SchemaParser(BaseParser):
 
     # needed by startElement() and endElement()
     _handled_tags = BaseParser._handled_tags + ("schema",)
+    _top_level = "schema"
 
     def start_schema(self, attrs):
         self.push_prefix(attrs)
@@ -429,5 +429,5 @@ class SchemaParser(BaseParser):
     def end_schema(self):
         del self._stack[-1]
         assert not self._stack
-        del self._prefixes[-1]
+        self.pop_prefix()
         assert not self._prefixes
