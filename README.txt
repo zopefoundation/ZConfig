@@ -20,7 +20,7 @@ separate packages.
 ZConfig is licensed under the Zope Public License, version 2.1.  See
 the file LICENSE.txt in the distribution for the full license text.
 
-Reference documentation is available in the ZConfig/doc/ directory.
+Reference documentation is available in the doc/ directory.
 
 Information on the latest released version of the ZConfig package is
 available at
@@ -50,7 +50,7 @@ Installation from the source distribution:
   To install to another prefix (eg. /usr/local)
     python setup.py install --prefix=/usr/local
 
-  If you need to force the python interpreter to eg. python2:
+  If you need to force the python interpreter to e.g. python2:
     python2 setup.py install
 
   For more information please refer to
