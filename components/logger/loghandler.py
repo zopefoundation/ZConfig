@@ -17,7 +17,7 @@ import os.path
 import sys
 
 from logging import Handler, StreamHandler
-from logging.handlers import SysLogHandler
+from logging.handlers import SysLogHandler, BufferingHandler
 from logging.handlers import HTTPHandler, SMTPHandler
 from logging.handlers import NTEventLogHandler as Win32EventLogHandler
 
@@ -53,32 +53,19 @@ class NullHandler(Handler):
         pass
 
 
-class StartupHandler(Handler):
-    """
-    A handler which outputs messages to a stream but also buffers them until
-    they can be flushed to a target handler.  Useful at startup before we can
-    know that we can safely write to a config-specified handler.
-    """
-    def __init__(self, stream=None):
-        Handler.__init__(self)
-        if not stream:
-            stream = sys.stderr
-        self.stream = stream
-        self.buffer = []
+class StartupHandler(BufferingHandler):
+    """Handler which stores messages in a buffer until later.
 
-    def emit(self, record):
-        try:
-            self.buffer.append(record)
-            msg = self.format(record)
-            self.stream.write("%s\n" % msg)
-            self.flush()
-        except:
-            self.handleError(record)
+    This is useful at startup before we can know that we can safely
+    write to a configuration-specified handler.
+    """
 
-    def flush(self):
-        self.stream.flush()
+    def __init__(self):
+        BufferingHandler.__init__(self, sys.maxint)
+
+    def shouldFlush(self, record):
+        return False
 
     def flushBufferTo(self, target):
-        for record in self.buffer:
-            target.handle(record)
-        self.buffer = []
+        while self.buffer:
+            target.handle(self.buffer.pop(0))
