@@ -36,7 +36,6 @@ class LoggerFactoryBase(Factory):
         # set the logger up
         import logging
         logger = logging.getLogger(self.name)
-        logger.handlers = []
         logger.setLevel(self.level)
         if self.handler_factories:
             for handler_factory in self.handler_factories:
