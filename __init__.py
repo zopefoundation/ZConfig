@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.11 2003/10/02 18:17:24 jeremy Exp $
+$Id: __init__.py,v 1.12 2003/12/29 01:15:30 fdrake Exp $
 """
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
@@ -58,6 +58,30 @@ class SchemaError(_ParseError):
 
     def __init__(self, msg, url=None, lineno=None, colno=None):
         _ParseError.__init__(self, msg, url, lineno, colno)
+
+
+class SchemaResourceError(SchemaError):
+    """Raised when there's an error locating a resource required by the schema.
+    """
+
+    def __init__(self, msg, url=None, lineno=None, colno=None,
+                 path=None, package=None, filename=None):
+        self.filename = filename
+        self.package = package
+        if path is not None:
+            path = path[:]
+        self.path = path
+        SchemaError.__init__(self, msg, url, lineno, colno)
+
+    def __str__(self):
+        s = SchemaError.__str__(self)
+        if self.package is not None:
+            s += "\n  Package name: " + repr(self.package)
+        if self.filename is not None:
+            s += "\n  File name: " + repr(self.filename)
+        if self.package is not None:
+            s += "\n  Package path: " + repr(self.path)
+        return s
 
 
 class ConfigurationMissingSectionError(ConfigurationError):
