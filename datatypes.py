@@ -313,15 +313,24 @@ stock_datatypes = {
 
 class Registry:
     __metatype__ = type
-    __slots__ = '_stock', '_other'
+    __slots__ = '_stock', '_other', '_basic_key'
 
     def __init__(self, stock=None):
         if stock is None:
             stock = stock_datatypes.copy()
         self._stock = stock
         self._other = {}
+        self._basic_key = None
 
     def get(self, name):
+        if '.' not in name:
+            if self._basic_key is None:
+                self._basic_key = self._other.get("basic-key")
+                if self._basic_key is None:
+                    self._basic_key = self._stock.get("basic-key")
+                if self._basic_key is None:
+                    self._basic_key = stock_datatypes["basic-key"]
+            name = self._basic_key(name)
         t = self._stock.get(name)
         if t is None:
             t = self._other.get(name)

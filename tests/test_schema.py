@@ -657,6 +657,9 @@ class SchemaTestCase(BaseSchemaTest):
         self.assertRaises(ZConfig.ConfigurationError,
                           self.load_config_text, schema, "abc.  127.0.0.1")
 
+    def test_datatype_casesensitivity(self):
+        self.load_schema_text("<schema datatype='NULL'/>")
+
 
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)
