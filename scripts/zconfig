@@ -13,7 +13,7 @@
 #
 ##############################################################################
 
-"""zconfig: Script to check well-formedness of a schema or configuration file.
+"""zconfig: Script to check validity of a configuration file.
 
 Usage:
 
