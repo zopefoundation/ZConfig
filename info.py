@@ -184,8 +184,8 @@ class SectionInfo(BaseInfo):
             return False
         elif self.name == "+":
             return name and True or False
-        elif not name:
-            return self.name == "*"
+        elif self.name == "*":
+            return True
         else:
             return name == self.name
 

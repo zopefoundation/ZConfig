@@ -558,6 +558,16 @@ class SchemaTestCase(BaseSchemaTest):
         else:
             self.fail("expected ZConfig.DataConversionError")
 
+    def test_numeric_section_name(self):
+        schema = self.load_schema_text("<schema>"
+                                       "  <sectiontype type='sect'/>"
+                                       "  <multisection name='*' type='sect'"
+                                       "                attribute='things'/>"
+                                       "</schema>")
+        conf = self.load_config_text(schema,
+                                     "<sect 1 />")
+        self.assertEqual(len(conf.things), 1)
+
 
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)
