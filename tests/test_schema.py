@@ -568,6 +568,55 @@ class SchemaTestCase(BaseSchemaTest):
                                      "<sect 1 />")
         self.assertEqual(len(conf.things), 1)
 
+    def test_sectiontype_extension(self):
+        schema = self.load_schema_text("<schema>"
+                                       "  <sectiontype type='t1'>"
+                                       "    <key name='k1'/>"
+                                       "  </sectiontype>"
+                                       "  <sectiontype type='t2' extends='t1'>"
+                                       "    <key name='k2'/>"
+                                       "  </sectiontype>"
+                                       "  <section name='s' type='t2'/>"
+                                       "</schema>")
+        conf = self.load_config_text(schema,
+                                     "<t2 s>\n"
+                                     "  k1 k1-value\n"
+                                     "  k2 k2-value\n"
+                                     "</t2>")
+        self.assertEqual(conf.s.k1, "k1-value")
+        self.assertEqual(conf.s.k2, "k2-value")
+
+    def test_sectiontype_extension_errors(self):
+        # cannot override key from base
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
+                          "<schema>"
+                          "  <sectiontype type='t1'>"
+                          "    <key name='k1'/>"
+                          "  </sectiontype>"
+                          "  <sectiontype type='t2' extends='t1'>"
+                          "    <key name='k1'/>"
+                          "  </sectiontype>"
+                          "</schema>")
+        # cannot extend non-existing section
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
+                          "<schema>"
+                          "  <sectiontype type='t2' extends='t1'/>"
+                          "</schema>")
+        # cannot extend abstract type
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
+                          "<schema>"
+                          "  <sectiongroup type='t1'>"
+                          "    <sectiontype type='t2' extends='t1'/>"
+                          "  </sectiongroup>"
+                          "</schema>")
+        # cannot specify keytype
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text,
+                          "<schema>"
+                          "  <sectiontype type='t1' keytype='string'/>"
+                          "  <sectiontype type='t2' extends='t1'"
+                          "               keytype='integer'/>"
+                          "</schema>")
+
 
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)

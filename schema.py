@@ -217,8 +217,20 @@ class SchemaParser(xml.sax.ContentHandler):
         name = self.basic_key(name)
         self.push_prefix(attrs)
         keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
-        sectinfo = self._schema.createSectionType(
-            name, keytype, valuetype, datatype)
+        if attrs.has_key("extends"):
+            basename = self.basic_key(attrs["extends"])
+            if basename == name:
+                self.error("sectiontype cannot extend itself")
+            base = self._schema.gettype(basename)
+            if base.istypegroup():
+                self.error("sectiontype cannot extend an abstract type")
+            if attrs.has_key("keytype"):
+                self.error("derived sectiontype may not specify a keytype")
+            sectinfo = self._schema.deriveSectionType(
+                base, name, valuetype, datatype)
+        else:
+            sectinfo = self._schema.createSectionType(
+                name, keytype, valuetype, datatype)
         if self._group is not None:
             if attrs.has_key("group"):
                 self.error("sectiontype cannot specify group"
