@@ -163,11 +163,9 @@ class ConfigLoader(BaseLoader):
         self.schema = schema
 
     def loadResource(self, resource):
-        self.handlers = []
-        sm = ZConfig.matcher.SchemaMatcher(self.schema, self.handlers)
+        sm = ZConfig.matcher.SchemaMatcher(self.schema)
         self._parse_resource(sm, resource)
-        result = sm.finish(), CompositeHandler(self.handlers, self.schema)
-        del self.handlers
+        result = sm.finish(), CompositeHandler(sm.handlers, self.schema)
         return result
 
     # config parser support API
@@ -180,13 +178,7 @@ class ConfigLoader(BaseLoader):
             raise ZConfig.ConfigurationError(
                 "concrete sections cannot match abstract section types;"
                 " found abstract type " + `type`)
-        ci = parent.type.getsectioninfo(type, name)
-        assert not ci.isabstract()
-        if not ci.isAllowedName(name):
-            raise ZConfig.ConfigurationError(
-                "%s is not an allowed name for %s sections"
-                % (`name`, `ci.sectiontype.name`))
-        return ZConfig.matcher.SectionMatcher(ci, t, name, self.handlers)
+        return parent.createChildMatcher(t, name)
 
     def endSection(self, parent, type, name, delegatename, matcher):
         assert not delegatename

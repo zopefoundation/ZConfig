@@ -28,7 +28,7 @@ class BaseMatcher:
         self._sectionnames = {}
         if handlers is None:
             handlers = []
-        self._handlers = handlers
+        self.handlers = handlers
 
     def __repr__(self):
         clsname = self.__class__.__name__
@@ -114,6 +114,15 @@ class BaseMatcher:
             v.append(value)
         else:
             self._values[i] = value
+
+    def createChildMatcher(self, type, name):
+        ci = self.type.getsectioninfo(type.name, name)
+        assert not ci.isabstract()
+        if not ci.isAllowedName(name):
+            raise ZConfig.ConfigurationError(
+                "%s is not an allowed name for %s sections"
+                % (`name`, `ci.sectiontype.name`))
+        return SectionMatcher(ci, type, name, self.handlers)
 
     def finish(self):
         """Check the constraints of the section and convert to an application
@@ -202,7 +211,7 @@ class BaseMatcher:
                     v = v.convert(ci.datatype)
             values[i] = v
             if ci.handler is not None:
-                self._handlers.append((ci.handler, v))
+                self.handlers.append((ci.handler, v))
         return self.createValue(attrnames)
 
     def createValue(self, attrnames):
@@ -223,8 +232,8 @@ class SectionMatcher(BaseMatcher):
 
 
 class SchemaMatcher(BaseMatcher):
-    def __init__(self, info, handlers=None):
-        BaseMatcher.__init__(self, info, info, handlers)
+    def __init__(self, schema):
+        BaseMatcher.__init__(self, schema, schema, [])
 
     def finish(self):
         # Since there's no outer container to call datatype()
@@ -232,7 +241,7 @@ class SchemaMatcher(BaseMatcher):
         v = BaseMatcher.finish(self)
         v = self.type.datatype(v)
         if self.type.handler is not None:
-            self._handlers.append((self.type.handler, v))
+            self.handlers.append((self.type.handler, v))
         return v
 
 
