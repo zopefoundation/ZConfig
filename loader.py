@@ -21,6 +21,7 @@ import urllib2
 import ZConfig
 import ZConfig.cfgparser
 import ZConfig.datatypes
+import ZConfig.info
 import ZConfig.matcher
 import ZConfig.schema
 import ZConfig.url
@@ -133,8 +134,7 @@ class SchemaLoader(BaseLoader):
         if resource.url and self._cache.has_key(resource.url):
             schema = self._cache[resource.url]
         else:
-            schema = ZConfig.schema.parseResource(resource,
-                                                  self.registry, self)
+            schema = ZConfig.schema.parseResource(resource, self)
             self._cache[resource.url] = schema
         return schema
 
@@ -145,12 +145,16 @@ class SchemaLoader(BaseLoader):
         if not parts:
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + `package`)
-        if len(filter(None, parts)) != len(parts):
+        if "" in parts:
             # '' somewhere in the package spec; still illegal
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + `package`)
         file = file or "component.xml"
-        __import__(package)
+        try:
+            __import__(package)
+        except ImportError, e:
+            raise ZConfig.SchemaError("could not load package %s: %s"
+                                      % (package, str(e)))
         pkg = sys.modules[package]
         if not hasattr(pkg, "__path__"):
             raise ZConfig.SchemaError(
@@ -172,6 +176,7 @@ class ConfigLoader(BaseLoader):
                 "cannot check a configuration an abstract type")
         BaseLoader.__init__(self)
         self.schema = schema
+        self._private_schema = False
 
     def loadResource(self, resource):
         sm = self.createSchemaMatcher()
@@ -199,6 +204,24 @@ class ConfigLoader(BaseLoader):
         assert not delegatename
         sectvalue = matcher.finish()
         parent.addSection(type, name, sectvalue)
+
+    def importSchemaComponent(self, pkgname):
+        schema = self.schema
+        if schema.hasComponent(pkgname):
+            return
+        if not self._private_schema:
+            # replace the schema with an extended schema on the first %import
+            self._loader = SchemaLoader(self.schema.registry)
+            schema = ZConfig.info.createDerivedSchema(self.schema)
+            self._private_schema = True
+            self.schema = schema
+        url = self._loader.schemaComponentSource(pkgname, '')
+        resource = self.openResource(url)
+        schema.addComponent(pkgname)
+        try:
+            ZConfig.schema.parseComponent(resource, self._loader, schema)
+        finally:
+            resource.close()
 
     def includeConfiguration(self, section, url, defines):
         url = self.normalizeURL(url)

@@ -368,6 +368,7 @@ class SchemaType(SectionType):
                  registry):
         SectionType.__init__(self, None, keytype, valuetype, datatype,
                              registry, {})
+        self._components = {}
         self.handler = handler
         self.url = url
 
@@ -411,3 +412,23 @@ class SchemaType(SectionType):
         t._keymap.update(base._keymap)
         t._children.extend(base._children)
         return t
+
+    def addComponent(self, name):
+        if self._components.has_key(name):
+            raise ZConfig.SchemaError("already have component %s" % name)
+        self._components[name] = name
+
+    def hasComponent(self, name):
+        return self._components.has_key(name)
+
+
+def createDerivedSchema(base):
+    new = SchemaType(base.keytype, base.valuetype, base.datatype,
+                     base.handler, base.url, base.registry)
+    new._components.update(base._components)
+    new.description = base.description
+    new._children[:] = base._children
+    new._attrmap.update(base._attrmap)
+    new._keymap.update(base._keymap)
+    new._types.update(base._types)
+    return new

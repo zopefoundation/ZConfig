@@ -139,7 +139,7 @@ class ZConfigParser:
         if not m:
             self.error("missing or unrecognized directive")
         name, arg = m.group('key', 'value')
-        if name not in ("define", "include"):
+        if name not in ("define", "import", "include"):
             self.error("unknown directive: " + `name`)
         if not arg:
             self.error("missing argument to %%%s directive" % name)
@@ -147,10 +147,17 @@ class ZConfigParser:
             self.handle_include(section, arg)
         elif name == "define":
             self.handle_define(section, arg)
+        elif name == "import":
+            self.handle_import(section, arg)
         else:
             assert 0, "unexpected directive for " + `"%" + rest`
 
+    def handle_import(self, section, rest):
+        pkgname = self.replace(rest.strip())
+        self.context.importSchemaComponent(pkgname)
+
     def handle_include(self, section, rest):
+        rest = self.replace(rest.strip())
         newurl = ZConfig.url.urljoin(self.url, rest)
         self.context.includeConfiguration(section, newurl, self.defs)
 

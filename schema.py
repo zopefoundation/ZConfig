@@ -38,10 +38,15 @@ except NameError:
         return d
 
 
-def parseResource(resource, registry, loader):
-    parser = SchemaParser(registry, loader, resource.url)
+def parseResource(resource, loader):
+    parser = SchemaParser(loader, resource.url)
     xml.sax.parse(resource.file, parser)
     return parser._schema
+
+
+def parseComponent(resource, loader, schema):
+    parser = ComponentParser(loader, resource.url, schema)
+    xml.sax.parse(resource.file, parser)
 
 
 def _srepr(ob):
@@ -74,18 +79,17 @@ class BaseParser(xml.sax.ContentHandler):
         "multisection": ["schema", "sectiontype"],
         }
 
-    def __init__(self, registry, loader, url):
-        self._registry = registry
+    def __init__(self, loader, url):
+        self._registry = loader.registry
         self._loader = loader
-        self._basic_key = registry.get("basic-key")
-        self._identifier = registry.get("identifier")
+        self._basic_key = self._registry.get("basic-key")
+        self._identifier = self._registry.get("identifier")
         self._cdata = None
         self._locator = None
         self._prefixes = []
         self._schema = None
         self._stack = []
         self._url = url
-        self._components = {}
         self._elem_stack = []
 
     # SAX 2 ContentHandler methods
@@ -299,16 +303,14 @@ class BaseParser(xml.sax.ContentHandler):
         else:
             if os.path.dirname(file):
                 self.error("file may not include a directory part")
-            src = self._loader.schemaComponentSource(pkg, file)
-            if not self._components.has_key(src):
-                self._components[pkg] = src
+            if not self._schema.hasComponent(pkg):
+                src = self._loader.schemaComponentSource(pkg, file)
+                self._schema.addComponent(pkg)
                 self.loadComponent(src)
 
     def loadComponent(self, src):
         r = self._loader.openResource(src)
-        parser = ComponentParser(self._registry, self._loader, src,
-                                 self._schema)
-        parser._components = self._components
+        parser = ComponentParser(self._loader, src, self._schema)
         try:
             xml.sax.parse(r.file, parser)
         finally:
@@ -475,8 +477,8 @@ class ComponentParser(BaseParser):
     _handled_tags = BaseParser._handled_tags + ("component",)
     _top_level = "component"
 
-    def __init__(self, registry, loader, url, schema):
-        BaseParser.__init__(self, registry, loader, url)
+    def __init__(self, loader, url, schema):
+        BaseParser.__init__(self, loader, url)
         self._parent = schema
 
     def characters_description(self, data):
