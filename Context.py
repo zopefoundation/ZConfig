@@ -156,9 +156,9 @@ class Context:
         # users.
         self._all_sections.reverse()
         for sect in self._all_sections:
-            if self.delegate is None:
+            if sect.delegate is None:
                 sect.finish()
         for sect in self._all_sections:
-            if self.delegate is not None:
+            if sect.delegate is not None:
                 sect.finish()
         self._all_sections = None
