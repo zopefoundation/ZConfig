@@ -22,7 +22,8 @@
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
     <key name="path" required="yes"/>
-    <key name="format" default="------\n%(asctime)s %(message)s"
+    <key name="format"
+         default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
          datatype=".log_format"/>
   </sectiontype>
 
@@ -32,7 +33,8 @@
                extends="ZConfig.logger.base-log-handler">
     <key name="facility" default="user" datatype=".syslog_facility"/>
     <key name="address" datatype="socket-address" default="localhost:514"/>
-    <key name="format" default="%(message)s"
+    <key name="format"
+         default="%(name)s %(message)s"
          datatype=".log_format"/>
   </sectiontype>
 
@@ -41,7 +43,8 @@
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
     <key name="appname" default="Zope"/>
-    <key name="format" default="%(message)s"
+    <key name="format"
+         default="%(levelname)s %(name)s %(message)s"
          datatype=".log_format"/>
   </sectiontype>
 
@@ -51,7 +54,8 @@
                extends="ZConfig.logger.base-log-handler">
     <key name="url" default="http://localhost/" datatype=".http_handler_url"/>
     <key name="method" default="GET" datatype=".get_or_post"/>
-    <key name="format" default="%(asctime)s %(message)s"
+    <key name="format"
+         default="%(asctime)s %(levelname)s %(name)s %(message)s"
          datatype=".log_format"/>
   </sectiontype>
 
@@ -63,7 +67,8 @@
     <multikey name="to" required="yes" attribute="toaddrs"/>
     <key name="subject" default="Message from Zope"/>
     <key name="smtp-server" default="localhost" datatype="inet-address"/>
-    <key name="format" default="%(asctime)s %(message)s"
+    <key name="format"
+         default="%(asctime)s %(levelname)s %(name)s %(message)s"
          datatype=".log_format"/>
   </sectiontype>
 
