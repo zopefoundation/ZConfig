@@ -76,23 +76,6 @@ class LoaderTestCase(unittest.TestCase):
         schema = loader.loadFile(sio)
         self.assert_(schema.gettype("widget-a") is not None)
 
-    def test_import_from_package_extended(self):
-        loader = ZConfig.loader.SchemaLoader()
-        sio = StringIO("<schema>"
-                       "  <import package='ZConfig.tests.library.thing'/>"
-                       "  <section name='*' type='thing' attribute='thing'/>"
-                       "</schema>")
-        schema = loader.loadFile(sio)
-        schema.gettype("thing")
-        schema.gettype("thing-a")
-        schema.gettype("thing-b")
-        schema.gettype("thing-ext")
-
-        # Make sure the extension is wired in properly:
-        sio = StringIO("<thing-ext thing/>")
-        conf, handlers = ZConfig.loadConfigFile(schema, sio)
-        self.assertEqual(conf.thing.thing_ext_key, "thing-ext-default")
-
     def test_urlsplit_urlunsplit(self):
         # Extracted from Python's test.test_urlparse module:
         for url, parsed, split in [

@@ -137,7 +137,7 @@ class SchemaLoader(BaseLoader):
 
     # schema parser support API
 
-    def schemaComponentInfo(self, package):
+    def schemaComponentSource(self, package):
         parts = package.split(".")
         if not parts:
             raise ZConfig.SchemaError(
@@ -154,15 +154,7 @@ class SchemaLoader(BaseLoader):
         else:
             raise ZConfig.SchemaError(
                 "schema component not found: " + `package`)
-        url = "file://" + urllib.pathname2url(fn)
-        extensions = []
-        for fn in os.listdir(dirname):
-            if fn == "component.xml":
-                continue
-            path = os.path.join(dirname, fn, "extension.xml")
-            if os.path.exists(path):
-                extensions.append("file://" + urllib.pathname2url(path))
-        return url, extensions
+        return "file://" + urllib.pathname2url(fn)
 
 
 class ConfigLoader(BaseLoader):

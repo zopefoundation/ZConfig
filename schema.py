@@ -287,7 +287,8 @@ class BaseParser(xml.sax.ContentHandler):
             src = url.urljoin(self._url, src)
             src, fragment = url.urldefrag(src)
             if fragment:
-                self.error("import src many not include a fragment identifier")
+                self.error("import src many not include"
+                           " a fragment identifier")
             schema = self._loader.loadURL(src)
             for n in schema.gettypenames():
                 self._schema.addtype(schema.gettype(n))
@@ -295,28 +296,21 @@ class BaseParser(xml.sax.ContentHandler):
             # already loaded, or in progress
             pass
         else:
-            pi = self._loader.schemaComponentInfo(pkg)
-            if not pi:
+            src = self._loader.schemaComponentSource(pkg)
+            if not src:
                 self.error("could not locate schema component " + `pkg`)
-            self._components[pkg] = pi
-            self.loadComponent(pi)
+            self._components[pkg] = src
+            self.loadComponent(src)
 
-    def loadComponent(self, info):
-        base, extensions = info
-        r = self._loader.openResource(base)
-        parser = ComponentParser(self._registry, self._loader, base,
+    def loadComponent(self, src):
+        r = self._loader.openResource(src)
+        parser = ComponentParser(self._registry, self._loader, src,
                                  self._schema)
         parser._components = self._components
         try:
             xml.sax.parse(r.file, parser)
         finally:
             r.close()
-        for ext in extensions:
-            r = self._loader.openResource(ext)
-            try:
-                parser.loadExtension(r)
-            finally:
-                r.close()
 
     def end_import(self):
         pass
@@ -525,23 +519,4 @@ class ComponentParser(BaseComponentParser):
         self.push_prefix(attrs)
 
     def end_component(self):
-        self.pop_prefix()
-
-    def loadExtension(self, resource):
-        parser = ExtensionParser(self._registry, self._loader, resource.url,
-                                 self._parent, self._localtypes)
-        parser._components = self._components
-        xml.sax.parse(resource.file, parser)
-
-
-class ExtensionParser(BaseComponentParser):
-
-    _handled_tags = BaseComponentParser._handled_tags + ("extension",)
-    _top_level = "extension"
-
-    def start_extension(self, attrs):
-        self._schema = self._parent
-        self.push_prefix(attrs)
-
-    def end_extension(self):
         self.pop_prefix()
