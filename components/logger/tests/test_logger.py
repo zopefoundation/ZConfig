@@ -32,8 +32,10 @@ class LoggingTestBase(unittest.TestCase):
     # XXX This tries to save and restore the state of logging around
     # the test.  Somewhat surgical; there may be a better way.
 
+    name = None
+
     def setUp(self):
-        self._old_logger = logging.getLogger()
+        self._old_logger = logging.getLogger(self.name)
         self._old_level = self._old_logger.level
         self._old_handlers = self._old_logger.handlers[:]
         self._old_logger.handlers[:] = []
@@ -46,16 +48,7 @@ class LoggingTestBase(unittest.TestCase):
             self._old_logger.addHandler(h)
         self._old_logger.setLevel(self._old_level)
 
-
-class TestConfig(LoggingTestBase):
-
     _schema = None
-    _schematext = """
-      <schema>
-        <import package='ZConfig.components.logger'/>
-        <section type='eventlog' name='*' attribute='eventlog'/>
-      </schema>
-    """
 
     def get_schema(self):
         if self._schema is None:
@@ -68,6 +61,16 @@ class TestConfig(LoggingTestBase):
                                                StringIO.StringIO(text))
         self.assert_(not handler)
         return conf
+
+
+class TestConfig(LoggingTestBase):
+
+    _schematext = """
+      <schema>
+        <import package='ZConfig.components.logger'/>
+        <section type='eventlog' name='*' attribute='eventlog'/>
+      </schema>
+    """
 
     def test_logging_level(self):
         # Make sure the expected names are supported; it's not clear
