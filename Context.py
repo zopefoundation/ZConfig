@@ -45,7 +45,7 @@ class Context:
         if os.path.exists(url):
             url = "file://" + urllib.pathname2url(os.path.abspath(url))
         else:
-            parts = urlparse.urlsplit(url)
+            parts = urlparse.urlparse(url)
             if not parts[0]:
                 raise ValueError("invalid URL, or file does not exist:\n"
                                  + repr(url))
