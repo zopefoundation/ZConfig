@@ -13,7 +13,6 @@
 ##############################################################################
 """Tests of ZConfig schemas."""
 
-import StringIO
 import unittest
 
 import ZConfig

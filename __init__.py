@@ -13,12 +13,10 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.8 2003/04/13 02:25:22 chrism Exp $
+$Id: __init__.py,v 1.9 2003/05/01 19:34:56 faassen Exp $
 """
-
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
-
 
 class ConfigurationError(Exception):
     def __init__(self, msg):

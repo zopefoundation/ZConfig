@@ -13,8 +13,6 @@
 ##############################################################################
 """Utility that manages the binding of configuration data to a section."""
 
-import types
-
 import ZConfig
 
 from ZConfig.info import ValueInfo

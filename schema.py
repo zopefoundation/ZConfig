@@ -14,7 +14,6 @@
 """Parser for ZConfig schemas."""
 
 import xml.sax
-import xml.sax.saxutils
 
 import ZConfig
 
