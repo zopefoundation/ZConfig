@@ -5,19 +5,19 @@ from __future__ import nested_scopes
 
 import unittest
 
-from ZConfig.Interpolation import get, interpolate
-from ZConfig.Interpolation import InterpolationRecursionError
-from ZConfig.Interpolation import InterpolationSyntaxError
+from ZConfig.Substitution import get, substitute
+from ZConfig.Substitution import SubstitutionRecursionError
+from ZConfig.Substitution import SubstitutionSyntaxError
 
 
-class InterpolationTestCase(unittest.TestCase):
+class SubstitutionTestCase(unittest.TestCase):
     def test_simple_names(self):
         d = {"name": "value",
              "name1": "abc",
              "name_": "def",
              "_123": "ghi"}
         def check(s, v):
-            self.assertEqual(interpolate(s, d), v)
+            self.assertEqual(substitute(s, d), v)
         check("$name", "value")
         check(" $name ", " value ")
         check("${name}", "value")
@@ -36,15 +36,15 @@ class InterpolationTestCase(unittest.TestCase):
 
     def test_undefined_names(self):
         d = {"name": "value"}
-        self.assertEqual(interpolate("$splat", d), "")
-        self.assertEqual(interpolate("$splat1", d), "")
-        self.assertEqual(interpolate("$splat_", d), "")
+        self.assertEqual(substitute("$splat", d), "")
+        self.assertEqual(substitute("$splat1", d), "")
+        self.assertEqual(substitute("$splat_", d), "")
 
     def test_syntax_errors(self):
         d = {"name": "value"}
         def check(s):
-            self.assertRaises(InterpolationSyntaxError,
-                              interpolate, s, d)
+            self.assertRaises(SubstitutionSyntaxError,
+                              substitute, s, d)
         check("${")
         check("${name")
         check("${1name}")
@@ -54,14 +54,14 @@ class InterpolationTestCase(unittest.TestCase):
         # It's debatable what should happen for these cases, so we'll
         # follow the lead of the Bourne shell here.
         def check(s):
-            self.assertEqual(interpolate(s, {}), s)
+            self.assertEqual(substitute(s, {}), s)
         check("$1")
         check("$")
         check("$ stuff")
 
     def test_non_nesting(self):
         d = {"name": "$value"}
-        self.assertEqual(interpolate("$name", d), "$value")
+        self.assertEqual(substitute("$name", d), "$value")
 
     def test_simple_nesting(self):
         d = {"name": "value",
@@ -75,16 +75,16 @@ class InterpolationTestCase(unittest.TestCase):
     def test_nesting_errors(self):
         d = {"name": "$splat",
              "splat": "$name"}
-        self.assertRaises(InterpolationRecursionError,
+        self.assertRaises(SubstitutionRecursionError,
                           get, d, "name")
         d = {"name": "$splat",
              "splat": "$splat"}
-        self.assertRaises(InterpolationRecursionError,
+        self.assertRaises(SubstitutionRecursionError,
                           get, d, "name")
 
 
 def test_suite():
-    return unittest.makeSuite(InterpolationTestCase)
+    return unittest.makeSuite(SubstitutionTestCase)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

@@ -1,10 +1,7 @@
-"""Interpolation support for ZConfig values.
+"""Substitution support for ZConfig values."""
 
-XXX document syntax here
-"""
-
-class InterpolationError(Exception):
-    """Base exception for string interpolation errors."""
+class SubstitutionError(Exception):
+    """Base exception for string substitution errors."""
 
     def __init__(self, msg, context):
         self.message = msg
@@ -13,22 +10,22 @@ class InterpolationError(Exception):
     def __str__(self):
         return self.message
 
-class InterpolationSyntaxError(InterpolationError):
+class SubstitutionSyntaxError(SubstitutionError):
     """Raised when interpolation source text contains syntactical errors."""
 
     def __init__(self, msg, context):
         if context is not None:
             context = context[:]
-        InterpolationError.__init__(self, msg, context)
+        SubstitutionError.__init__(self, msg, context)
 
-class InterpolationRecursionError(InterpolationError):
+class SubstitutionRecursionError(SubstitutionError):
     """Raised when a nested interpolation is recursive."""
 
     def __init__(self, name, context):
         self.name = name
         msg = ("recursion on %s; current context:\n%s"
                % (repr(name), ", ".join(context)))
-        InterpolationError.__init__(self, msg, context[:])
+        SubstitutionError.__init__(self, msg, context[:])
 
 
 def get(section, name, default=None):
@@ -44,7 +41,7 @@ def get(section, name, default=None):
     return s
 
 
-def interpolate(s, section):
+def substitute(s, section):
     """Interpolate variables from `section` into `s`."""
     if '$' in s:
         accum = []
@@ -71,17 +68,17 @@ def _interp(accum, rest, section, context):
             rest = rest[1:]
             m = _name_match(rest[:])
             if not m:
-                raise InterpolationSyntaxError("'${' not followed by name",
-                                               context)
+                raise SubstitutionSyntaxError("'${' not followed by name",
+                                              context)
             name = m.group(0)
             length = len(name)
             if rest[length:length+1] != "}":
-                raise InterpolationSyntaxError(
+                raise SubstitutionSyntaxError(
                     "'${%s' not followed by '}'" % name, context)
             v = section.get(name, "")
             if "$" in v and context:
                 if name in context:
-                    raise InterpolationRecursionError(name, context)
+                    raise SubstitutionRecursionError(name, context)
                 _interp(accum, v, section, context + [name])
             else:
                 accum.append(v)
@@ -95,7 +92,7 @@ def _interp(accum, rest, section, context):
             v = section.get(name, "")
             if "$" in v and context:
                 if name in context:
-                    raise InterpolationRecursionError(name, context)
+                    raise SubstitutionRecursionError(name, context)
                 _interp(accum, v, section, context + [name])
             else:
                 accum.append(v)

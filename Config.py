@@ -25,6 +25,9 @@ class Configuration:
         else:
             return "<%s at 0x%x>" % (classname, id(self))
 
+    def finish(self):
+        return self
+
     def setDelegate(self, section):
         if self.delegate is not None:
             raise ConfigurationError("cannot modify delegation")

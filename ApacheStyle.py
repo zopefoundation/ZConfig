@@ -32,6 +32,7 @@ def Parse(file, context, section, url):
             if type.lower() != section.type:
                 raise ConfigurationSyntaxError(
                     "unbalanced section end", url, lineno)
+            section.finish()
             section = stack.pop()
             continue
         if line[0] == "<":
