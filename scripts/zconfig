@@ -25,10 +25,11 @@ Options:
     --help          Print this help text.
 
     -s file
-    --schema file   Use the schema in 'file' to validate the configuration.
+    --schema file   Use the schema in 'file' to validate the configuration;
+                    this must be specified.
 
 Each file named on the command line is checked for syntactical errors
-and schema conformance (when the schema is specified).  If no files
+and schema conformance.  The schema must be specified.  If no files
 are specified and standard input is not a TTY, standard in is treated
 as a configuration file.  Specifying a schema and no configuration
 files causes the schema to be checked.
@@ -39,12 +40,11 @@ import getopt
 import sys
 
 import ZConfig
-import ZConfig.Context
 import ZConfig.loader
 
 
 def main():
-    loader = ClassicLoader()
+    loader = None
     schema = None
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "schema="])
@@ -64,6 +64,11 @@ def main():
                 print >>sys.stderr, e
                 return 1
             loader = ZConfig.loader.ConfigLoader(schema)
+
+    if loader is None:
+        print >>sys.stderr, "No schema specified, but is required."
+        usage(sys.stderr)
+        return 2
 
     if not args:
         if sys.stdin.isatty():
@@ -95,13 +100,6 @@ def main():
 
 def usage(fp):
     print >>fp, __doc__
-
-
-class ClassicLoader(ZConfig.Context.Context):
-    def loadResource(self, resource):
-        # create a temporary context since it's not reusable
-        context = ZConfig.Context.Context()
-        return context.loadResource(resource)
 
 
 if __name__ == "__main__":
