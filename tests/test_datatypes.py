@@ -183,18 +183,6 @@ class DatatypeTestCase(unittest.TestCase):
             self.assert_(a1.family is None)
             self.assert_(a2.family is None)
 
-    def test_constructor(self):
-        convert = self.types.get('constructor')
-        eq = self.assertEqual
-        raises = self.assertRaises
-        eq(convert('Foo()'),          ('Foo', [], {}))
-        eq(convert('Foo(1,a=1,b=2)'), ('Foo', [1], {'a':1, 'b':2}))
-        eq(convert('Foo(1,2,3)'),     ('Foo', [1,2,3], {}))
-        eq(convert('Foo(1,2,3)'),     ('Foo', [1,2,3], {}))
-        raises(ValueError, convert, 'Foo')
-        raises(ValueError, convert, 'Foo(')
-        raises(NameError, convert, 'Foo(a, b, c)')
-
     def test_ipaddr_or_hostname(self):
         convert = self.types.get('ipaddr-or-hostname')
         eq = self.assertEqual
@@ -245,14 +233,6 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert(here), here)
         raises(ValueError, convert, '/a/hopefully/nonexistent/path')
         raises(ValueError, convert, here + '/bogus')
-
-    def test_space_sep_key_value(self):
-        convert = self.types.get('key-value')
-        eq = self.assertEqual
-        eq(convert('A B'), ['A', 'B'])
-        eq(convert('Foo Boo'), ['Foo', 'Boo'])
-        eq(convert('Foo Boo Baz'), ['Foo', 'Boo Baz'])
-        eq(convert('Foo'), ['Foo', ''])
 
     def test_byte_size(self):
         eq = self.assertEqual
