@@ -52,6 +52,7 @@ class TestBase(unittest.TestCase):
         return conf
 
     def check_simple_gets(self, conf):
+        self.assertEqual(conf.get('empty'), '')
         self.assertEqual(conf.getint('int-var'), 12)
         self.assertEqual(conf.getint('neg-int'), -2)
         self.assertEqual(conf.getfloat('float-var'), 12.02)
@@ -62,13 +63,38 @@ class TestBase(unittest.TestCase):
         self.assert_(not conf.getbool('false-var-1'))
         self.assert_(not conf.getbool('false-var-2'))
         self.assert_(not conf.getbool('false-var-3'))
+        self.assertEqual(conf.getlist('list-1'), [])
+        self.assertEqual(conf.getlist('list-2'), ['abc'])
+        self.assertEqual(conf.getlist('list-3'), ['abc', 'def', 'ghi'])
+        self.assertEqual(conf.getlist('list-4'), ['[', 'what', 'now?', ']'])
+        self.assert_(conf.getlist('list-0') is None)
+        missing = Thing()
+        self.assert_(conf.getlist('list-0', missing) is missing)
+        self.assertEqual(conf.getlist('list-1', missing), [])
+        self.assertEqual(conf.getlist('list-2', missing), ['abc'])
+        self.assertEqual(conf.getlist('list-3', missing),
+                         ['abc', 'def', 'ghi'])
+        self.assertEqual(conf.getlist('list-4', missing),
+                         ['[', 'what', 'now?', ']'])
 
+
+class Thing:
+    pass
 
 class ConfigurationTestCase(TestBase):
 
     def test_simple_gets(self):
         conf = self.load("simple.conf")
         self.check_simple_gets(conf)
+
+    def test_simple_getitem(self):
+        conf = self.load("simple.conf")
+        self.assertEqual(conf['empty'], '')
+        self.assertEqual(conf['int-var'], '12')
+        self.assertEqual(conf['list-3'], 'abc def ghi')
+        def check(conf=conf):
+            conf['really-not-there']
+        self.assertRaises(KeyError, check)
 
     def test_type_errors(self):
         conf = self.load("simple.conf")

@@ -87,6 +87,15 @@ class Configuration:
         key = key.lower()
         self._data[key] = value
 
+    def has_key(self, key):
+        key = key.lower()
+        if self._data.has_key(key):
+            return True
+        elif self.delegate:
+            return self.delegate.has_key(key)
+        else:
+            return False
+
     def items(self):
         """Returns a list of key-value pairs for this section.
 
@@ -115,6 +124,18 @@ class Configuration:
                 if k not in L2:
                     L2.append(k)
             return L2
+
+    def __getitem__(self, key):
+        k = key.lower()
+        if self._data.has_key(k):
+            return self._data[k]
+        elif self.delegate:
+            v = self.delegate.get(k)
+            if v is None:
+                raise KeyError(key)
+            return v
+        else:
+            raise KeyError(key)
 
     def get(self, key, default=None):
         key = key.lower()
@@ -166,6 +187,14 @@ class Configuration:
         if max is not None and x > max:
             raise ValueError("value for %s must be no more than %s, found %s"
                              % (repr(key), max, x))
+
+    def getlist(self, key, default=None):
+        missing = []
+        s = self.get(key, missing)
+        if s is missing:
+            return default
+        else:
+            return s.split()
 
 
 class ImportingConfiguration(Configuration):
