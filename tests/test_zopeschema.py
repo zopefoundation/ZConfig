@@ -23,7 +23,7 @@ try:
 except NameError:
     True = 1
     False = 0
-    
+
 class StreamHandler:
     pass
 
@@ -105,7 +105,7 @@ def directory(value):
     return value
 
 def dirname(value):
-    _assert( os.path.exists(os.path.dirname(value)) )
+    _assert(os.path.exists(os.path.dirname(value)))
     return value
 
 def constructor(value):

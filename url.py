@@ -48,9 +48,9 @@ def urlunsplit(parts):
     parts = list(parts)
     parts.insert(3, '')
     url = _urlparse.urlunparse(tuple(parts))
-    if (  parts[0] == "file"
-          and url.startswith("file:/")
-          and not url.startswith("file:///")):
+    if (parts[0] == "file"
+        and url.startswith("file:/")
+        and not url.startswith("file:///")):
         url = "file://" + url[5:]
     return url
 
