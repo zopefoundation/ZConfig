@@ -36,47 +36,31 @@ files causes the schema to be checked.
 
 """
 
-import getopt
+import optparse
 import sys
 
 import ZConfig
-import ZConfig.loader
 
 
 def main():
-    loader = None
-    schema = None
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "schema="])
-    except getopt.GetoptError, e:
-        print >>sys.stderr, e
-        usage(sys.stderr)
-        return 2
+    optparser = optparse.OptionParser(
+        usage="usage: %prog [-s FILE] [file ...]")
+    optparser.add_option(
+        "-s", "--schema", dest="schema",
+        help="use the schema in FILE (can be a URL)",
+        metavar="FILE")
+    options, args = optparser.parse_args()
 
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage(sys.stdout)
-            return 0
-        if opt in ("-s", "--schema"):
-            try:
-                schema = ZConfig.loadSchema(arg)
-            except ZConfig.SchemaError, e:
-                print >>sys.stderr, e
-                return 1
-            loader = ZConfig.loader.ConfigLoader(schema)
-
-    if loader is None:
+    if not options.schema:
         print >>sys.stderr, "No schema specified, but is required."
         usage(sys.stderr)
         return 2
+    schema = ZConfig.loadSchema(options.schema)
 
     if not args:
         if sys.stdin.isatty():
-            if schema:
-                return 0
-            print >>sys.stderr, "No configuration files specified."
-            usage(sys.stderr)
-            return 2
+            # just checking the schema
+            return 0
         else:
             # stdin is a pipe
             args = ["-"]
@@ -85,9 +69,9 @@ def main():
     for fn in args:
         try:
             if fn == "-":
-                loader.loadFile(sys.stdin)
+                ZConfig.loadConfigFile(schema, sys.stdin)
             else:
-                loader.loadURL(fn)
+                ZConfig.loadConfig(schema, fn)
         except ZConfig.ConfigurationError, e:
             print >>sys.stderr, str(e)
             errors += 1
