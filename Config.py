@@ -137,18 +137,6 @@ class Configuration:
                     L2.append(k)
             return L2
 
-    def __getitem__(self, key):
-        k = key.lower()
-        if self._data.has_key(k):
-            return self._data[k]
-        elif self.delegate:
-            v = self.delegate.get(k)
-            if v is None:
-                raise KeyError(key)
-            return v
-        else:
-            raise KeyError(key)
-
     def get(self, key, default=None):
         key = key.lower()
         try:

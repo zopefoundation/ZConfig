@@ -86,15 +86,6 @@ class ConfigurationTestCase(TestBase):
         conf = self.load("simple.conf")
         self.check_simple_gets(conf)
 
-    def test_simple_getitem(self):
-        conf = self.load("simple.conf")
-        self.assertEqual(conf['empty'], '')
-        self.assertEqual(conf['int-var'], '12')
-        self.assertEqual(conf['list-3'], 'abc def ghi')
-        def check(conf=conf):
-            conf['really-not-there']
-        self.assertRaises(KeyError, check)
-
     def test_type_errors(self):
         conf = self.load("simple.conf")
         getbool = conf.getbool
