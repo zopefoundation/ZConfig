@@ -43,11 +43,24 @@ def get(section, name, default=None):
 
 def substitute(s, section):
     """Interpolate variables from `section` into `s`."""
-    if '$' in s:
+    if "$" in s:
         accum = []
         _interp(accum, s, section, None)
         s = ''.join(accum)
     return s
+
+
+def getnames(s):
+    """Return a list of names referenced by s."""
+    if "$" in s:
+        L = []
+        while s:
+            p, name, s = _split(s, None)
+            if name and name not in L:
+                L.append(name)
+        return L
+    else:
+        return []
 
 
 def _interp(accum, rest, section, context):
@@ -106,7 +119,7 @@ def _split(s, context):
                 return prefix + "$", None, s[i+1:]
             name = m.group(0)
             i = m.end()
-        return prefix, name, s[i:]
+        return prefix, name.lower(), s[i:]
     else:
         return s, None, None
 

@@ -8,7 +8,7 @@ import unittest
 from types import StringType
 from UserDict import UserDict
 
-from ZConfig.Substitution import get, substitute
+from ZConfig.Substitution import get, getnames, substitute
 from ZConfig.Substitution import SubstitutionRecursionError
 from ZConfig.Substitution import SubstitutionSyntaxError
 
@@ -118,6 +118,22 @@ class SubstitutionTestCase(unittest.TestCase):
             else:
                 name = exc.__module__ + "." + exc.__name__
             self.fail("expected exception " + name)
+
+    def test_getnames(self):
+        self.assertEqual(getnames(""), [])
+        self.assertEqual(getnames("abc"), [])
+        self.assertEqual(getnames("$"), [])
+        self.assertEqual(getnames("$$"), [])
+        self.assertEqual(getnames("$abc"), ["abc"])
+        self.assertEqual(getnames("$abc$abc"), ["abc"])
+        self.assertEqual(getnames("$abc$def"), ["abc", "def"])
+        self.assertEqual(getnames("${abc}${def}"), ["abc", "def"])
+        self.assertEqual(getnames("$abc xyz${def}pqr$def"), ["abc", "def"])
+        self.assertEqual(getnames("$ABC xyz${def}pqr$DEF"), ["abc", "def"])
+        self.assertRaises(SubstitutionSyntaxError, getnames, "${")
+        self.assertRaises(SubstitutionSyntaxError, getnames, "${name")
+        self.assertRaises(SubstitutionSyntaxError, getnames, "${1name}")
+        self.assertRaises(SubstitutionSyntaxError, getnames, "${ name}")
 
 
 def test_suite():
