@@ -5,6 +5,7 @@ from __future__ import nested_scopes
 
 import unittest
 
+from types import StringType
 from UserDict import UserDict
 
 from ZConfig.Substitution import get, substitute
@@ -49,14 +50,17 @@ class SubstitutionTestCase(unittest.TestCase):
         self.assertEqual(substitute("$splat_", d), "")
 
     def test_syntax_errors(self):
-        d = {"name": "value"}
+        d = {"name": "${next"}
         def check(s):
-            self.assertRaises(SubstitutionSyntaxError,
-                              substitute, s, d)
+            self.check_error_context(SubstitutionSyntaxError, None,
+                                     substitute, s, d)
         check("${")
         check("${name")
         check("${1name}")
         check("${ name}")
+
+        self.check_error_context(SubstitutionSyntaxError, ["name"],
+                                 get, d, "name")
 
     def test_edge_cases(self):
         # It's debatable what should happen for these cases, so we'll
@@ -83,12 +87,12 @@ class SubstitutionTestCase(unittest.TestCase):
     def test_nesting_errors(self):
         d = {"name": "$splat",
              "splat": "$name"}
-        self.assertRaises(SubstitutionRecursionError,
-                          get, d, "name")
+        self.check_error_context(SubstitutionRecursionError, ["name", "splat"],
+                                 get, d, "name")
         d = {"name": "$splat",
              "splat": "$splat"}
-        self.assertRaises(SubstitutionRecursionError,
-                          get, d, "name")
+        self.check_error_context(SubstitutionRecursionError, ["name", "splat"],
+                                 get, d, "name")
 
     def test_container_search(self):
         d1 = {"outer": "outervalue",
@@ -99,6 +103,21 @@ class SubstitutionTestCase(unittest.TestCase):
         self.assertEqual(get(d2, "both"),
                          "inner-from-inner outervalue")
         self.assertEqual(get(d2, "bogus"), "")
+
+    def check_error_context(self, exc, context, callable, *args, **kw):
+        try:
+            callable(*args, **kw)
+        except exc, e:
+            self.assertEqual(e.context, context)
+        else:
+            if isinstance(exc, StringType):
+                name = `exc`
+            elif exc.module == "exceptions":
+                # Built-in exceptions
+                name = exc.__name__
+            else:
+                name = exc.__module__ + "." + exc.__name__
+            self.fail("expected exception " + name)
 
 
 def test_suite():
