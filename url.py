@@ -41,12 +41,8 @@ except ImportError:
 
 
 def urlnormalize(url):
-    parts = urlsplit(url)
-    if not parts[0]:
-        raise ValueError("invalid URL, or file does not exist:\n"
-                         + repr(url))
-    url = urlunsplit(parts)
-    if url.startswith("file:/") and not url.startswith("file:///"):
+    lc = url.lower()
+    if lc.startswith("file:/") and not lc.startswith("file:///"):
         url = "file://" + url[5:]
     return url
 
