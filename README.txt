@@ -17,7 +17,7 @@ separate configuration support from configuration loading even with
 configuration data being defined and consumed by a wide range of
 separate packages.
 
-ZConfig is licensed under the Zope Public License, version 2.0.  See
+ZConfig is licensed under the Zope Public License, version 2.1.  See
 the file LICENSE.txt in the distribution for the full license text.
 
 Reference documentation is available in the ZConfig/doc/ directory.
