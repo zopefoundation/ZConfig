@@ -5,9 +5,17 @@ from __future__ import nested_scopes
 
 import unittest
 
+from UserDict import UserDict
+
 from ZConfig.Substitution import get, substitute
 from ZConfig.Substitution import SubstitutionRecursionError
 from ZConfig.Substitution import SubstitutionSyntaxError
+
+
+class ContainerDict(UserDict):
+    def __init__(self, mapping=None, container=None):
+        self.container = container
+        UserDict.__init__(self, mapping)
 
 
 class SubstitutionTestCase(unittest.TestCase):
@@ -81,6 +89,16 @@ class SubstitutionTestCase(unittest.TestCase):
              "splat": "$splat"}
         self.assertRaises(SubstitutionRecursionError,
                           get, d, "name")
+
+    def test_container_search(self):
+        d1 = ContainerDict({"outer": "outervalue",
+                            "inner": "inner-from-outer"})
+        d2 = ContainerDict({"inner": "inner-from-inner",
+                            "bogus": "${nothere}",
+                            "both": "${inner} ${outer}"}, d1)
+        self.assertEqual(get(d2, "both"),
+                         "inner-from-inner outervalue")
+        self.assertEqual(get(d2, "bogus"), "")
 
 
 def test_suite():

@@ -75,7 +75,16 @@ def _interp(accum, rest, section, context):
             if rest[length:length+1] != "}":
                 raise SubstitutionSyntaxError(
                     "'${%s' not followed by '}'" % name, context)
-            v = section.get(name, "")
+            v = section.get(name)
+            if v is None:
+                parent = section.container
+                while parent is not None:
+                    v = parent.get(name)
+                    if v is not None:
+                        break
+                    parent = parent.container
+                else:
+                    v = ""
             if "$" in v and context:
                 if name in context:
                     raise SubstitutionRecursionError(name, context)

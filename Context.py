@@ -22,15 +22,15 @@ class Context:
     # subclass-support API
 
     def createImportedSection(self, section, url):
-        return ImportingConfiguration(None, None, url)
+        return ImportingConfiguration(url)
 
     def createNestedSection(self, section, type, name, delegatename):
         if name:
             name = name.lower()
-        return Configuration(type.lower(), name, section.url)
+        return Configuration(section, type.lower(), name, section.url)
 
     def createToplevelSection(self, url):
-        return ImportingConfiguration(None, None, url)
+        return ImportingConfiguration(url)
 
     def getDelegateType(self, type):
         # Applications must provide delegation typing information by

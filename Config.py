@@ -3,7 +3,8 @@
 from Common import *
 
 class Configuration:
-    def __init__(self, type, name, url):
+    def __init__(self, container, type, name, url):
+        self.container = container
         self.type = type
         self.name = name or None
         self.delegate = None
@@ -201,9 +202,9 @@ class Configuration:
 
 
 class ImportingConfiguration(Configuration):
-    def __init__(self, *args):
+    def __init__(self, url):
         self._imports = []
-        Configuration.__init__(self, *args)
+        Configuration.__init__(self, None, None, None, url)
 
     def addImport(self, section):
         self._imports.append(section)
