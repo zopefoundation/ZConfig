@@ -76,6 +76,8 @@ def Parse(file, context, section, url):
             newurl = urlparse.urljoin(section.url, value)
             context.includeConfiguration(section, newurl)
         else:
+            if not value:
+                value = ''
             try:
                 section.addValue(key, value)
             except ConfigurationError, e:
