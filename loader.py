@@ -163,10 +163,13 @@ class ConfigLoader(BaseLoader):
         self.schema = schema
 
     def loadResource(self, resource):
-        sm = ZConfig.matcher.SchemaMatcher(self.schema)
+        sm = self.createSchemaMatcher()
         self._parse_resource(sm, resource)
         result = sm.finish(), CompositeHandler(sm.handlers, self.schema)
         return result
+
+    def createSchemaMatcher(self):
+        return ZConfig.matcher.SchemaMatcher(self.schema)
 
     # config parser support API
 
