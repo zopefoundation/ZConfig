@@ -41,12 +41,21 @@ class Context:
         from ApacheStyle import Parse
         Parse(file, self, section, url)
 
+    def _normalize_url(self, url):
+        if os.path.exists(url):
+            url = "file://" + urllib.pathname2url(os.path.abspath(url))
+        else:
+            parts = urlparse.urlsplit(url)
+            if not parts[0]:
+                raise ValueError("invalid URL, or file does not exist:\n"
+                                 + repr(url))
+        return url
+
     # public API
 
     def load(self, url):
         """Load a resource from a URL or pathname."""
-        if os.path.exists(url):
-            url = "file://" + urllib.pathname2url(os.path.abspath(url))
+        url = self._normalize_url(url)
         top = self.createToplevelSection(url)
         self._all_sections.append(top)
         self._imports = [top]
