@@ -10,6 +10,9 @@ class InterpolationError(Exception):
         self.message = msg
         self.context = context
 
+    def __str__(self):
+        return self.message
+
 class InterpolationSyntaxError(InterpolationError):
     """Raised when interpolation source text contains syntactical errors."""
 
