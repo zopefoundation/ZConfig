@@ -103,7 +103,8 @@ class BaseMatcher:
                     v[key] = [value]
             else:
                 if v.has_key(key):
-                    raise ZConfig.ConfigurationError("too many")
+                    raise ZConfig.ConfigurationError(
+                        "too many values for " + `key`)
                 v[key] = value
         elif ismulti:
             v.append(value)
