@@ -52,29 +52,10 @@ def substitute(s, section):
 
 def _interp(accum, rest, section, context):
     while 1:
-        i = rest.find("$")
-        if i < 0:
-            accum.append(rest)
-            break
-        accum.append(rest[:i])
-        rest = rest[i+1:]
-        if not rest:
-            accum.append("$")
-            break
-        if rest[0] == "$":
-            accum.append("$")
-            rest = rest[1:]
-        elif rest[0] == "{":
-            rest = rest[1:]
-            m = _name_match(rest[:])
-            if not m:
-                raise SubstitutionSyntaxError("'${' not followed by name",
-                                              context)
-            name = m.group(0)
-            length = len(name)
-            if rest[length:length+1] != "}":
-                raise SubstitutionSyntaxError(
-                    "'${%s' not followed by '}'" % name, context)
+        s, name, rest = _split(rest)
+        if s:
+            accum.append(s)
+        if name:
             v = section.get(name)
             if v is None:
                 parent = getattr(section, "container", None)
@@ -91,21 +72,38 @@ def _interp(accum, rest, section, context):
                 _interp(accum, v, section, context + [name])
             else:
                 accum.append(v)
-            rest = rest[length+1:]
-        else:
-            m = _name_match(rest)
+        if not rest:
+            return
+
+
+def _split(s, context=None):
+    if "$" in s:
+        i = s.find("$")
+        c = s[i+1:i+2]
+        if c == "":
+            return s, None, None
+        if c == "$":
+            return s[:i+1], None, s[i+2:]
+        prefix = s[:i]
+        if c == "{":
+            m = _name_match(s, i + 2)
             if not m:
-                accum.append("$")
-                continue
+                raise SubstitutionSyntaxError("'${' not followed by name",
+                                              context)
             name = m.group(0)
-            v = section.get(name, "")
-            if "$" in v and context:
-                if name in context:
-                    raise SubstitutionRecursionError(name, context)
-                _interp(accum, v, section, context + [name])
-            else:
-                accum.append(v)
-            rest = rest[len(name):]
+            i = m.end() + 1
+            if not s.startswith("}", i - 1):
+                raise SubstitutionSyntaxError(
+                    "'${%s' not followed by '}'" % name, context)
+        else:
+            m = _name_match(s, i+1)
+            if not m:
+                return prefix + "$", None, s[i+1:]
+            name = m.group(0)
+            i = m.end()
+        return prefix, name, s[i:]
+    else:
+        return s, None, None
 
 
 import re
