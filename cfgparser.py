@@ -25,14 +25,16 @@ except NameError:
 
 
 class ZConfigParser:
-    def __init__(self, resource, context):
+    def __init__(self, resource, context, defines=None):
         self.resource = resource
         self.context = context
         self.file = resource.file
         self.url = resource.url
         self.lineno = 0
         self.stack = []   # [(type, name, delegatename, prevmatcher), ...]
-        self.defs = {}
+        if defines is None:
+            defines = {}
+        self.defs = defines
 
     def nextline(self):
         line = self.file.readline()
@@ -145,7 +147,7 @@ class ZConfigParser:
 
     def handle_include(self, section, rest):
         newurl = urljoin(self.url, rest)
-        self.context.includeConfiguration(section, newurl)
+        self.context.includeConfiguration(section, newurl, self.defs)
 
     def handle_define(self, section, rest):
         parts = rest.split(None, 1)

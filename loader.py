@@ -203,15 +203,15 @@ class ConfigLoader(BaseLoader):
         sectvalue = matcher.finish()
         parent.addSection(type, name, sectvalue)
 
-    def includeConfiguration(self, section, url):
+    def includeConfiguration(self, section, url, defines):
         r = self.openResource(url)
-        self._parse_resource(section, r)
+        self._parse_resource(section, r, defines)
 
     # internal helper
 
-    def _parse_resource(self, matcher, resource):
+    def _parse_resource(self, matcher, resource, defines=None):
         from ZConfig.cfgparser import ZConfigParser
-        parser = ZConfigParser(resource, self)
+        parser = ZConfigParser(resource, self, defines)
         parser.parse(matcher)
 
 

@@ -40,9 +40,9 @@ class Context(loader.BaseLoader):
         # overriding the Context.getDelegateType() method.
         return type.lower()
 
-    def parse(self, resource, section):
+    def parse(self, resource, section, defines=None):
         from ZConfig.cfgparser import ZConfigParser
-        ZConfigParser(resource, self).parse(section)
+        ZConfigParser(resource, self, defines).parse(section)
 
     def loadResource(self, resource):
         top = self.createToplevelSection(resource.url)
@@ -53,10 +53,10 @@ class Context(loader.BaseLoader):
 
     # interface for parser
 
-    def includeConfiguration(self, section, url):
+    def includeConfiguration(self, section, url, defines):
         r = self.openResource(url)
         try:
-            self.parse(r, section)
+            self.parse(r, section, defines)
         finally:
             r.close()
 

@@ -204,6 +204,12 @@ class ConfigurationTestCase(TestBase):
         self.assertEqual(conf.get("VAR2"), "value2")
         self.assertEqual(conf.get("var3"), "value3")
         self.assertEqual(conf.get("VAR3"), "value3")
+        self.assertEqual(conf.get("var4"), "value")
+
+    def test_includes_with_defines(self):
+        conf = self.load("outer.conf")
+        self.assertEqual(conf.get("refinner"), "inner")
+        self.assertEqual(conf.get("refouter"), "outer")
 
     def test_define(self):
         conf = self.load("simple.conf")
