@@ -22,7 +22,7 @@ import warnings
 
 import ZConfig
 from ZConfig.Context import Context
-from ZConfig.Common import ConfigurationTypeError
+from ZConfig.Common import ConfigurationError, ConfigurationTypeError
 
 warnings.filterwarnings("ignore", r".*\bmktemp\b.*",
                         RuntimeWarning, __name__)
@@ -189,6 +189,10 @@ class ConfigurationTestCase(TestBase):
         self.assertEqual(conf.get("var1"), "abc")
         self.assertEqual(conf.get("var2"), "value2")
         self.assertEqual(conf.get("var3"), "value3")
+
+    def test_fragment_ident_disallowed(self):
+        self.assertRaises(ConfigurationError,
+                          self.load, "simplesections.conf#another")
 
     def test_load_from_abspath(self):
         fn = self.write_tempfile()
