@@ -79,15 +79,14 @@ class BaseLoader:
         # resources.  The policy needs to support both re-retrieve on
         # change and provide the cached resource when the remote
         # resource is not accessible.
-        parts = list(urlsplit(url))
+        url = str(url)
+        parts = urlsplit(url)
         fragment = parts[-1]
         if fragment:
+            parts = list(parts)
             parts[-1] = ''
             url = urlunsplit(tuple(parts))
-        if parts[0] == 'zconfig':
-            file = _open_resource_file(url)
-        else:
-            file = urllib2.urlopen(url)
+        file = urllib2.urlopen(url)
         return self.createResource(file, url, fragment or None)
 
     def normalizeURL(self, url):
@@ -112,15 +111,6 @@ def _url_from_file(file):
         return "file://" + urllib.pathname2url(os.path.abspath(name))
     else:
         return None
-
-
-def _open_resource_file(url):
-    parts = urlsplit(url)
-    assert parts[0] == 'zconfig'
-    fn = os.path.join(RESOURCE_DIR, parts[2])
-    if not os.path.isfile(fn):
-        raise ValueError("no such resource: " + `parts[2]`)
-    return open(fn)
 
 
 class SchemaLoader(BaseLoader):
