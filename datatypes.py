@@ -128,6 +128,11 @@ def asBoolean(s):
         raise ValueError("not a valid boolean value: " + repr(s))
 
 
+def string_list(s):
+    """Convert a string to a list of strings using .split()."""
+    return s.split()
+
+
 port_number = RangeCheckedConversion(integer, min=1, max=0xffff).__call__
 
 
@@ -281,6 +286,7 @@ stock_datatypes = {
     "integer":           integer,
     "float":             float_conversion,
     "string":            str,
+    "string-list":       string_list,
     "null":              null_conversion,
     "locale":            MemoizedConversion(check_locale),
     "port-number":       port_number,
