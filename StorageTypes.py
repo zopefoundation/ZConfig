@@ -92,10 +92,29 @@ def convertClientStorageArgs(addr=None, **kw):
     return kw
 
 
+def convertFullStorageArgs(**kw):
+    from bsddb3Storage.BerkeleyBase import BerkeleyConfig
+    config = BerkeleyConfig()
+    for name in dir(BerkeleyConfig):
+        if name.startswith('_'):
+            continue
+        val = kw.get(name)
+        if val is not None:
+            if name != 'logdir':
+                val = int(val)
+            setattr(config, name, val)
+            del kw[name]
+    # XXX: Nobody ever passes in env
+    assert not kw.has_key('env')
+    kw['config'] = config
+    return kw
+
+
 storage_types = {
     'FileStorage': ('ZODB.FileStorage', convertFileStorageArgs),
     'DemoStorage': ('ZODB.DemoStorage', None),
     'MappingStorage': ('ZODB.MappingStorage', None),
     'TemporaryStorage': ('Products.TemporaryFolder.TemporaryStorage', None),
     'ClientStorage': ('ZEO.ClientStorage', convertClientStorageArgs),
+    'Full': ('bsddb3Storage.Full', convertFullStorageArgs),
     }
