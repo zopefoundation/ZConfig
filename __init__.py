@@ -13,8 +13,11 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.12 2003/12/29 01:15:30 fdrake Exp $
+$Id: __init__.py,v 1.13 2004/01/02 17:28:10 fdrake Exp $
 """
+version_info = (2, 1)
+__version__ = ".".join([str(n) for n in version_info])
+
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
 
