@@ -284,6 +284,9 @@ class BaseParser(xml.sax.ContentHandler):
         self._stack[-1].adddefault(data, self._position, key)
 
     def characters_description(self, data):
+        if self._stack[-1].description is not None:
+            self.error(
+                "at most one <description> may be used for each element")
         self._stack[-1].description = data
 
     def characters_example(self, data):

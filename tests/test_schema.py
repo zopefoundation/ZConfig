@@ -900,6 +900,16 @@ class SchemaTestCase(TestBase):
             <schema extends='%s/base-keytype1.xml %s/base-keytype2.xml'/>
             """ % (CONFIG_BASE, CONFIG_BASE))
 
+    def test_multiple_descriptions_is_error(self):
+        self.assertRaises(ZConfig.SchemaError,
+                          self.load_schema_text, """\
+            <schema>
+              <description>  foo  </description>
+              <description>  bar  </description>
+            </schema>
+            """)
+
+
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)
 
