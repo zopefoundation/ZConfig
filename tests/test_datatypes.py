@@ -111,6 +111,7 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert(":80"),                 ("", 80))
         eq(convert("80"),                  ("", 80))
         eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
+        self.assertRaises(ValueError, convert, "40 # foo")
 
     def test_datatype_integer(self):
         convert = self.types.get("integer")
