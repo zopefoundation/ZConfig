@@ -327,8 +327,6 @@ class BaseParser(xml.sax.ContentHandler):
         if attrs.has_key("extends"):
             basename = self.basic_key(attrs["extends"])
             base = self._schema.gettype(basename)
-            if not self._localtypes.has_key(basename):
-                self.error("cannot extend type derived outside component")
             if base.isabstract():
                 self.error("sectiontype cannot extend an abstract type")
             if attrs.has_key("keytype"):
@@ -338,7 +336,6 @@ class BaseParser(xml.sax.ContentHandler):
         else:
             sectinfo = self._schema.createSectionType(
                 name, keytype, valuetype, datatype)
-        self._localtypes[name] = sectinfo
         if attrs.has_key("implements"):
             ifname = self.basic_key(attrs["implements"])
             interface = self._schema.gettype(ifname)
@@ -464,7 +461,6 @@ class SchemaParser(BaseParser):
         keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
         self._schema = info.SchemaType(keytype, valuetype, datatype,
                                        handler, self._url, self._registry)
-        self._localtypes = self._schema._types
         self._stack = [self._schema]
 
     def end_schema(self):
@@ -474,7 +470,6 @@ class SchemaParser(BaseParser):
         assert not self._prefixes
 
 
-
 class ComponentParser(BaseParser):
 
     _handled_tags = BaseParser._handled_tags + ("component",)
@@ -482,7 +477,6 @@ class ComponentParser(BaseParser):
 
     def __init__(self, registry, loader, url, schema):
         BaseParser.__init__(self, registry, loader, url)
-        self._localtypes = {}
         self._parent = schema
 
     def characters_description(self, data):
