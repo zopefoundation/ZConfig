@@ -2,7 +2,9 @@
 
 import unittest
 
-from ZConfig.Interpolation import interpolate, InterpolationSyntaxError
+from ZConfig.Interpolation import get, interpolate
+from ZConfig.Interpolation import InterpolationRecursionError
+from ZConfig.Interpolation import InterpolationSyntaxError
 
 
 class InterpolationTestCase(unittest.TestCase):
@@ -51,6 +53,30 @@ class InterpolationTestCase(unittest.TestCase):
     def test_non_nesting(self):
         d = {"name": "$value"}
         self.assertEqual(interpolate("$name", d), "$value")
+
+    def test_simple_nesting(self):
+        d = {"name": "value",
+             "nest": "$splat",
+             "splat": "nested"}
+        def check(name, value):
+            self.assertEqual(get(d, name), value)
+        check("name", "value")
+        check("nest", "nested")
+
+    def test_nesting_errors(self):
+        d = {"name": "$splat",
+             "splat": "$foo",
+             "foo": "$"}
+        self.assertRaises(InterpolationSyntaxError,
+                          get, d, "name")
+        d = {"name": "$splat",
+             "splat": "$name"}
+        self.assertRaises(InterpolationRecursionError,
+                          get, d, "name")
+        d = {"name": "$splat",
+             "splat": "$splat"}
+        self.assertRaises(InterpolationRecursionError,
+                          get, d, "name")
 
 
 def test_suite():
