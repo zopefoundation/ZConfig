@@ -13,6 +13,7 @@
 ##############################################################################
 """Parser for ZConfig schemas."""
 
+import os
 import xml.sax
 
 import ZConfig
@@ -279,11 +280,14 @@ class BaseParser(xml.sax.ContentHandler):
     def start_import(self, attrs):
         src = attrs.get("src", "").strip()
         pkg = attrs.get("package", "").strip()
+        file = attrs.get("file", "").strip()
         if not (src or pkg):
             self.error("import must specify either src or package")
         if src and pkg:
             self.error("import may only specify one of src or package")
         if src:
+            if file:
+                self.error("import may not specify file and src")
             src = url.urljoin(self._url, src)
             src, fragment = url.urldefrag(src)
             if fragment:
@@ -292,15 +296,13 @@ class BaseParser(xml.sax.ContentHandler):
             schema = self._loader.loadURL(src)
             for n in schema.gettypenames():
                 self._schema.addtype(schema.gettype(n))
-        elif self._components.has_key(pkg):
-            # already loaded, or in progress
-            pass
         else:
-            src = self._loader.schemaComponentSource(pkg)
-            if not src:
-                self.error("could not locate schema component " + `pkg`)
-            self._components[pkg] = src
-            self.loadComponent(src)
+            if os.path.dirname(file):
+                self.error("file may not include a directory part")
+            src = self._loader.schemaComponentSource(pkg, file)
+            if not self._components.has_key(src):
+                self._components[pkg] = src
+                self.loadComponent(src)
 
     def loadComponent(self, src):
         r = self._loader.openResource(src)

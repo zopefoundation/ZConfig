@@ -76,6 +76,31 @@ class LoaderTestCase(unittest.TestCase):
         schema = loader.loadFile(sio)
         self.assert_(schema.gettype("widget-a") is not None)
 
+    def test_import_from_package_with_file(self):
+        loader = ZConfig.loader.SchemaLoader()
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.library.widget'"
+                       "          file='extra.xml' />"
+                       "</schema>")
+        schema = loader.loadFile(sio)
+        self.assert_(schema.gettype("extra-type") is not None)
+
+    def test_import_from_package_with_missing_file(self):
+        loader = ZConfig.loader.SchemaLoader()
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.library.widget'"
+                       "          file='notthere.xml' />"
+                       "</schema>")
+        self.assertRaises(ZConfig.SchemaError, loader.loadFile, sio)
+
+    def test_import_from_package_with_directory_file(self):
+        loader = ZConfig.loader.SchemaLoader()
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.library.widget'"
+                       "          file='really/notthere.xml' />"
+                       "</schema>")
+        self.assertRaises(ZConfig.SchemaError, loader.loadFile, sio)
+
     def test_urlsplit_urlunsplit(self):
         # Extracted from Python's test.test_urlparse module:
         for url, parsed, split in [
