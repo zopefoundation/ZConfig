@@ -174,17 +174,19 @@ def inet_address(s):
     return host, port
 
 
-def socket_address(s):
-    # returns (family, address) tuple
-    import socket
-    if "/" in s:
-        if hasattr(socket, "AF_UNIX"):
-            return socket.AF_UNIX, s
+class SocketAddress:
+    def __init__(self, s):
+        # returns (family, address) tuple
+        import socket
+        if "/" in s:
+            if hasattr(socket, "AF_UNIX"):
+                self.family = socket.AF_UNIX
+            else:
+                self.family = None
+            self.address = s
         else:
-            raise ValueError(
-                "AF_UNIX sockets are not supported on this platform")
-    else:
-        return socket.AF_INET, inet_address(s)
+            self.family = socket.AF_INET
+            self.address = inet_address(s)
 
 def float_conversion(v):
     if isinstance(v, type('')) or isinstance(v, type(u'')):
@@ -311,7 +313,7 @@ stock_datatypes = {
     "basic-key":         BasicKeyConversion(),
     "logging-level":     LogLevelConversion(),
     "inet-address":      inet_address,
-    "socket-address":    socket_address,
+    "socket-address":    SocketAddress,
     "ipaddr-or-hostname":IpaddrOrHostname(),
     "existing-directory":existing_directory,
     "existing-path":     existing_path,

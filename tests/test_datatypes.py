@@ -161,20 +161,27 @@ class DatatypeTestCase(unittest.TestCase):
     def test_datatype_socket_address(self):
         convert = self.types.get("socket-address")
         eq = self.assertEqual
-        raises = self.assertRaises
         AF_INET = socket.AF_INET
-        eq(convert("Host.Example.Com:80"),(AF_INET, ("host.example.com", 80)))
-        eq(convert(":80"),                (AF_INET, ("", 80)))
-        eq(convert("80"),                 (AF_INET, ("", 80)))
-        eq(convert("host.EXAMPLE.com"),   (AF_INET, ("host.example.com",None)))
+
+        def check(value, family, address, self=self, convert=convert):
+            a = convert(value)
+            self.assertEqual(a.family, family)
+            self.assertEqual(a.address, address)
+
+        check("Host.Example.Com:80", AF_INET, ("host.example.com", 80))
+        check(":80",                 AF_INET, ("", 80))
+        check("80",                  AF_INET, ("", 80))
+        check("host.EXAMPLE.com",    AF_INET, ("host.example.com",None))
+        a1 = convert("/tmp/var/@345.4")
+        a2 = convert("/tmp/var/@345.4:80")
+        self.assertEqual(a1.address, "/tmp/var/@345.4")
+        self.assertEqual(a2.address, "/tmp/var/@345.4:80")
         if hasattr(socket, "AF_UNIX"):
-            eq(convert("/tmp/var/@345.4"),
-               (socket.AF_UNIX, "/tmp/var/@345.4"))
-            eq(convert("/tmp/var/@345.4:80"),
-               (socket.AF_UNIX, "/tmp/var/@345.4:80"))
+            self.assertEqual(a1.family, socket.AF_UNIX)
+            self.assertEqual(a2.family, socket.AF_UNIX)
         else:
-            raises(ValueError, convert, "/tmp/var/@345.4")
-            raises(ValueError, convert, "/tmp/var/@345.4:80")
+            self.assert_(a1.family is None)
+            self.assert_(a2.family is None)
 
     def test_constructor(self):
         convert = self.types.get('constructor')
