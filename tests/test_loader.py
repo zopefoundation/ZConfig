@@ -220,6 +220,22 @@ class LoaderTestCase(TestBase):
             ZConfig.url.urldefrag("file:/abc/def#frag"),
             ("file:///abc/def", "frag"))
 
+    def test_isPath(self):
+        assert_ = self.assert_
+        isPath = ZConfig.loader.BaseLoader().isPath
+        assert_(isPath("abc"))
+        assert_(isPath("abc/def"))
+        assert_(isPath("/abc"))
+        assert_(isPath("/abc/def"))
+        assert_(isPath(r"\abc"))
+        assert_(isPath(r"\abc\def"))
+        assert_(isPath(r"c:\abc\def"))
+        assert_(not isPath("http://www.example.com/"))
+        assert_(not isPath("http://www.example.com/sample.conf"))
+        assert_(not isPath("file:///etc/zope/zope.conf"))
+        assert_(not isPath("file:///c|/foo/bar.conf"))
+
+
 class TestNonExistentResources(unittest.TestCase):
 
     # XXX Not sure if this is the best approach for these.  These

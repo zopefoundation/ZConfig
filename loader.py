@@ -101,27 +101,45 @@ class BaseLoader:
         except urllib2.URLError, e:
             # urllib2.URLError has a particularly hostile str(), so we
             # generally don't want to pass it along to the user.
-            error = ZConfig.ConfigurationError("error opening resource %s: %s"
-                                               % (url, e.reason))
-            error.url = url
-            raise error
+            self._raise_open_error(url, e.reason)
         except (IOError, OSError), e:
             # Python 2.1 raises a different error from Python 2.2+,
             # so we catch both to make sure we detect the situation.
-            error = ZConfig.ConfigurationError("error opening resource %s: %s"
-                                               % (url, str(e)))
-            error.url = url
-            raise error
+            self._raise_open_error(url, str(e))
         return self.createResource(file, url)
 
+    def _raise_open_error(self, url, message):
+        if url[:7].lower() == "file://":
+            what = "file"
+            ident = urllib.url2pathname(url[7:])
+        else:
+            what = "URL"
+            ident = url
+        error = ZConfig.ConfigurationError("error opening %s %s: %s"
+                                           % (what, ident, message))
+        error.url = url
+        raise error
+
     def normalizeURL(self, url):
-        if os.path.exists(url) or ":" not in url:
+        if self.isPath(url):
             url = "file://" + urllib.pathname2url(os.path.abspath(url))
         url, fragment = ZConfig.url.urldefrag(url)
         if fragment:
             raise ZConfig.ConfigurationError(
                 "fragment identifiers are not supported")
         return url
+
+    def isPath(self, s):
+        """Return True iff 's' should be handled as a filesystem path."""
+        if ":" in s:
+            # XXX This assumes that one-character scheme identifiers
+            # are always Windows drive letters; I don't know of any
+            # one-character scheme identifiers.
+            scheme, rest = urllib.splittype(s)
+            return len(scheme) == 1
+        else:
+            return True
+
 
 
 def _url_from_file(file):
