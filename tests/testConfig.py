@@ -19,15 +19,11 @@ import tempfile
 import unittest
 import urllib
 import urlparse
-import warnings
 
 import ZConfig
 
 from ZConfig.Context import Context
 from ZConfig.Common import ConfigurationError, ConfigurationTypeError
-
-warnings.filterwarnings("ignore", r".*\bmktemp\b.*",
-                        RuntimeWarning, __name__)
 
 try:
     __file__
