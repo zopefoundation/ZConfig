@@ -222,7 +222,12 @@ class AbstractType:
             raise ZConfig.SchemaError("no sectiontype %s in abstracttype %s"
                                       % (`name`, `self.name`))
 
+    def hassubtype(self, name):
+        """Return true iff this type has 'name' as a concrete manifestation."""
+        return name in self._subtypes.keys()
+
     def getsubtypenames(self):
+        """Return the names of all concrete types as a sorted list."""
         L = self._subtypes.keys()
         L.sort()
         return L
@@ -363,6 +368,41 @@ class SectionType:
         if st.isabstract():
             st = st.gettype(type)
         return st
+
+    def getinfobyname(self, name):
+        """Return the info object corresponding to the section 'name'.
+
+        Returns None if there is no matching info.  The resulting info
+        may represent either a section or a key; if it's a section, it
+        may be abstract or a multi-section.
+        """
+        if name in ("*", "+"):
+            raise ZConfig.ConfigurationError(
+                "'*' and '+' may not be used as key or section names")
+        for key, info in self._children:
+            if info.name == name:
+                return info
+        return None
+
+    def getsectionbytype(self, type):
+        L = []
+        for key, info in self._children:
+            if not info.issection():
+                continue
+            if info.sectiontype.name == type:
+                L.append(info)
+            if info.sectiontype.isabstract():
+                st = info.sectiontype
+                if st.hassubtype(type):
+                    L.append(info)
+        if len(L) == 1:
+            return L[0]
+        elif L:
+            raise ZConfig.ConfigurationError(
+                "section type not found in context")
+        else:
+            raise ZConfig.ConfigurationError(
+                "section type ambiguous in context")
 
     def isabstract(self):
         return False
