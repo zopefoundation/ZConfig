@@ -209,10 +209,10 @@ def existing_file(v):
     raise ValueError, '%s is not an existing file' % v
 
 def existing_dirpath(v):
-    if not os.path.split(v)[0]:
-        # relative pathname
-        return v
     dir = os.path.dirname(v)
+    if not dir:
+        # relative pathname with no directory component
+        return v
     if os.path.isdir(dir):
         return v
     raise ValueError, ('The directory named as part of the path %s '
