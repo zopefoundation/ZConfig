@@ -17,6 +17,14 @@ import os
 import re
 import sys
 
+# types.StringTypes was added in Python 2.2
+try:
+    unicode
+except NameError:
+    StringTypes = type(''), type(unicode(''))
+else:
+    StringTypes = type(''),
+
 try:
     True
 except NameError:
@@ -165,7 +173,7 @@ class SocketAddress:
             self.address = inet_address(s)
 
 def float_conversion(v):
-    if isinstance(v, type('')) or isinstance(v, type(u'')):
+    if type(v) in StringTypes:
         if v.lower() in ["inf", "-inf", "nan"]:
             raise ValueError(`v` + " is not a portable float representation")
     return float(v)
@@ -209,42 +217,6 @@ def existing_dirpath(v):
         return v
     raise ValueError, ('The directory named as part of the path %s '
                        'does not exist.' % v)
-
-def parse_constructor(v):
-    parenmsg = (
-        'Invalid constructor (unbalanced parenthesis in "%s")' % v
-        )
-    openparen = v.find('(')
-    if openparen < 0:
-        raise ValueError(parenmsg)
-    klass = v[:openparen]
-    if not v.endswith(')'):
-        raise ValueError(parenmsg)
-    arglist = v[openparen+1:-1]
-    return klass, arglist
-
-def get_arglist(s):
-    # someone could do a better job at this.
-    pos = []
-    kw = {}
-    args = s.split(',')
-    args = filter(None, args)
-    while args:
-        arg = args.pop(0)
-        try:
-            if '=' in arg:
-                k,v=arg.split('=', 1)
-                k = k.strip()
-                v = v.strip()
-                kw[k] = eval(v)
-            else:
-                arg = arg.strip()
-                pos.append(eval(arg))
-        except SyntaxError:
-            if not args:
-                raise
-            args[0] = '%s, %s' % (arg, args[0])
-    return pos, kw
 
 
 class SuffixMultiplier:
