@@ -15,6 +15,7 @@
 
 import os
 import sys
+import shutil
 import socket
 import tempfile
 import unittest
@@ -327,8 +328,37 @@ class DatatypeTestCase(unittest.TestCase):
         raises(ValueError, convert, '120w')
 
 
+class RegistryTestCase(unittest.TestCase):
+
+    def test_registry_does_not_mask_toplevel_imports(self):
+        old_sys_path = sys.path[:]
+        tmpdir = tempfile.mkdtemp(prefix="test_datatypes_")
+        fn = os.path.join(tmpdir, "datatypes.py")
+        f = open(fn, "w")
+        f.write(TEST_DATATYPE_SOURCE)
+        f.close()
+        registry = ZConfig.datatypes.Registry()
+
+        # we really want the temp area to override everything else:
+        sys.path.insert(0, tmpdir)
+        try:
+            datatype = registry.get("datatypes.my_sample_datatype")
+        finally:
+            shutil.rmtree(tmpdir)
+            sys.path[:] = old_sys_path
+        self.assertEqual(datatype, 42)
+
+TEST_DATATYPE_SOURCE = """
+# sample datatypes file
+
+my_sample_datatype = 42
+"""
+
+
 def test_suite():
-    return unittest.makeSuite(DatatypeTestCase)
+    suite = unittest.makeSuite(DatatypeTestCase)
+    suite.addTest(unittest.makeSuite(RegistryTestCase))
+    return suite
 
 
 if __name__ == '__main__':

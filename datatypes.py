@@ -354,7 +354,7 @@ class Registry:
             raise ValueError("unloadable datatype name: " + `name`)
         components = name.split('.')
         start = components[0]
-        g = globals()
+        g = {}
         package = __import__(start, g, g)
         modulenames = [start]
         for component in components[1:]:
