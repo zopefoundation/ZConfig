@@ -33,9 +33,6 @@ except NameError:
 
 LIBRARY_DIR = os.path.join(sys.prefix, "lib", "zconfig")
 
-RESOURCE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            "resources")
-
 
 def loadSchema(url):
     return SchemaLoader().loadURL(url)
