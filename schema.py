@@ -44,11 +44,35 @@ def parseResource(resource, registry, loader):
     return parser._schema
 
 
+def _srepr(ob):
+    if isinstance(ob, type(u'')):
+        # drop the leading "u" from a unicode repr
+        return `ob`[1:]
+    else:
+        return `ob`
+
+
 class BaseParser(xml.sax.ContentHandler):
 
     _cdata_tags = "description", "metadefault", "example", "default"
     _handled_tags = ("import", "abstracttype", "sectiontype",
                      "key", "multikey", "section", "multisection")
+
+    _allowed_parents = {
+        "description": ["key", "section", "multikey", "multisection",
+                        "sectiontype", "abstracttype",
+                        "schema", "component", "extension"],
+        "example": ["key", "section", "multikey", "multisection"],
+        "metadefault": ["key", "section", "multikey", "multisection"],
+        "default": ["multikey"],
+        "import": ["schema", "component", "extension"],
+        "abstracttype": ["schema", "component", "extension"],
+        "sectiontype": ["schema", "component", "extension"],
+        "key": ["schema", "sectiontype"],
+        "multikey": ["schema", "sectiontype"],
+        "section": ["schema", "sectiontype"],
+        "multisection": ["schema", "sectiontype"],
+        }
 
     def __init__(self, registry, loader, url):
         self._registry = registry
@@ -62,6 +86,7 @@ class BaseParser(xml.sax.ContentHandler):
         self._stack = []
         self._url = url
         self._components = {}
+        self._elem_stack = []
 
     # SAX 2 ContentHandler methods
 
@@ -70,6 +95,16 @@ class BaseParser(xml.sax.ContentHandler):
 
     def startElement(self, name, attrs):
         attrs = dict(attrs)
+        if self._elem_stack:
+            parent = self._elem_stack[-1]
+            if not self._allowed_parents.has_key(name):
+                self.error("Unknown tag " + name)
+            if parent not in self._allowed_parents[name]:
+                self.error("%s elements may not be nested in %s elements"
+                           % (_srepr(name), _srepr(parent)))
+        elif name != self._top_level:
+            self.error("Unknown document type " + name)
+        self._elem_stack.append(name)
         if name == self._top_level:
             if self._schema is not None:
                 self.error("schema element improperly nested")
@@ -85,8 +120,6 @@ class BaseParser(xml.sax.ContentHandler):
                 self.error(name + " element improperly nested")
             self._cdata = []
             self._position = None
-        else:
-            self.error("Unknown tag " + name)
 
     def characters(self, data):
         if self._cdata is not None:
@@ -98,6 +131,7 @@ class BaseParser(xml.sax.ContentHandler):
                        + `data.strip()`)
 
     def endElement(self, name):
+        del self._elem_stack[-1]
         if name in self._handled_tags:
             getattr(self, "end_" + name)()
         else:
