@@ -13,20 +13,11 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.6 2003/01/06 20:02:56 fdrake Exp $
+$Id: __init__.py,v 1.7 2003/01/13 17:31:42 fdrake Exp $
 """
 
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
-
-
-def loadURL(url):
-    import Context
-    return Context.Context().loadURL(url)
-
-def loadFile(file, url=None):
-    import Context
-    return Context.Context().loadFile(file, url)
 
 
 class ConfigurationError(Exception):
