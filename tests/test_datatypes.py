@@ -17,6 +17,7 @@ import os
 import sys
 import shutil
 import socket
+import datetime
 import tempfile
 import unittest
 
@@ -32,9 +33,9 @@ here = os.path.abspath(here)
 try:
     unicode
 except NameError:
-    have_unicode = 0
+    have_unicode = False
 else:
-    have_unicode = 1
+    have_unicode = True
 
 
 class DatatypeTestCase(unittest.TestCase):
@@ -341,6 +342,18 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert('120h'), 120*60*60)
         eq(convert('120d'), 120*60*60*24)
         raises(ValueError, convert, '120w')
+
+    def test_timedelta(self):
+        eq = self.assertEqual
+        raises = self.assertRaises
+        convert = self.types.get('timedelta')
+        eq(convert('4w'), datetime.timedelta(weeks=4))
+        eq(convert('2d'), datetime.timedelta(days=2))
+        eq(convert('7h'), datetime.timedelta(hours=7))
+        eq(convert('12m'), datetime.timedelta(minutes=12))
+        eq(convert('14s'), datetime.timedelta(seconds=14))
+        eq(convert('4w 2d 7h 12m 14s'),
+           datetime.timedelta(2, 14, minutes=12, hours=7, weeks=4))
 
 
 class RegistryTestCase(unittest.TestCase):
