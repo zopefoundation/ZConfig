@@ -14,14 +14,13 @@
 """Tests of ZConfig.loader classes and helper functions."""
 
 import unittest
-import urlparse
 
 from StringIO import StringIO
 
 import ZConfig
 import ZConfig.loader
 
-from ZConfig import url
+from ZConfig.url import urljoin
 
 from ZConfig.tests.test_config import CONFIG_BASE
 
@@ -30,14 +29,14 @@ class LoaderTestCase(unittest.TestCase):
 
     def test_schema_caching(self):
         loader = ZConfig.loader.SchemaLoader()
-        url = urlparse.urljoin(CONFIG_BASE, "simple.xml")
+        url = urljoin(CONFIG_BASE, "simple.xml")
         schema1 = loader.loadURL(url)
         schema2 = loader.loadURL(url)
         self.assert_(schema1 is schema2)
 
     def test_schema_components(self):
         loader = ZConfig.loader.SchemaLoader()
-        url = urlparse.urljoin(CONFIG_BASE, "library.xml")
+        url = urljoin(CONFIG_BASE, "library.xml")
         schema = loader.loadURL(url)
         type_a = loader.loadURL(url + "#type-a")
         type_b = loader.loadURL(url + "#type-b")
@@ -49,13 +48,13 @@ class LoaderTestCase(unittest.TestCase):
 
     def test_simple_import_with_cache(self):
         loader = ZConfig.loader.SchemaLoader()
-        url1 = urlparse.urljoin(CONFIG_BASE, "library.xml")
+        url1 = urljoin(CONFIG_BASE, "library.xml")
         schema1 = loader.loadURL(url1)
         sio = StringIO("<schema>"
                        "  <import src='library.xml'/>"
                        "  <section type='type-a' name='section'/>"
                        "</schema>")
-        url2 = urlparse.urljoin(CONFIG_BASE, "stringio")
+        url2 = urljoin(CONFIG_BASE, "stringio")
         schema2 = loader.loadFile(sio, url2)
         self.assert_(schema1.gettype("type-a") is schema2.gettype("type-a"))
 

@@ -119,12 +119,10 @@ class ZopeSchemaTestCase(BaseSchemaTest):
     # tests
 
     def test_defaultbug(self):
-        schema = self.load_schema('zconfig:zope.xml')
-        conf = self.load_config(schema, 'empty.conf')
+        schema, conf = self.load_both('zope.xml', 'empty.conf')
 
     def test_load_populated(self):
-        schema = self.load_schema('zconfig:zope.xml')
-        conf = self.load_config(schema, 'zope-allpopulated.conf')
+        schema, conf = self.load_both('zope.xml', 'zope-allpopulated.conf')
         self.assertEqual(conf.zope_home, '.')
         self.assertEqual(conf.instance_home, '.')
         self.assertEqual(conf.software_home, '.')
