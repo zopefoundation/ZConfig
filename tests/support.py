@@ -56,12 +56,17 @@ class TestBase(unittest.TestCase):
 
     def load_config(self, schema, conf_url, num_handlers=0):
         conf_url = urljoin(CONFIG_BASE, conf_url)
-        self.conf, self.handlers = ConfigLoader(schema).loadURL(conf_url)
+        loader = self.create_loader(schema)
+        self.conf, self.handlers = loader.loadURL(conf_url)
         self.assertEqual(len(self.handlers), num_handlers)
         return self.conf
 
     def load_config_text(self, schema, text, num_handlers=0, url=None):
         sio = StringIO.StringIO(text)
-        self.conf, self.handlers = ZConfig.loadConfigFile(schema, sio, url)
+        loader = self.create_loader(schema)
+        self.conf, self.handlers = loader.loadFile(sio, url)
         self.assertEqual(len(self.handlers), num_handlers)
         return self.conf
+
+    def create_loader(self, schema):
+        return ConfigLoader(schema)
