@@ -128,7 +128,7 @@ class ZConfigParser:
         if not value:
             value = ''
         else:
-            value = substitute(value, self.defs)
+            value = self.replace(value)
         try:
             section.addValue(key, value, (self.lineno, None, self.url))
         except ZConfig.ConfigurationError, e:
@@ -164,7 +164,15 @@ class ZConfigParser:
             self.error("cannot redefine " + `defname`)
         if not isname(defname):
             self.error("not a substitution legal name: " + `defname`)
-        self.defs[defname] = substitute(defvalue, self.defs)
+        self.defs[defname] = self.replace(defvalue)
+
+    def replace(self, text):
+        try:
+            return substitute(text, self.defs)
+        except ZConfig.SubstitutionReplacementError, e:
+            e.lineno = self.lineno
+            e.url = self.url
+            raise
 
     def error(self, message):
         raise ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)

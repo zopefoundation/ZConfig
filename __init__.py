@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.9 2003/05/01 19:34:56 faassen Exp $
+$Id: __init__.py,v 1.10 2003/08/01 20:41:59 fdrake Exp $
 """
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
@@ -115,10 +115,11 @@ class SubstitutionSyntaxError(ConfigurationError):
     """Raised when interpolation source text contains syntactical errors."""
 
 
-class SubstitutionReplacementError(ConfigurationError, LookupError):
+class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
     """Raised when no replacement is available for a reference."""
 
-    def __init__(self, source, name):
+    def __init__(self, source, name, url=None, lineno=None):
         self.source = source
         self.name = name
-        ConfigurationError.__init__(self, "no replacement for " + `name`)
+        ConfigurationSyntaxError.__init__(
+            self, "no replacement for " + `name`, url, lineno)
