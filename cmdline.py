@@ -76,7 +76,6 @@ class OptionBag:
         for item in options:
             optpath, val, pos = item
             name = sectiontype.keytype(optpath[0])
-            key = None, name # section type, name
             if len(optpath) == 1:
                 self.add_value(name, val, pos)
             else:
