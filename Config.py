@@ -102,7 +102,8 @@ class Configuration:
             type = type.lower()
             return [sect for sect in self._sections if sect.type == type]
 
-    def addValue(self, key, value):
+    def addValue(self, key, value, position=None):
+        # position is needed for interface compatibility, but isn't used here
         key = key.lower()
         try:
             self._data[key]

@@ -84,11 +84,14 @@ class SchemaParser(xml.sax.ContentHandler):
             if self._cdata is not None:
                 self.error(name + " element improperly nested")
             self._cdata = []
+            self._position = None
         else:
             self.error("Unknown tag " + name)
 
     def characters(self, data):
         if self._cdata is not None:
+            if self._position is None:
+                self._position = self.get_position()
             self._cdata.append(data)
         elif data.strip():
             self.error("unexpected non-blank character data: "
@@ -102,7 +105,7 @@ class SchemaParser(xml.sax.ContentHandler):
             self._cdata = None
             if name == "default":
                 # value for a key
-                self._stack[-1].adddefault(data)
+                self._stack[-1].adddefault(data, self._position)
             else:
                 setattr(self._stack[-1], name, data)
 
@@ -135,6 +138,14 @@ class SchemaParser(xml.sax.ContentHandler):
 
     def end_import(self):
         pass
+
+    def get_position(self):
+        if self._locator:
+            return (self._locator.getLineNumber(),
+                    self._locator.getColumnNumber(),
+                    self._url)
+        else:
+            return None, None, self._url
 
     def get_handler(self, attrs):
         v = attrs.get("handler")
@@ -313,7 +324,8 @@ class SchemaParser(xml.sax.ContentHandler):
         if attrs.has_key("default"):
             if min:
                 self.error("required key cannot have a default value")
-            key.adddefault(str(attrs["default"]).strip())
+            key.adddefault(str(attrs["default"]).strip(),
+                           self.get_position())
         key.finish()
         self._stack[-1].addkey(key)
         self._stack.append(key)

@@ -17,6 +17,8 @@ import types
 
 import ZConfig
 
+from ZConfig.info import ValueInfo
+
 
 class BaseMatcher:
     def __init__(self, info, type, handlers):
@@ -54,7 +56,7 @@ class BaseMatcher:
             raise ZConfig.ConfigurationError(
                 "too many instances of %s section" % `ci.sectiontype.name`)
 
-    def addValue(self, key, value):
+    def addValue(self, key, value, position):
         length = len(self.type)
         arbkey_info = None
         for i in range(length):
@@ -92,6 +94,7 @@ class BaseMatcher:
             raise ZConfig.ConfigurationError(
                 "too many values for " + `name`)
 
+        value = ValueInfo(value, position)
         if k == '+':
             if ismulti:
                 if v.has_key(key):
@@ -165,9 +168,9 @@ class BaseMatcher:
                 elif ci.name == '+':
                     v = values[i]
                     for key, val in v.items():
-                        v[key] = [ci.datatype(s) for s in val]
+                        v[key] = [vi.convert(ci.datatype) for vi in val]
                 else:
-                    v = [ci.datatype(s) for s in values[i]]
+                    v = [vi.convert(ci.datatype) for vi in values[i]]
             elif ci.issection():
                 if values[i] is not None:
                     v = values[i]._type.datatype(values[i])
@@ -176,11 +179,11 @@ class BaseMatcher:
             elif name == '+':
                 v = values[i]
                 for key, val in v.items():
-                    v[key] = ci.datatype(val)
+                    v[key] = val.convert(ci.datatype)
             else:
                 v = values[i]
                 if v is not None:
-                    v = ci.datatype(v)
+                    v = v.convert(ci.datatype)
             values[i] = v
             if ci.handler is not None:
                 self._handlers.append((ci.handler, v))

@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.4 2003/01/03 21:05:51 fdrake Exp $
+$Id: __init__.py,v 1.5 2003/01/06 19:35:41 fdrake Exp $
 """
 
 from ZConfig.loader import loadConfig, loadConfigFile
@@ -100,6 +100,27 @@ class ConfigurationTypeError(ConfigurationError):
         self.found = found
         self.expected = expected
         ConfigurationError.__init__(self, msg)
+
+
+class DataConversionError(ConfigurationError, ValueError):
+    """Raised when a data type conversion function raises ValueError."""
+
+    def __init__(self, exception, value, position):
+        ConfigurationError.__init__(self, str(exception))
+        self.exception = exception
+        self.value = value
+        self.position = position
+        self.lineno, self.colno, self.url = position
+
+    def __str__(self):
+        s = "%s (line %d" % (self.message, self.lineno)
+        if self.colno is not None:
+            s += ", %d" % self.colno
+        if self.url:
+            s += ", in %s)" % self.url
+        else:
+            s += ")"
+        return s
 
 
 class SubstitutionSyntaxError(ConfigurationError):

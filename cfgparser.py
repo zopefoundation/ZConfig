@@ -123,7 +123,7 @@ class ZConfigParser:
         else:
             value = substitute(value, self.defs)
         try:
-            section.addValue(key, value)
+            section.addValue(key, value, (self.lineno, None, self.url))
         except ConfigurationError, e:
             self.error(e[0])
 

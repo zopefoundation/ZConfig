@@ -48,6 +48,19 @@ class UnboundedThing:
 Unbounded = UnboundedThing()
 
 
+class ValueInfo:
+    def __init__(self, value, position):
+        self.value = value
+        # position is (lineno, colno, url)
+        self.position = position
+
+    def convert(self, datatype):
+        try:
+            return datatype(self.value)
+        except ValueError, e:
+            raise ZConfig.DataConversionError(e, self.value, self.position)
+
+
 class BaseInfo:
     """Information about a single configuration key."""
 
@@ -100,10 +113,11 @@ class KeyInfo(BaseInfo):
                 "cannot finish KeyInfo more than once")
         self._finished = True
 
-    def adddefault(self, value):
+    def adddefault(self, value, position):
         if self._finished:
             raise ZConfig.SchemaError(
                 "cannot add default values to finished KeyInfo")
+        value = ValueInfo(value, position)
         if self.maxOccurs > 1:
             if self._default is None:
                 self._default = [value]

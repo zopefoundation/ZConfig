@@ -49,9 +49,9 @@ class BaseSchemaTest(unittest.TestCase):
         self.assert_(self.schema.issection())
         return self.schema
 
-    def load_schema_text(self, text):
+    def load_schema_text(self, text, url=None):
         sio = StringIO.StringIO(text)
-        self.schema = ZConfig.loadSchemaFile(sio)
+        self.schema = ZConfig.loadSchemaFile(sio, url)
         return self.schema
 
     def load_config(self, schema, conf_url, num_handlers=0):
@@ -60,9 +60,9 @@ class BaseSchemaTest(unittest.TestCase):
         self.assertEqual(len(self.handlers), num_handlers)
         return self.conf
 
-    def load_config_text(self, schema, text, num_handlers=0):
+    def load_config_text(self, schema, text, num_handlers=0, url=None):
         sio = StringIO.StringIO(text)
-        self.conf, self.handlers = ZConfig.loadConfigFile(schema, sio)
+        self.conf, self.handlers = ZConfig.loadConfigFile(schema, sio, url)
         self.assertEqual(len(self.handlers), num_handlers)
         return self.conf
 
@@ -532,6 +532,31 @@ class SchemaTestCase(BaseSchemaTest):
         conf = self.load_config_text(t, "<s/>")
         self.assertEqual(conf.tkey, "tkey-default")
         self.assertEqual(conf.section.skey, "skey-default")
+
+    def test_datatype_conversion_error(self):
+        schema_url = "file:///tmp/fake-url-1.xml"
+        config_url = "file:///tmp/fake-url-2.xml"
+        schema = self.load_schema_text("<schema>\n"
+                                       "  <key name='key' default='bogus'"
+                                       "       datatype='integer'/>"
+                                       "</schema>", url=schema_url)
+        e = self.get_data_conversion_error(
+            schema, "", config_url)
+        self.assertEqual(e.url, schema_url)
+        self.assertEqual(e.lineno, 2)
+
+        e = self.get_data_conversion_error(
+            schema, "# comment\n\n key splat\n", config_url)
+        self.assertEqual(e.url, config_url)
+        self.assertEqual(e.lineno, 3)
+
+    def get_data_conversion_error(self, schema, src, url):
+        try:
+            self.load_config_text(schema, src, url=url)
+        except ZConfig.DataConversionError, e:
+            return e
+        else:
+            self.fail("expected ZConfig.DataConversionError")
 
 
 def test_suite():
