@@ -63,29 +63,45 @@ def Parse(resource, context, section):
                 stack.append(section)
                 section = newsect
             continue
+        if line[0] == "%":
+            # directive: import, include
+            m = _keyvalue_rx.match(line, 1)
+            if not m:
+                raise ConfigurationSyntaxError(
+                    "missing or unrecognized directive", resource.url, lineno)
+            name, arg = m.group('key', 'value')
+            if name not in ("import", "include"):
+                raise ConfigurationSyntaxError(
+                    "unknown directive: " + `name`, resource.url, lineno)
+            if not arg:
+                raise ConfigurationSyntaxError(
+                    "missing argument to %%%s directive" % name,
+                    resource.url, lineno)
+            if name == "import":
+                if stack:
+                    raise ConfigurationSyntaxError(
+                        "import only allowed at outermost level of a resource",
+                        resource.url, lineno)
+                newurl = urlparse.urljoin(resource.url, arg)
+                context.importConfiguration(section, newurl)
+            elif name == "include":
+                newurl = urlparse.urljoin(resource.url, arg)
+                context.includeConfiguration(section, newurl)
+            else:
+                assert 0, "unexpected directive for " + `line`
+            continue
         # key-value
         m = _keyvalue_rx.match(line)
         if not m:
             raise ConfigurationSyntaxError(
                 "malformed configuration data", resource.url, lineno)
         key, value = m.group('key', 'value')
-        if key == "import":
-            if stack:
-                raise ConfigurationSyntaxError(
-                    "import only allowed at the outermost level of a resource",
-                    resource.url, lineno)
-            newurl = urlparse.urljoin(resource.url, value)
-            context.importConfiguration(section, newurl)
-        elif key == "include":
-            newurl = urlparse.urljoin(resource.url, value)
-            context.includeConfiguration(section, newurl)
-        else:
-            if not value:
-                value = ''
-            try:
-                section.addValue(key, value)
-            except ConfigurationError, e:
-                raise ConfigurationSyntaxError(e[0], resource.url, lineno)
+        if not value:
+            value = ''
+        try:
+            section.addValue(key, value)
+        except ConfigurationError, e:
+            raise ConfigurationSyntaxError(e[0], resource.url, lineno)
     if stack:
         raise ConfigurationSyntaxError(
             "unclosed sections no allowed", resource.url, lineno + 1)
