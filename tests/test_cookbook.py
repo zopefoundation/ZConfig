@@ -13,6 +13,11 @@
 ##############################################################################
 """Tests of examples from the online cookbook, so we don't break them
 down the road.  Unless we really mean to.
+
+The ZConfig Cookbook is available online at:
+
+    http://dev.zope.org/Zope3/ZConfig
+
 """
 
 import unittest
