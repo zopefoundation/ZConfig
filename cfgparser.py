@@ -22,7 +22,7 @@ from ZConfig.substitution import isname, substitute
 class ZConfigParser:
     __metaclass__ = type
     __slots__ = ('resource', 'context', 'lineno',
-                 'stack', 'defs', 'file', 'url')
+                 'stack', 'defines', 'file', 'url')
 
     def __init__(self, resource, context, defines=None):
         self.resource = resource
@@ -33,7 +33,7 @@ class ZConfigParser:
         self.stack = []   # [(type, name, prevmatcher), ...]
         if defines is None:
             defines = {}
-        self.defs = defines
+        self.defines = defines
 
     def nextline(self):
         line = self.file.readline()
@@ -76,9 +76,8 @@ class ZConfigParser:
     def start_section(self, section, rest):
         isempty = rest[-1:] == "/"
         if isempty:
-            text = rest[:-1].rstrip()
-        else:
-            text = rest.rstrip()
+            rest = rest[:-1]
+        text = rest.rstrip()
         # parse section start stuff here
         m = _section_start_rx.match(text)
         if not m:
@@ -152,7 +151,7 @@ class ZConfigParser:
     def handle_include(self, section, rest):
         rest = self.replace(rest.strip())
         newurl = ZConfig.url.urljoin(self.url, rest)
-        self.context.includeConfiguration(section, newurl, self.defs)
+        self.context.includeConfiguration(section, newurl, self.defines)
 
     def handle_define(self, section, rest):
         parts = rest.split(None, 1)
@@ -160,15 +159,15 @@ class ZConfigParser:
         defvalue = ''
         if len(parts) == 2:
             defvalue = parts[1]
-        if self.defs.has_key(defname):
+        if self.defines.has_key(defname):
             self.error("cannot redefine " + `defname`)
         if not isname(defname):
             self.error("not a substitution legal name: " + `defname`)
-        self.defs[defname] = self.replace(defvalue)
+        self.defines[defname] = self.replace(defvalue)
 
     def replace(self, text):
         try:
-            return substitute(text, self.defs)
+            return substitute(text, self.defines)
         except ZConfig.SubstitutionReplacementError, e:
             e.lineno = self.lineno
             e.url = self.url

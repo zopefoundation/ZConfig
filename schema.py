@@ -213,6 +213,7 @@ class BaseParser(xml.sax.ContentHandler):
             return False
 
     def get_ordinality(self, attrs):
+        # used by start_multi*()
         min, max = 0, info.Unbounded
         if self.get_required(attrs):
             min = 1
