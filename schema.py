@@ -475,11 +475,14 @@ class SchemaParser(BaseParser):
 
 
 
-class BaseComponentParser(BaseParser):
+class ComponentParser(BaseParser):
 
-    def __init__(self, registry, loader, url, schema, localtypes):
+    _handled_tags = BaseParser._handled_tags + ("component",)
+    _top_level = "component"
+
+    def __init__(self, registry, loader, url, schema):
         BaseParser.__init__(self, registry, loader, url)
-        self._localtypes = localtypes
+        self._localtypes = {}
         self._parent = schema
 
     def characters_description(self, data):
@@ -502,23 +505,14 @@ class BaseComponentParser(BaseParser):
         self._check_not_toplevel("multisection")
         BaseParser.start_multisection(self, attrs)
 
-    def _check_not_toplevel(self, what):
-        if not self._stack:
-            self.error("cannot define top-level %s in a schema %s"
-                       % (what, self._top_level))
-
-
-class ComponentParser(BaseComponentParser):
-
-    _handled_tags = BaseComponentParser._handled_tags + ("component",)
-    _top_level = "component"
-
-    def __init__(self, registry, loader, url, schema):
-        BaseComponentParser.__init__(self, registry, loader, url, schema, {})
-
     def start_component(self, attrs):
         self._schema = self._parent
         self.push_prefix(attrs)
 
     def end_component(self):
         self.pop_prefix()
+
+    def _check_not_toplevel(self, what):
+        if not self._stack:
+            self.error("cannot define top-level %s in a schema %s"
+                       % (what, self._top_level))
