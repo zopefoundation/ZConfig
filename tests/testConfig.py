@@ -182,7 +182,7 @@ class ConfigurationTestCase(TestBase):
                 L.append(sect)
                 self.assertEqual(sect.get("var"), "triv")
                 break
-        L2 = conf.getChildSections("trivial")
+        L2 = conf.getChildSections("TRIVIAL")
         self.assertEqual(L, L2)
 
     def test_basic_import(self):
