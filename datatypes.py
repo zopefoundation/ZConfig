@@ -21,18 +21,9 @@ import sys
 try:
     unicode
 except NameError:
-    UnicodeType = None
-    StringTypes = type(''),
+    have_unicode = False
 else:
-    UnicodeType = type(unicode(''))
-    StringTypes = type(''), UnicodeType
-
-# True, False were added in Python 2.2.1
-try:
-    True
-except NameError:
-    True = 1
-    False = 0
+    have_unicode = True
 
 
 class MemoizedConversion:
@@ -113,7 +104,7 @@ class BasicKeyConversion(RegularExpressionConversion):
 class ASCIIConversion(RegularExpressionConversion):
     def __call__(self, value):
         value = RegularExpressionConversion.__call__(self, value)
-        if UnicodeType is not None and isinstance(value, UnicodeType):
+        if have_unicode and isinstance(value, unicode):
             value = value.encode("ascii")
         return value
 
@@ -214,7 +205,7 @@ class SocketAddress:
             self.address = inet_address(s)
 
 def float_conversion(v):
-    if type(v) in StringTypes:
+    if isinstance(v, basestring):
         if v.lower() in ["inf", "-inf", "nan"]:
             raise ValueError(`v` + " is not a portable float representation")
     return float(v)

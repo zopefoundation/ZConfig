@@ -29,8 +29,6 @@ except NameError:
 
 here = os.path.abspath(here)
 
-StringType = type("")
-
 try:
     unicode
 except NameError:
@@ -123,12 +121,12 @@ class DatatypeTestCase(unittest.TestCase):
     def assert_ascii_equal(self, convert, value):
         v = convert(value)
         self.assertEqual(v, value)
-        self.assert_(isinstance(v, StringType))
+        self.assert_(isinstance(v, str))
         if have_unicode:
             unicode_value = unicode(value)
             v = convert(unicode_value)
             self.assertEqual(v, value)
-            self.assert_(isinstance(v, StringType))
+            self.assert_(isinstance(v, str))
 
     def check_never_namelike(self, convert):
         raises = self.assertRaises

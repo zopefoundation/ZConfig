@@ -22,22 +22,6 @@ from ZConfig import info
 from ZConfig import url
 
 
-try:
-    True
-except NameError:
-    True = 1
-    False = 0
-
-try:
-    dict
-except NameError:
-    def dict(mapping):
-        d = {}
-        for k, v in mapping.items():
-            d[k] = v
-        return d
-
-
 def parseResource(resource, loader):
     parser = SchemaParser(loader, resource.url)
     xml.sax.parse(resource.file, parser)
