@@ -79,17 +79,17 @@ class LoaderTestCase(unittest.TestCase):
                                    "</schema>"))
 
     def test_import_from_package(self):
-        loader = ZConfig.loader.SchemaLoader(library=LIBRARY_DIR)
+        loader = ZConfig.loader.SchemaLoader()
         sio = StringIO("<schema>"
-                       "  <import package='widget'/>"
+                       "  <import package='ZConfig.tests.library.widget'/>"
                        "</schema>")
         schema = loader.loadFile(sio)
         self.assert_(schema.gettype("widget-a") is not None)
 
     def test_import_from_package_extended(self):
-        loader = ZConfig.loader.SchemaLoader(library=LIBRARY_DIR)
+        loader = ZConfig.loader.SchemaLoader()
         sio = StringIO("<schema>"
-                       "  <import package='thing'/>"
+                       "  <import package='ZConfig.tests.library.thing'/>"
                        "  <section name='*' type='thing' attribute='thing'/>"
                        "</schema>")
         schema = loader.loadFile(sio)

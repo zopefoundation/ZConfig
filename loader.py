@@ -31,9 +31,6 @@ except NameError:
     False = 0
 
 
-LIBRARY_DIR = os.path.join(sys.prefix, "lib", "zconfig")
-
-
 def loadSchema(url):
     return SchemaLoader().loadURL(url)
 
@@ -114,15 +111,12 @@ def _url_from_file(file):
 
 
 class SchemaLoader(BaseLoader):
-    def __init__(self, registry=None, library=None):
+    def __init__(self, registry=None):
         if registry is None:
             registry = datatypes.Registry()
         BaseLoader.__init__(self)
         self.registry = registry
         self._cache = {}
-        if library is None:
-            library = LIBRARY_DIR
-        self._library = library
 
     def loadResource(self, resource):
         if resource.url and self._cache.has_key(resource.url):
@@ -150,9 +144,12 @@ class SchemaLoader(BaseLoader):
             # '' somewhere in the package spec; still illegal
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + `package`)
-        dirname = os.path.join(self._library, *parts)
-        fn = os.path.join(dirname, "component.xml")
-        if not os.path.exists(fn):
+        for dir in sys.path:
+            dirname = os.path.join(dir, *parts)
+            fn = os.path.join(dirname, "component.xml")
+            if os.path.exists(fn):
+                break
+        else:
             raise ZConfig.SchemaError(
                 "schema component not found: " + `package`)
         url = "file://" + urllib.pathname2url(fn)
