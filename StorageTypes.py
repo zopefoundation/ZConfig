@@ -18,17 +18,7 @@ Adapted from DBTab/StorageTypes.py.
 
 import re
 
-
-def asBoolean(s):
-    if not s:
-        return 0
-    ss = str(s).lower()
-    if ss in ('yes', 'true', 'on'):
-        return 1
-    elif ss in ('no', 'false', 'off'):
-        return 0
-    else:
-        raise ValueError, 'Not a boolean value: %s' % s
+from ZConfig.Common import asBoolean
 
 
 def convertFileStorageArgs(quota=None, stop=None, **kw):

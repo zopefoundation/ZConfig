@@ -11,6 +11,17 @@ except NameError:
     False = 0
 
 
+def asBoolean(s):
+    """Convert a string value to a boolean value."""
+    ss = str(s).lower()
+    if ss in ('yes', 'true', 'on'):
+        return True
+    elif ss in ('no', 'false', 'off'):
+        return False
+    else:
+        raise ValueError("not a valid boolean value: " + repr(s))
+
+
 class ConfigurationError(Exception):
     def __init__(self, msg):
         self.message = msg

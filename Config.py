@@ -155,20 +155,13 @@ class Configuration:
             else:
                 return self.delegate.get(key, default)
 
-    _boolean_values = {
-         'true': True,  'yes': True,   'on': True,
-        'false': False,  'no': False, 'off': False,
-        } 
-
     def getbool(self, key, default=None):
         missing = []
         s = self.get(key, missing)
         if s is missing:
             return default
-        try:
-            return self._boolean_values[s.lower()]
-        except KeyError:
-            raise ValueError("%s is not a valid boolean value" % repr(s))
+        else:
+            return asBoolean(s)
 
     def getfloat(self, key, default=None, min=None, max=None):
         missing = []
