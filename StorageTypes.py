@@ -92,7 +92,7 @@ def convertClientStorageArgs(addr=None, **kw):
     return kw
 
 
-def convertFullStorageArgs(**kw):
+def convertBDBStorageArgs(**kw):
     from bsddb3Storage.BerkeleyBase import BerkeleyConfig
     config = BerkeleyConfig()
     for name in dir(BerkeleyConfig):
@@ -116,5 +116,6 @@ storage_types = {
     'MappingStorage': ('ZODB.MappingStorage', None),
     'TemporaryStorage': ('Products.TemporaryFolder.TemporaryStorage', None),
     'ClientStorage': ('ZEO.ClientStorage', convertClientStorageArgs),
-    'Full': ('bsddb3Storage.Full', convertFullStorageArgs),
+    'Full': ('bsddb3Storage.Full', convertBDBStorageArgs),
+    'Minimal': ('bsddb3Storage.Minimal', convertBDBStorageArgs),
     }
