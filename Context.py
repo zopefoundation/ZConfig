@@ -54,6 +54,23 @@ class Context:
         self._finish()
         return top
 
+    def loadfile(self, file, url=None):
+        if not url:
+            name = getattr(file, "name", None)
+            if name and name[0] != "<" and name[-1] != ">":
+                url = "file://" + urllib.pathname2url(os.path.abspath(name))
+        top = self.createToplevelSection(url)
+        self._all_sections.append(top)
+        self._imports = [top]
+        self._current_imports.append(top)
+        try:
+            self.parse(file, top, url)
+        finally:
+            del self._current_imports[-1]
+        self._finish()
+        return top
+
+
     # interface for parser
 
     def importConfiguration(self, section, url):

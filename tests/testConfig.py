@@ -14,6 +14,7 @@
 """Tests of the configuration data structures and loader."""
 
 import os
+import StringIO
 import tempfile
 import unittest
 import urllib
@@ -21,6 +22,7 @@ import urlparse
 import warnings
 
 import ZConfig
+
 from ZConfig.Context import Context
 from ZConfig.Common import ConfigurationError, ConfigurationTypeError
 
@@ -237,6 +239,15 @@ class ConfigurationTestCase(TestBase):
         finally:
             os.chdir(pwd)
             os.unlink(fn)
+
+    def test_load_from_fileobj(self):
+        sio = StringIO.StringIO("name value\n"
+                                "<section>\n"
+                                "  name value2\n"
+                                "</section>\n")
+        cf = ZConfig.loadfile(sio)
+        self.assertEqual(cf.get("name"), "value")
+        self.assertEqual(cf.getSection("section").get("name"), "value2")
 
     def write_tempfile(self):
         fn = tempfile.mktemp()

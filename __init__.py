@@ -13,9 +13,13 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.1 2002/10/08 21:42:17 fdrake Exp $
+$Id: __init__.py,v 1.2 2002/11/07 20:05:24 fdrake Exp $
 """
 
 def load(url):
     import Context
     return Context.Context().load(url)
+
+def loadfile(file, url=None):
+    import Context
+    return Context.Context().loadfile(file, url)
