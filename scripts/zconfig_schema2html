@@ -13,7 +13,7 @@
 #
 ##############################################################################
 
-__version__ = '$Revision: 1.1 $'[11:-2]
+__version__ = '$Revision: 1.2 $'[11:-2]
 
 import ZConfig.loader
 from ZConfig.info import *
@@ -83,6 +83,8 @@ def printContents(name, info):
             print '(default: %r)'%esc(default.value)
         elif default is not None:
             print '(default: %r)'%esc(default)
+        if info.metadefault:
+            print '(metadefault: %s)' % info.metadefault
         print '</dt>'
         if info.description:
             print '<dd>',info.description,'</dd>'
