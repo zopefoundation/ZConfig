@@ -445,9 +445,10 @@ class SchemaParser(BaseParser):
 
 class BaseComponentParser(BaseParser):
 
-    def __init__(self, registry, loader, url, localtypes):
-        self._localtypes = localtypes
+    def __init__(self, registry, loader, url, schema, localtypes):
         BaseParser.__init__(self, registry, loader, url)
+        self._localtypes = localtypes
+        self._parent = schema
 
     def characters_description(self, data):
         if self._stack:
@@ -481,8 +482,7 @@ class ComponentParser(BaseComponentParser):
     _top_level = "component"
 
     def __init__(self, registry, loader, url, schema):
-        BaseComponentParser.__init__(self, registry, loader, url, {})
-        self._parent = schema
+        BaseComponentParser.__init__(self, registry, loader, url, schema, {})
 
     def start_component(self, attrs):
         self._schema = self._parent
@@ -502,10 +502,6 @@ class ExtensionParser(BaseComponentParser):
 
     _handled_tags = BaseComponentParser._handled_tags + ("extension",)
     _top_level = "extension"
-
-    def __init__(self, registry, loader, url, schema, localtypes):
-        BaseComponentParser.__init__(self, registry, loader, url, localtypes)
-        self._parent = schema
 
     def start_extension(self, attrs):
         self._schema = self._parent
