@@ -86,6 +86,8 @@ class Context:
         self._finish()
         return top
 
+    loadFile = loadfile # Forward-compatible alias
+
 
     # interface for parser
 
