@@ -355,7 +355,9 @@ class SectionType:
                     pass
                 else:
                     return info
-        raise ZConfig.ConfigurationError("no matching section defined")
+        raise ZConfig.ConfigurationError(
+            "no matching section defined for type='%s', name='%s'" % (
+            type, name))
 
     def isabstract(self):
         return False
