@@ -178,8 +178,8 @@ class ConfigurationTestCase(TestBase):
         self.assert_(sect.get("var-one") is None)
         L = []
         for sect in conf.getChildSections():
-            L.append(sect)
             if sect.type == "trivial":
+                L.append(sect)
                 self.assertEqual(sect.get("var"), "triv")
                 break
         L2 = conf.getChildSections("trivial")
