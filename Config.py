@@ -75,8 +75,11 @@ class Configuration:
             else:
                 return None
 
-    def getChildSections(self):
-        return self._sections[:]
+    def getChildSections(self, type=None):
+        if type is None:
+            return self._sections[:]
+        else:
+            return [sect for sect in self._sections if sect.type == type]
 
     def addValue(self, key, value):
         key = key.lower()

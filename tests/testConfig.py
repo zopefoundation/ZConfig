@@ -176,10 +176,14 @@ class ConfigurationTestCase(TestBase):
         for k, v in [("var", "spam"), ("var-two", "stuff")]:
             self.assertEqual(sect.get(k), v)
         self.assert_(sect.get("var-one") is None)
+        L = []
         for sect in conf.getChildSections():
+            L.append(sect)
             if sect.type == "trivial":
                 self.assertEqual(sect.get("var"), "triv")
                 break
+        L2 = conf.getChildSections("trivial")
+        self.assertEqual(L, L2)
 
     def test_basic_import(self):
         conf = self.load("importer.conf")
