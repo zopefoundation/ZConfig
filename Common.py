@@ -42,7 +42,6 @@ class ConfigurationConflictingSectionError(ConfigurationError):
 
 class ConfigurationSyntaxError(ConfigurationError):
     def __init__(self, msg, url, lineno):
-        self.message = msg
         self.url = url
         self.lineno = lineno
         ConfigurationError.__init__(self, msg)
@@ -53,7 +52,6 @@ class ConfigurationSyntaxError(ConfigurationError):
 
 class ConfigurationTypeError(ConfigurationError):
     def __init__(self, msg, found, expected):
-        self.message = msg
         self.found = found
         self.expected = expected
         ConfigurationError.__init__(self, msg)
