@@ -395,7 +395,7 @@ class BaseParser(xml.sax.ContentHandler):
     def start_key(self, attrs):
         name, datatype, handler, attribute = self.get_key_info(attrs, "key")
         min = self.get_required(attrs) and 1 or 0
-        key = info.KeyInfo(name, datatype, min, 1, handler, attribute)
+        key = info.KeyInfo(name, datatype, min, handler, attribute)
         if attrs.has_key("default"):
             if min:
                 self.error("required key cannot have a default value")
@@ -418,7 +418,7 @@ class BaseParser(xml.sax.ContentHandler):
         name, datatype, handler, attribute = self.get_key_info(attrs,
                                                                "multikey")
         min, max = self.get_ordinality(attrs)
-        key = info.KeyInfo(name, datatype, min, max, handler, attribute)
+        key = info.MultiKeyInfo(name, datatype, min, max, handler, attribute)
         self._stack[-1].addkey(key)
         self._stack.append(key)
 

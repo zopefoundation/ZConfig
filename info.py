@@ -99,14 +99,14 @@ class BaseInfo:
         return False
 
 
-class KeyInfo(BaseInfo):
+class BaseKeyInfo(BaseInfo):
+
     def __init__(self, name, datatype, minOccurs, maxOccurs, handler,
                  attribute):
         assert minOccurs is not None
         BaseInfo.__init__(self, name, datatype, minOccurs, maxOccurs,
                           handler, attribute)
         self._finished = False
-        self._default = None
 
     def finish(self):
         if self._finished:
@@ -126,50 +126,63 @@ class KeyInfo(BaseInfo):
             raise ZConfig.SchemaError(
                 "unexpected key for default value")
 
-        value = ValueInfo(value, position)
-        if self.maxOccurs > 1:
-            if self.name == "+":
-                # This is a keyed value, not a simple value:
-                if self._default is None:
-                    self._default = {key: [value]}
-                else:
-                    if key in self._default:
-                        self._default[key].append(value)
-                    else:
-                        self._default[key] = [value]
-            elif self._default is None:
-                self._default = [value]
-            else:
-                self._default.append(value)
-        elif self.name == "+":
-            if self._default is None:
-                self._default = {key: value}
-            else:
-                if self._default.has_key(key):
-                    raise ZConfig.SchemaError(
-                        "duplicate default value for key %s" % `key`)
-                self._default[key] = value
+        self.add_valueinfo(ValueInfo(value, position), key)
+
+
+class KeyInfo(BaseKeyInfo):
+
+    _default = None
+
+    def __init__(self, name, datatype, minOccurs, handler, attribute):
+        BaseKeyInfo.__init__(self, name, datatype, minOccurs, 1,
+                             handler, attribute)
+        if self.name == "+":
+            self._default = {}
+
+    def add_valueinfo(self, vi, key):
+        if self.name == "+":
+            if self._default.has_key(key):
+                # not ideal: we're presenting the unconverted
+                # version of the key
+                raise ZConfig.SchemaError(
+                    "duplicate default value for key %s" % `key`)
+            self._default[key] = vi
         elif self._default is not None:
             raise ZConfig.SchemaError(
                 "cannot set more than one default to key with maxOccurs == 1")
         else:
-            self._default = value
+            self._default = vi
 
     def getdefault(self):
-        if not self._finished:
-            raise ZConfig.SchemaError(
-                "cannot get default value of key before KeyInfo"
-                " has been completely initialized")
-        if self._default is None:
-            if self.name == "+":
-                return {}
-            elif self.maxOccurs > 1:
-                return []
+        # Use copy.copy() to make sure we don't allow polution of
+        # our internal data without having to worry about both the
+        # list and dictionary cases:
+        return copy.copy(self._default)
+
+
+class MultiKeyInfo(BaseKeyInfo):
+
+    def __init__(self, name, datatype, minOccurs, maxOccurs, handler,
+                 attribute):
+        BaseKeyInfo.__init__(self, name, datatype, minOccurs, maxOccurs,
+                             handler, attribute)
+        if self.name == "+":
+            self._default = {}
         else:
-            # Use copy.copy() to make sure we don't allow polution of
-            # our internal data without having to worry about both the
-            # list and dictionary cases:
-            return copy.copy(self._default)
+            self._default = []
+
+    def add_valueinfo(self, vi, key):
+        if self.name == "+":
+            # This is a keyed value, not a simple value:
+            if key in self._default:
+                self._default[key].append(vi)
+            else:
+                self._default[key] = [vi]
+        else:
+            self._default.append(vi)
+
+    def getdefault(self):
+        return copy.copy(self._default)
 
 
 class SectionInfo(BaseInfo):
