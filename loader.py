@@ -84,7 +84,7 @@ class BaseLoader:
     # utilities
 
     def loadResource(self, resource):
-        raise NotImpementedError(
+        raise NotImplementedError(
             "BaseLoader.loadResource() must be overridden by a subclass")
 
     def openResource(self, url):
@@ -191,7 +191,7 @@ class ConfigLoader(BaseLoader):
 
     def startSection(self, parent, type, name, delegatename):
         if delegatename:
-            raise NotImpementedError(
+            raise NotImplementedError(
                 "section delegation is not yet supported")
         t = self.schema.gettype(type)
         if t.isabstract():
