@@ -13,6 +13,8 @@
 ##############################################################################
 """Objects that can describe a ZConfig schema."""
 
+import copy
+
 import ZConfig
 
 
@@ -119,16 +121,41 @@ class KeyInfo(BaseInfo):
                 "cannot finish KeyInfo more than once")
         self._finished = True
 
-    def adddefault(self, value, position):
+    def adddefault(self, value, position, key=None):
         if self._finished:
             raise ZConfig.SchemaError(
                 "cannot add default values to finished KeyInfo")
+        # Check that the name/keyed relationship is right:
+        if self.name == "+" and key is None:
+            raise ZConfig.SchemaError(
+                "default values must be keyed for name='+'")
+        elif self.name != "+" and key is not None:
+            raise ZConfig.SchemaError(
+                "unexpected key for default value")
+
         value = ValueInfo(value, position)
         if self.maxOccurs > 1:
-            if self._default is None:
+            if self.name == "+":
+                # This is a keyed value, not a simple value:
+                if self._default is None:
+                    self._default = {key: [value]}
+                else:
+                    if key in self._default:
+                        self._default[key].append(value)
+                    else:
+                        self._default[key] = [value]
+            elif self._default is None:
                 self._default = [value]
             else:
                 self._default.append(value)
+        elif self.name == "+":
+            if self._default is None:
+                self._default = {key: value}
+            else:
+                if self._default.has_key(key):
+                    raise ZConfig.SchemaError(
+                        "duplicate default value for key %s" % `key`)
+                self._default[key] = value
         elif self._default is not None:
             raise ZConfig.SchemaError(
                 "cannot set more than one default to key with maxOccurs == 1")
@@ -140,10 +167,16 @@ class KeyInfo(BaseInfo):
             raise ZConfig.SchemaError(
                 "cannot get default value of key before KeyInfo"
                 " has been completely initialized")
-        if self._default is None and self.maxOccurs > 1:
-            return []
+        if self._default is None:
+            if self.name == "+":
+                return {}
+            elif self.maxOccurs > 1:
+                return []
         else:
-            return self._default
+            # Use copy.copy() to make sure we don't allow polution of
+            # our internal data without having to worry about both the
+            # list and dictionary cases:
+            return copy.copy(self._default)
 
 
 class SectionInfo(BaseInfo):

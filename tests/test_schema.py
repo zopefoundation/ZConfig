@@ -406,7 +406,7 @@ class SchemaTestCase(TestBase):
         conf = self.load_config_text(schema, "some-key 42")
         self.assertEqual(conf.keymap, {'some-key': 42})
 
-    def test_arbitrary_multikey(self):
+    def test_arbitrary_multikey_required(self):
         schema = self.load_schema_text("""\
             <schema>
               <multikey name='+' required='yes' attribute='keymap'
@@ -418,6 +418,81 @@ class SchemaTestCase(TestBase):
                                      some-key 43
                                      """)
         self.assertEqual(conf.keymap, {'some-key': [42, 43]})
+
+    def test_arbitrary_multikey_optional(self):
+        schema = self.load_schema_text("""\
+            <schema>
+              <sectiontype name='sect'>
+                <multikey name='+' attribute='keymap'/>
+              </sectiontype>
+              <section name='+' type='sect' attribute='stuff'/>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, """\
+                                     <sect foo>
+                                       some-key 42
+                                       some-key 43
+                                     </sect>
+                                     """)
+        self.assertEqual(conf.stuff.keymap, {'some-key': ['42', '43']})
+
+    def test_arbitrary_multikey_optional_empty(self):
+        schema = self.load_schema_text("""\
+            <schema>
+              <sectiontype name='sect'>
+                <multikey name='+' attribute='keymap'/>
+              </sectiontype>
+              <section name='+' type='sect' attribute='stuff'/>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, "<sect foo/>")
+        self.assertEqual(conf.stuff.keymap, {})
+
+    def test_arbitrary_multikey_with_defaults(self):
+        schema = self.load_schema_text("""\
+            <schema>
+              <multikey name='+' attribute='keymap'>
+                <default key='a'>value-a1</default>
+                <default key='a'>value-a2</default>
+                <default key='b'>value-b</default>
+              </multikey>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, "")
+        self.assertEqual(conf.keymap, {'a': ['value-a1', 'value-a2'],
+                                       'b': ['value-b']})
+
+    def test_arbitrary_multikey_with_unkeyed_default(self):
+        self.assertRaises(ZConfig.SchemaError,
+                          self.load_schema_text, """\
+                          <schema>
+                            <multikey name='+' attribute='keymap'>
+                              <default>value-a1</default>
+                            </multikey>
+                          </schema>
+                          """)
+
+    def test_arbitrary_key_with_defaults(self):
+        schema = self.load_schema_text("""\
+            <schema>
+              <key name='+' attribute='keymap'>
+                <default key='a'>value-a</default>
+                <default key='b'>value-b</default>
+              </key>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, "")
+        self.assertEqual(conf.keymap, {'a': 'value-a', 'b': 'value-b'})
+
+    def test_arbitrary_key_with_unkeyed_default(self):
+        self.assertRaises(ZConfig.SchemaError,
+                          self.load_schema_text, """\
+                          <schema>
+                            <key name='+' attribute='keymap'>
+                              <default>value-a1</default>
+                            </key>
+                          </schema>
+                          """)
 
     def test_arbitrary_keys_with_others(self):
         schema = self.load_schema_text("""\

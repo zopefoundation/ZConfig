@@ -69,7 +69,7 @@ class BaseParser(xml.sax.ContentHandler):
                         "schema", "component", "extension"],
         "example": ["key", "section", "multikey", "multisection"],
         "metadefault": ["key", "section", "multikey", "multisection"],
-        "default": ["multikey"],
+        "default": ["key", "multikey"],
         "import": ["schema", "component", "extension"],
         "abstracttype": ["schema", "component", "extension"],
         "sectiontype": ["schema", "component", "extension"],
@@ -124,6 +124,7 @@ class BaseParser(xml.sax.ContentHandler):
                 self.error(name + " element improperly nested")
             self._cdata = []
             self._position = None
+            self._attrs = attrs
 
     def characters(self, data):
         if self._cdata is not None:
@@ -279,7 +280,8 @@ class BaseParser(xml.sax.ContentHandler):
     # schema loading logic
 
     def characters_default(self, data):
-        self._stack[-1].adddefault(data, self._position)
+        key = self._attrs.get("key")
+        self._stack[-1].adddefault(data, self._position, key)
 
     def characters_description(self, data):
         self._stack[-1].description = data
@@ -412,12 +414,15 @@ class BaseParser(xml.sax.ContentHandler):
                 self.error("required key cannot have a default value")
             key.adddefault(str(attrs["default"]).strip(),
                            self.get_position())
-        key.finish()
+        if name != "+":
+            key.finish()
         self._stack[-1].addkey(key)
         self._stack.append(key)
 
     def end_key(self):
-        self._stack.pop()
+        key = self._stack.pop()
+        if key.name == "+":
+            key.finish()
 
     def start_multikey(self, attrs):
         if attrs.has_key("default"):
