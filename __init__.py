@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.16 2004/02/11 21:31:46 fdrake Exp $
+$Id: __init__.py,v 1.17 2004/03/25 21:28:22 fdrake Exp $
 """
 version_info = (2, 1)
 __version__ = ".".join([str(n) for n in version_info])
@@ -21,7 +21,10 @@ __version__ = ".".join([str(n) for n in version_info])
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
 
+
 class ConfigurationError(Exception):
+    """Base class for ZConfig exceptions."""
+
     def __init__(self, msg, url=None):
         self.message = msg
         self.url = url
