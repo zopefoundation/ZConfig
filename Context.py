@@ -74,7 +74,7 @@ class Context:
         self._all_sections.append(top)
         self._imports = [top]
         self._current_imports.append(top)
-        r = Resource(file, url)
+        r = self.createResource(file, url)
         try:
             self.parse(r, top)
         finally:
@@ -98,7 +98,7 @@ class Context:
     def includeConfiguration(self, section, url):
         # XXX we always re-parse, unlike import
         file = urllib2.urlopen(url)
-        r = Resource(file, url)
+        r = self.createResource(file, url)
         try:
             self.parse(r, section)
         finally:
@@ -151,7 +151,7 @@ class Context:
                 "fragment identifiers are not currently supported")
         file = urllib2.urlopen(url)
         self._current_imports.append(section)
-        r = Resource(file, url)
+        r = self.createResource(file, url)
         try:
             self.parse(r, section)
         finally:
