@@ -77,12 +77,12 @@ def _interp(accum, rest, section, context):
                     "'${%s' not followed by '}'" % name, context)
             v = section.get(name)
             if v is None:
-                parent = section.container
+                parent = getattr(section, "container", None)
                 while parent is not None:
                     v = parent.get(name)
                     if v is not None:
                         break
-                    parent = parent.container
+                    parent = getattr(parent, "container", None)
                 else:
                     v = ""
             if "$" in v and context:
