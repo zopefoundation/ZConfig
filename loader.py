@@ -115,19 +115,19 @@ class BaseLoader:
         else:
             what = "URL"
             ident = url
-        error = ZConfig.ConfigurationError("error opening %s %s: %s"
-                                           % (what, ident, message))
-        error.url = url
-        raise error
+        raise ZConfig.ConfigurationError(
+            "error opening %s %s: %s" % (what, ident, message),
+            url)
 
     def normalizeURL(self, url):
         if self.isPath(url):
             url = "file://" + urllib.pathname2url(os.path.abspath(url))
-        url, fragment = ZConfig.url.urldefrag(url)
+        newurl, fragment = ZConfig.url.urldefrag(url)
         if fragment:
             raise ZConfig.ConfigurationError(
-                "fragment identifiers are not supported")
-        return url
+                "fragment identifiers are not supported",
+                url)
+        return newurl
 
     def isPath(self, s):
         """Return True iff 's' should be handled as a filesystem path."""

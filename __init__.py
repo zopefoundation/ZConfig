@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.15 2004/02/11 21:18:54 fdrake Exp $
+$Id: __init__.py,v 1.16 2004/02/11 21:31:46 fdrake Exp $
 """
 version_info = (2, 1)
 __version__ = ".".join([str(n) for n in version_info])
@@ -22,8 +22,9 @@ from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
 
 class ConfigurationError(Exception):
-    def __init__(self, msg):
+    def __init__(self, msg, url=None):
         self.message = msg
+        self.url = url
         Exception.__init__(self, msg)
 
     def __str__(self):
@@ -32,10 +33,9 @@ class ConfigurationError(Exception):
 
 class _ParseError(ConfigurationError):
     def __init__(self, msg, url, lineno, colno=None):
-        self.url = url
         self.lineno = lineno
         self.colno = colno
-        ConfigurationError.__init__(self, msg)
+        ConfigurationError.__init__(self, msg, url)
 
     def __str__(self):
         s = self.message
