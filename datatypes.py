@@ -335,7 +335,7 @@ class Registry:
             raise ValueError("datatype name conflicts with built-in type: "
                              + `name`)
         if self._other.has_key(name):
-            raise ValueError("datatype name already registered:" + `name`)
+            raise ValueError("datatype name already registered: " + `name`)
         self._other[name] = conversion
 
     def search(self, name):
