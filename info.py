@@ -249,8 +249,8 @@ class SectionType:
         self.handler = None
         self.registry = registry
         self._children = []    # [(key, info), ...]
-        self._attrmap = {}     # {attribute: index, ...}
-        self._keymap = {}      # {key: index, ...}
+        self._attrmap = {}     # {attribute: info, ...}
+        self._keymap = {}      # {key: info, ...}
         self._types = types
 
     def gettype(self, name):
@@ -280,9 +280,9 @@ class SectionType:
                 "child attribute name %s already used" % info.attribute)
         # a-ok, add the item to the appropriate maps
         if info.attribute:
-            self._attrmap[info.attribute] = len(self._children)
+            self._attrmap[info.attribute] = info
         if key:
-            self._keymap[key] = len(self._children)
+            self._keymap[key] = info
         self._children.append((key, info))
 
     def addkey(self, keyinfo):
@@ -296,11 +296,10 @@ class SectionType:
         if not key:
             raise ZConfig.ConfigurationError(
                 "cannot match a key without a name")
-        index = self._keymap.get(key)
-        if index is None:
+        try:
+            return self._keymap[key]
+        except KeyError:
             raise ZConfig.ConfigurationError("no key matching " + `key`)
-        else:
-            return self._children[index][1]
 
     def getchildnames(self):
         return [key for (key, info) in self._children]
