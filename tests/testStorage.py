@@ -96,6 +96,33 @@ class StorageTestCase(unittest.TestCase):
         self.storage = Storage.createStorage(storageconf)
         self.assert_(isinstance(self.storage, DemoStorage))
 
+    def testFullStorage(self):
+        try:
+            from bsddb3Storage.Full import Full
+        except ImportError:
+            print 'ImportError'
+            return
+        sample = """
+        <Storage>
+        type       Full
+        name       %s
+        cachesize  1000
+        </Storage>
+        """ % self.tmpfn
+        os.mkdir(self.tmpfn)
+        io = StringIO(sample)
+        rootconf = ZConfig.loadfile(io)
+        storageconf = rootconf.getSection("Storage")
+        cls, args = Storage.getStorageInfo(storageconf)
+        self.assertEqual(cls, Full)
+        args = args.copy()
+        del args['config']
+        self.assertEqual(args, {"name": self.tmpfn})
+        self.storage = Storage.createStorage(storageconf)
+        self.assert_(isinstance(self.storage, Full))
+        # XXX _config isn't public
+        self.assert_(self.storage._config.cachesize, 1000)
+
 def test_suite():
     return unittest.makeSuite(StorageTestCase)
 
