@@ -368,18 +368,18 @@ class SectionType:
 
 
 class SchemaType(SectionType):
-    def __init__(self, name, keytype, valuetype, datatype, handler, url,
+    def __init__(self, keytype, valuetype, datatype, handler, url,
                  registry):
-        SectionType.__init__(self, name, keytype, valuetype, datatype,
+        SectionType.__init__(self, None, keytype, valuetype, datatype,
                              registry, {})
         self.handler = handler
         self.url = url
 
     def addtype(self, typeinfo):
-        n = typeinfo.name.lower()
+        n = typeinfo.name
         if self._types.has_key(n):
             raise ZConfig.SchemaError("type name cannot be redefined: "
-                                             + `typeinfo.name`)
+                                      + `typeinfo.name`)
         self._types[n] = typeinfo
 
     def allowUnnamed(self):

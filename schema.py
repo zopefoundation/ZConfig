@@ -427,15 +427,9 @@ class SchemaParser(BaseParser):
         self.push_prefix(attrs)
         handler = self.get_handler(attrs)
         keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
-        name = attrs.get("type")
-        if name is not None:
-            name = self.basic_key(name)
-        self._schema = info.SchemaType(name, keytype, valuetype, datatype,
+        self._schema = info.SchemaType(keytype, valuetype, datatype,
                                        handler, self._url, self._registry)
         self._localtypes = self._schema._types
-        if name is not None:
-            # XXX circular reference
-            self._schema.addtype(self._schema)
         self._stack = [self._schema]
 
     def end_schema(self):

@@ -420,14 +420,14 @@ class SchemaTestCase(BaseSchemaTest):
         self.assertEqual(schema.getrequiredtypes(), [])
 
         schema = self.load_schema_text(
-            "<schema type='top'>"
+            "<schema>"
             "  <sectiontype name='used'/>"
             "  <sectiontype name='unused'/>"
             "  <section type='used' name='a'/>"
             "</schema>")
         L = schema.getrequiredtypes()
         L.sort()
-        self.assertEqual(L, ["top", "used"])
+        self.assertEqual(L, ["used"])
 
     def test_getunusedtypes(self):
         schema = self.load_schema("library.xml")
