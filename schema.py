@@ -409,6 +409,7 @@ class BaseParser(xml.sax.ContentHandler):
     def end_key(self):
         key = self._stack.pop()
         if key.name == "+":
+            key.computedefault(self._stack[-1].keytype)
             key.finish()
 
     def start_multikey(self, attrs):
@@ -423,7 +424,10 @@ class BaseParser(xml.sax.ContentHandler):
         self._stack.append(key)
 
     def end_multikey(self):
-        self._stack.pop().finish()
+        multikey = self._stack.pop()
+        if multikey.name == "+":
+            multikey.computedefault(self._stack[-1].keytype)
+        multikey.finish()
 
     # datatype conversion wrappers
 

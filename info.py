@@ -101,6 +101,8 @@ class BaseInfo:
 
 class BaseKeyInfo(BaseInfo):
 
+    _rawdefaults = None
+
     def __init__(self, name, datatype, minOccurs, maxOccurs, handler,
                  attribute):
         assert minOccurs is not None
@@ -140,6 +142,12 @@ class BaseKeyInfo(BaseInfo):
         raise NotImplementedError(
             "add_valueinfo() must be implemented by subclasses of BaseKeyInfo")
 
+    def prepare_raw_defaults(self):
+        assert self.name == "+"
+        if self._rawdefaults is None:
+            self._rawdefaults = self._default
+        self._default = {}
+
 
 class KeyInfo(BaseKeyInfo):
 
@@ -164,6 +172,12 @@ class KeyInfo(BaseKeyInfo):
                 "cannot set more than one default to key with maxOccurs == 1")
         else:
             self._default = vi
+
+    def computedefault(self, keytype):
+        self.prepare_raw_defaults()
+        for k, vi in self._rawdefaults.iteritems():
+            key = ValueInfo(k, vi.position).convert(keytype)
+            self.add_valueinfo(vi, key)
 
     def getdefault(self):
         # Use copy.copy() to make sure we don't allow polution of
@@ -192,6 +206,13 @@ class MultiKeyInfo(BaseKeyInfo):
                 self._default[key] = [vi]
         else:
             self._default.append(vi)
+
+    def computedefault(self, keytype):
+        self.prepare_raw_defaults()
+        for k, vlist in self._rawdefaults.iteritems():
+            key = ValueInfo(k, vlist[0].position).convert(keytype)
+            for vi in vlist:
+                self.add_valueinfo(vi, key)
 
     def getdefault(self):
         return copy.copy(self._default)
@@ -462,6 +483,14 @@ class SchemaType(SectionType):
         t._attrmap.update(base._attrmap)
         t._keymap.update(base._keymap)
         t._children.extend(base._children)
+        for i in range(len(t._children)):
+            key, info = t._children[i]
+            if isinstance(info, BaseKeyInfo) and info.name == "+":
+                # need to create a new info object and recompute the
+                # default mapping based on the new keytype
+                info = copy.copy(info)
+                info.computedefault(t.keytype)
+                t._children[i] = (key, info)
         return t
 
     def addComponent(self, name):
