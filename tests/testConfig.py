@@ -135,17 +135,25 @@ class ConfigurationTestCase(TestBase):
                          [("var", "bar"), ("var-one", "splat"),
                           ("var-two", "stuff")])
 
+    def has_key(self):
+        conf = self.load("simplesections.conf")
+        sect = conf.getSection("section", "name")
+        for key in ("var", "var-one", "var-two"):
+            self.assert_(sect.has_key(key))
+            self.assert_(sect.has_key(key.upper()))
+        self.assert_(not sect.has_key("var-three"))
+
     def test_keys(self):
         conf = self.load("simplesections.conf")
         self.assertEqual(sorted_keys(conf),
                          ["var", "var-0", "var-1", "var-2", "var-3",
                           "var-4", "var-5", "var-6"])
-        sect = conf.getSection("section", "name")
+        sect = conf.getSection("section", "Name")
         self.assertEqual(sorted_keys(sect),
                          ["var", "var-one", "var-two"])
-        sect = conf.getSection("section", "delegate")
+        sect = conf.getSection("Section", "delegate")
         self.assertEqual(sorted_keys(sect), ["var", "var-two"])
-        sect = conf.getSection("section", "another")
+        sect = conf.getSection("SECTION", "ANOTHER")
         self.assertEqual(sorted_keys(sect), ["var", "var-three"])
         L = [sect for sect in conf.getChildSections() if not sect.name]
         self.assertEqual(len(L), 3)
@@ -171,11 +179,13 @@ class ConfigurationTestCase(TestBase):
         for k, v in [("var", "bar"), ("var-one", "splat"),
                      ("var-two", "stuff")]:
             self.assertEqual(sect.get(k), v)
+            self.assertEqual(sect.get(k.upper()), v)
         self.assert_(sect.get("not-there") is None)
         sect = conf.getSection("section", "delegate")
         for k, v in [("var", "spam"), ("var-two", "stuff")]:
             self.assertEqual(sect.get(k), v)
-        self.assert_(sect.get("var-one") is None)
+            self.assertEqual(sect.get(k.upper()), v)
+        self.assert_(sect.get("Var-One") is None)
         L = []
         for sect in conf.getChildSections():
             if sect.type == "trivial":
@@ -188,7 +198,9 @@ class ConfigurationTestCase(TestBase):
     def test_basic_import(self):
         conf = self.load("importer.conf")
         self.assertEqual(conf.get("var1"), "def")
+        self.assertEqual(conf.get("VAR1"), "def")
         self.assertEqual(conf.get("int-var"), "12")
+        self.assertEqual(conf.get("INT-VAR"), "12")
 
     def test_imported_section_override(self):
         conf = self.load("importsections.conf")
@@ -219,8 +231,11 @@ class ConfigurationTestCase(TestBase):
     def test_include(self):
         conf = self.load("include.conf")
         self.assertEqual(conf.get("var1"), "abc")
+        self.assertEqual(conf.get("VAR1"), "abc")
         self.assertEqual(conf.get("var2"), "value2")
+        self.assertEqual(conf.get("VAR2"), "value2")
         self.assertEqual(conf.get("var3"), "value3")
+        self.assertEqual(conf.get("VAR3"), "value3")
 
     def test_fragment_ident_disallowed(self):
         self.assertRaises(ConfigurationError,
@@ -250,8 +265,8 @@ class ConfigurationTestCase(TestBase):
                                 "  name value2\n"
                                 "</section>\n")
         cf = ZConfig.loadfile(sio)
-        self.assertEqual(cf.get("name"), "value")
-        self.assertEqual(cf.getSection("section").get("name"), "value2")
+        self.assertEqual(cf.get("Name"), "value")
+        self.assertEqual(cf.getSection("Section").get("Name"), "value2")
 
     def write_tempfile(self):
         fn = tempfile.mktemp()
