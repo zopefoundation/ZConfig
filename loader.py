@@ -189,10 +189,7 @@ class ConfigLoader(BaseLoader):
 
     # config parser support API
 
-    def startSection(self, parent, type, name, delegatename):
-        if delegatename:
-            raise NotImplementedError(
-                "section delegation is not yet supported")
+    def startSection(self, parent, type, name):
         t = self.schema.gettype(type)
         if t.isabstract():
             raise ZConfig.ConfigurationError(
@@ -200,8 +197,7 @@ class ConfigLoader(BaseLoader):
                 " found abstract type " + `type`)
         return parent.createChildMatcher(t, name)
 
-    def endSection(self, parent, type, name, delegatename, matcher):
-        assert not delegatename
+    def endSection(self, parent, type, name, matcher):
         sectvalue = matcher.finish()
         parent.addSection(type, name, sectvalue)
 
