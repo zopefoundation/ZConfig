@@ -38,11 +38,22 @@ def loadSchema(url):
 def loadSchemaFile(file, url=None):
     return SchemaLoader().loadFile(file, url)
 
-def loadConfig(schema, url):
-    return ConfigLoader(schema).loadURL(url)
+def loadConfig(schema, url, overrides=()):
+    return _get_config_loader(schema, overrides).loadURL(url)
 
-def loadConfigFile(schema, file, url=None):
-    return ConfigLoader(schema).loadFile(file, url)
+def loadConfigFile(schema, file, url=None, overrides=()):
+    return _get_config_loader(schema, overrides).loadFile(file, url)
+
+
+def _get_config_loader(schema, overrides):
+    if overrides:
+        from ZConfig import cmdline
+        loader = cmdline.ExtendedConfigLoader(schema)
+        for opt in overrides:
+            loader.addOption(opt)
+    else:
+        loader = ConfigLoader(schema)
+    return loader
 
 
 class BaseLoader:
