@@ -205,7 +205,7 @@ class BaseParser(xml.sax.ContentHandler):
             self.error(e[0])
 
     def get_sect_typeinfo(self, attrs, base=None):
-        keytype = self.get_datatype(attrs, "keytype", "basic-key")
+        keytype = self.get_datatype(attrs, "keytype", "basic-key", base)
         valuetype = self.get_datatype(attrs, "valuetype", "string")
         datatype = self.get_datatype(attrs, "datatype", "null", base)
         return keytype, valuetype, datatype
@@ -333,11 +333,9 @@ class BaseParser(xml.sax.ContentHandler):
             base = self._schema.gettype(basename)
             if base.isabstract():
                 self.error("sectiontype cannot extend an abstract type")
-            if attrs.has_key("keytype"):
-                self.error("derived sectiontype may not specify a keytype")
             keytype, valuetype, datatype = self.get_sect_typeinfo(attrs, base)
             sectinfo = self._schema.deriveSectionType(
-                base, name, valuetype, datatype)
+                base, name, keytype, valuetype, datatype)
         else:
             keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
             sectinfo = self._schema.createSectionType(

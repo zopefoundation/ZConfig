@@ -659,14 +659,6 @@ class SchemaTestCase(TestBase):
                             <sectiontype name='t2' extends='t1'/>
                           </schema>
                           """)
-        # cannot specify keytype
-        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
-                          <schema>
-                            <sectiontype name='t1' keytype='string'/>
-                            <sectiontype name='t2' extends='t1'
-                                         keytype='integer'/>
-                          </schema>
-                          """)
 
     def test_sectiontype_derived_keytype(self):
         # make sure that a derived section type inherits the keytype
@@ -689,6 +681,34 @@ class SchemaTestCase(TestBase):
             """)
         self.assertEqual(conf.foo.foo, "bar")
         self.assertEqual(conf.foo.Foo, "BAR")
+
+    def test_sectiontype_override_keytype(self):
+        schema = self.load_schema_text("""\
+            <schema>
+              <sectiontype name='base' keytype='identifier' >
+                <key name='+' attribute='map' />
+              </sectiontype>
+              <sectiontype name='derived' keytype='ipaddr-or-hostname'
+                           extends='base' />
+              <section name='*' type='base' attribute='base' />
+              <section name='*' type='derived' attribute='derived' />
+            </schema>
+            """)
+        conf = self.load_config_text(schema, """\
+            <base>
+              ident1 foo
+              Ident2 bar
+            </base>
+            <derived>
+              EXAMPLE.COM foo
+            </derived>
+            """)
+        L = conf.base.map.items()
+        L.sort()
+        self.assertEqual(L, [("Ident2", "bar"), ("ident1", "foo")])
+        L = conf.derived.map.items()
+        L.sort()
+        self.assertEqual(L, [("example.com", "foo")])
 
     def test_sectiontype_inherited_datatype(self):
         schema = self.load_schema_text("""\

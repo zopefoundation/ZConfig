@@ -403,11 +403,11 @@ class SchemaType(SectionType):
         self.addtype(t)
         return t
 
-    def deriveSectionType(self, base, name, valuetype, datatype):
+    def deriveSectionType(self, base, name, keytype, valuetype, datatype):
         if isinstance(base, SchemaType):
             raise ZConfig.SchemaError(
                 "cannot derive sectiontype from top-level schema")
-        t = self.createSectionType(name, base.keytype, valuetype, datatype)
+        t = self.createSectionType(name, keytype, valuetype, datatype)
         t._attrmap.update(base._attrmap)
         t._keymap.update(base._keymap)
         t._children.extend(base._children)
