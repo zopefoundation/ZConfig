@@ -505,9 +505,10 @@ class ComponentParser(BaseComponentParser):
 
     def start_component(self, attrs):
         self._schema = self._parent
+        self.push_prefix(attrs)
 
     def end_component(self):
-        pass
+        self.pop_prefix()
 
     def loadExtension(self, resource):
         parser = ExtensionParser(self._registry, self._loader, resource.url,
@@ -527,6 +528,7 @@ class ExtensionParser(BaseComponentParser):
 
     def start_extension(self, attrs):
         self._schema = self._parent
+        self.push_prefix(attrs)
 
     def end_extension(self):
-        pass
+        self.pop_prefix()
