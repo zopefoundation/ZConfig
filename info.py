@@ -16,13 +16,6 @@
 import ZConfig
 
 
-try:
-    True
-except NameError:
-    True = 1
-    False = 0
-
-
 class UnboundedThing:
     __metaclass__ = type
     __slots__ = ()
