@@ -39,9 +39,8 @@ class TestBase(unittest.TestCase):
     def load(self, relurl, context=None):
         url = urljoin(CONFIG_BASE, relurl)
         if context is None:
-            conf = ZConfig.loadURL(url)
-        else:
-            conf = context.loadURL(url)
+            context = Context()
+        conf = context.loadURL(url)
         self.assertEqual(conf.url, url)
         self.assert_(conf.name is None)
         self.assert_(conf.type is None)
@@ -50,7 +49,7 @@ class TestBase(unittest.TestCase):
 
     def loadtext(self, text):
         sio = StringIO.StringIO(text)
-        return ZConfig.loadFile(sio)
+        return Context().loadFile(sio)
 
     def check_simple_gets(self, conf):
         self.assertEqual(conf.get('empty'), '')
@@ -254,7 +253,7 @@ class ConfigurationTestCase(TestBase):
                                 "<section>\n"
                                 "  name value2\n"
                                 "</section>\n")
-        cf = ZConfig.loadFile(sio)
+        cf = Context().loadFile(sio)
         self.assertEqual(cf.get("Name"), "value")
         self.assertEqual(cf.getSection("Section").get("Name"), "value2")
 
