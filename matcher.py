@@ -134,7 +134,7 @@ class BaseMatcher:
                     if key:
                         s = `key`
                     else:
-                        s = "section type " + `ci.typename`
+                        s = "section type " + `ci.sectiontype.name`
                     raise ZConfig.ConfigurationError(
                         "no values for %s; %s required" % (s, ci.minOccurs))
                 else:
