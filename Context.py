@@ -17,6 +17,7 @@ class Context:
         self._named_sections = {}  # name -> Configuration
         self._needed_names = {}    # name -> [needy Configuration, ...]
         self._current_imports = []
+        self._all_sections = []
 
     # subclass-support API
 
@@ -47,6 +48,7 @@ class Context:
         if os.path.exists(url):
             url = "file://" + urllib.pathname2url(os.path.abspath(url))
         top = self.createToplevelSection(url)
+        self._all_sections.append(top)
         self._imports = [top]
         self._parse_url(url, top)
         self._finish()
@@ -59,6 +61,7 @@ class Context:
             if config.url == url:
                 return config
         newsect = self.createImportedSection(section, url)
+        self._all_sections.append(newsect)
         self._imports.append(newsect)
         section.addImport(newsect)
         self._parse_url(url, newsect)
@@ -88,6 +91,7 @@ class Context:
                 raise ConfigurationError(
                     "named section cannot change type")
         newsect = self.createNestedSection(section, type, name, delegatename)
+        self._all_sections.append(newsect)
         if delegatename:
             # The knitting together of the delegation graph needs this.
             try:
@@ -144,3 +148,17 @@ class Context:
                         referrer.type, type)
                 referrer.setDelegate(section)
         self._needed_names = None
+        # Now "finish" the sections, making sure we close inner
+        # sections before outer sections.  We really should order
+        # these better, but for now, "finish" all sections that have
+        # no delegates first, then those that have them.  This is not
+        # enough to guarantee that delegates are finished before their
+        # users.
+        self._all_sections.reverse()
+        for sect in self._all_sections:
+            if self.delegate is None:
+                sect.finish()
+        for sect in self._all_sections:
+            if self.delegate is not None:
+                sect.finish()
+        self._all_sections = None
