@@ -330,6 +330,9 @@ stock_datatypes = {
     }
 
 class Registry:
+    __metatype__ = type
+    __slots__ = '_stock', '_other'
+
     def __init__(self, stock=None):
         if stock is None:
             stock = stock_datatypes.copy()

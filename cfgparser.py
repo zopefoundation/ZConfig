@@ -25,6 +25,10 @@ except NameError:
 
 
 class ZConfigParser:
+    __metaclass__ = type
+    __slots__ = ('resource', 'context', 'lineno',
+                 'stack', 'defs', 'file', 'url')
+
     def __init__(self, resource, context, defines=None):
         self.resource = resource
         self.context = context

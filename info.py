@@ -24,6 +24,9 @@ except NameError:
 
 
 class UnboundedThing:
+    __metaclass__ = type
+    __slots__ = ()
+
     def __lt__(self, other):
         return False
 
@@ -49,6 +52,9 @@ Unbounded = UnboundedThing()
 
 
 class ValueInfo:
+    __metaclass__ = type
+    __slots__ = 'value', 'position'
+
     def __init__(self, value, position):
         self.value = value
         # position is (lineno, colno, url)
@@ -198,6 +204,9 @@ class SectionInfo(BaseInfo):
 
 
 class AbstractType:
+    __metaclass__ = type
+    __slots__ = '_subtypes', 'name'
+
     def __init__(self, name):
         self._subtypes = {}
         self.name = name

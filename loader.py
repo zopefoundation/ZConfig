@@ -216,6 +216,9 @@ class ConfigLoader(BaseLoader):
 
 
 class CompositeHandler:
+    __metatype__ = type
+    __slots__ = '_handlers', '_convert'
+
     def __init__(self, handlers, schema):
         self._handlers = handlers
         self._convert = schema.registry.get("basic-key")
