@@ -5,7 +5,9 @@ from __future__ import nested_scopes
 
 import unittest
 
-from ZConfig.Substitution import isname, substitute, SubstitutionSyntaxError
+from ZConfig.Substitution import isname, substitute
+from ZConfig.Substitution import SubstitutionReplacementError
+from ZConfig.Substitution import SubstitutionSyntaxError
 
 
 class SubstitutionTestCase(unittest.TestCase):
@@ -34,9 +36,12 @@ class SubstitutionTestCase(unittest.TestCase):
 
     def test_undefined_names(self):
         d = {"name": "value"}
-        self.assertEqual(substitute("$splat", d), "")
-        self.assertEqual(substitute("$splat1", d), "")
-        self.assertEqual(substitute("$splat_", d), "")
+        self.assertRaises(SubstitutionReplacementError,
+                          substitute, "$splat", d)
+        self.assertRaises(SubstitutionReplacementError,
+                          substitute, "$splat1", d)
+        self.assertRaises(SubstitutionReplacementError,
+                          substitute, "$splat_", d)
 
     def test_syntax_errors(self):
         d = {"name": "${next"}
@@ -52,7 +57,8 @@ class SubstitutionTestCase(unittest.TestCase):
         # It's debatable what should happen for these cases, so we'll
         # follow the lead of the Bourne shell here.
         def check(s):
-            self.assertEqual(substitute(s, {}), s)
+            self.assertRaises(SubstitutionSyntaxError,
+                              substitute, s, {})
         check("$1")
         check("$")
         check("$ stuff")

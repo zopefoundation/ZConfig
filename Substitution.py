@@ -5,8 +5,8 @@ try:
 except NameError:
     False = 0
 
-class SubstitutionSyntaxError(Exception):
-    """Raised when interpolation source text contains syntactical errors."""
+class SubstitutionError(Exception):
+    """Base class for exceptions raised by ZConfig.Substitution."""
 
     def __init__(self, msg):
         self.message = msg
@@ -14,14 +14,35 @@ class SubstitutionSyntaxError(Exception):
     def __str__(self):
         return self.message
 
+class SubstitutionSyntaxError(SubstitutionError):
+    """Raised when interpolation source text contains syntactical errors."""
+
+class SubstitutionReplacementError(SubstitutionError, LookupError):
+    """Raised when no replacement is available for a reference."""
+
+    def __init__(self, source, name):
+        self.source = source
+        self.name = name
+        SubstitutionError.__init__(
+            self, "no replacement for " + `name`)
+
 
 def substitute(s, mapping):
     """Interpolate variables from `section` into `s`."""
     if "$" in s:
-        accum = []
-        _interp(accum, s, mapping)
-        s = ''.join(accum)
-    return s
+        result = ''
+        rest = s
+        while rest:
+            p, name, rest = _split(rest)
+            result += p
+            if name:
+                v = mapping.get(name)
+                if v is None:
+                    raise SubstitutionReplacementError(s, name)
+                result += v
+        return result
+    else:
+        return s
 
 
 def isname(s):
@@ -31,18 +52,6 @@ def isname(s):
         return m.group() == s
     else:
         return False
-
-
-def _interp(accum, rest, mapping):
-    while 1:
-        s, name, rest = _split(rest)
-        if s:
-            accum.append(s)
-        if name:
-            v = mapping.get(name, "")
-            accum.append(v)
-        if not rest:
-            return
 
 
 def _split(s):
@@ -55,7 +64,8 @@ def _split(s):
         i = s.find("$")
         c = s[i+1:i+2]
         if c == "":
-            return s, None, None
+            raise SubstitutionSyntaxError(
+                "illegal lone '$' at end of source")
         if c == "$":
             return s[:i+1], None, s[i+2:]
         prefix = s[:i]
@@ -71,7 +81,8 @@ def _split(s):
         else:
             m = _name_match(s, i+1)
             if not m:
-                return prefix + "$", None, s[i+1:]
+                raise SubstitutionSyntaxError(
+                    "'$' not followed by '$' or name")
             name = m.group(0)
             i = m.end()
         return prefix, name.lower(), s[i:]
