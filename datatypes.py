@@ -179,10 +179,7 @@ class SocketAddress:
         # returns (family, address) tuple
         import socket
         if "/" in s:
-            if hasattr(socket, "AF_UNIX"):
-                self.family = socket.AF_UNIX
-            else:
-                self.family = None
+            self.family = getattr(socket, "AF_UNIX", None)
             self.address = s
         else:
             self.family = socket.AF_INET
