@@ -91,8 +91,8 @@ class SubstitutionTestCase(unittest.TestCase):
                           get, d, "name")
 
     def test_container_search(self):
-        d1 = ContainerDict({"outer": "outervalue",
-                            "inner": "inner-from-outer"})
+        d1 = {"outer": "outervalue",
+              "inner": "inner-from-outer"}
         d2 = ContainerDict({"inner": "inner-from-inner",
                             "bogus": "${nothere}",
                             "both": "${inner} ${outer}"}, d1)
