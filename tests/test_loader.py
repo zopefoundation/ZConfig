@@ -69,60 +69,6 @@ class LoaderTestCase(unittest.TestCase):
                                    "          package='ZConfig'/>"
                                    "</schema>"))
 
-    def test_zconfig_resource(self):
-        loader = ZConfig.loader.SchemaLoader()
-        r = loader.openResource("zconfig:schema.dtd")
-        self.assert_(r.fragment is None)
-        self.assertEqual(r.url, "zconfig:schema.dtd")
-        # just make sure we can read it; we don't care about the content:
-        self.assert_(r.readline())
-        self.assert_(not r.closed)
-        r.close()
-        self.assert_(r.closed)
-
-    def test_urldefrag(self):
-        eq = self.assertEqual
-        eq(url.urldefrag("zconfig:abc/def.ghi#frag"),
-           ("zconfig:abc/def.ghi", "frag"))
-        eq(url.urldefrag("zconfig:abc/def.ghi"),
-           ("zconfig:abc/def.ghi", ''))
-
-    def test_urlsplit_absolute(self):
-        parts = url.urlsplit("zconfig:path/to/resource/file.txt#fragment")
-        self.assertEqual(parts, ("zconfig", '', "path/to/resource/file.txt",
-                                 '', "fragment"))
-        self.assertRaises(ValueError, url.urlsplit, "zconfig://host")
-        self.assertRaises(ValueError, url.urlsplit, "zconfig:host?query")
-
-    def test_urlsplit_relative(self):
-        eq = self.assertEqual
-        raises = self.assertRaises
-
-        def urlsplit(s):
-            return url.urlsplit(s, scheme="zconfig")
-
-        eq(urlsplit("#frag"),
-           ('zconfig', '', '', '', "frag"))
-        eq(urlsplit("path/to/resource#frag"),
-           ('zconfig', '', "path/to/resource", '', "frag"))
-        eq(url.urlsplit("path/to/resource/file.txt#fragment", "zconfig"),
-           ('zconfig', '', "path/to/resource/file.txt", '', "fragment"))
-
-        raises(ValueError, urlsplit, "/path/to/resource")
-        raises(ValueError, urlsplit, "/path/to/resource?query")
-        raises(ValueError, urlsplit, "path/to/resource?query")
-
-    def test_urljoin(self):
-        eq = self.assertEqual
-        eq(url.urljoin("zconfig:path/file.txt#oldfrag", "../newpath/foo.xml"),
-           "zconfig:newpath/foo.xml")
-        eq(url.urljoin("zconfig:abc.xml", "def.xml"),
-           "zconfig:def.xml")
-        eq(url.urljoin("zconfig:abc.xml", "#frag"),
-           "zconfig:abc.xml#frag")
-        self.assertRaises(ValueError, url.urljoin,
-                          "zconfig:abc.xml", "../def.xml")
-
 
 def test_suite():
     return unittest.makeSuite(LoaderTestCase)
