@@ -169,9 +169,13 @@ class BaseMatcher:
                     v = []
                     for s in values[i]:
                         if s is not None:
-                            v.append(s.getSectionDefinition().datatype(s))
-                        else:
-                            v.append(None)
+                            st = s.getSectionDefinition()
+                            try:
+                                s = st.datatype(s)
+                            except ValueError, e:
+                                raise ZConfig.DataConversionError(
+                                    e, s, (-1, -1, None))
+                        v.append(s)
                 elif ci.name == '+':
                     v = values[i]
                     for key, val in v.items():
@@ -180,7 +184,12 @@ class BaseMatcher:
                     v = [vi.convert(ci.datatype) for vi in values[i]]
             elif ci.issection():
                 if values[i] is not None:
-                    v = values[i].getSectionDefinition().datatype(values[i])
+                    st = values[i].getSectionDefinition()
+                    try:
+                        v = st.datatype(values[i])
+                    except ValueError, e:
+                        raise ZConfig.DataConversionError(
+                            e, values[i], (-1, -1, None))
                 else:
                     v = None
             elif name == '+':
