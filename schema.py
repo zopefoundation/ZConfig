@@ -257,7 +257,7 @@ class BaseParser(xml.sax.ContentHandler):
             # already loaded, or in progress
             pass
         else:
-            pi = self._loader.schemaPackageInfo(pkg)
+            pi = self._loader.schemaComponentInfo(pkg)
             if not pi:
                 self.error("could not locate schema component " + `pkg`)
             self._components[pkg] = pi

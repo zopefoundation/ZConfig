@@ -135,7 +135,7 @@ class SchemaLoader(BaseLoader):
 
     # schema parser support API
 
-    def schemaPackageInfo(self, package):
+    def schemaComponentInfo(self, package):
         parts = package.split(".")
         if not parts:
             raise ZConfig.SchemaError(
