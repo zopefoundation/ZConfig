@@ -121,7 +121,7 @@ def Parse(resource, context, section):
 
     if stack:
         raise ConfigurationSyntaxError(
-            "unclosed sections no allowed", resource.url, lineno + 1)
+            "unclosed sections not allowed", resource.url, lineno + 1)
 
 
 import re
