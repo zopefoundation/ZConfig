@@ -127,6 +127,20 @@ class LoaderTestCase(unittest.TestCase):
             result2 = ZConfig.url.urlunsplit(result)
             self.assertEqual(result2, url)
 
+    def test_file_url_normalization(self):
+        self.assertEqual(
+            ZConfig.url.urlnormalize("file:/abc/def"),
+            "file:///abc/def")
+        self.assertEqual(
+            ZConfig.url.urlunsplit(("file", "", "/abc/def", "", "")),
+            "file:///abc/def")
+        self.assertEqual(
+            ZConfig.url.urljoin("file:/abc/", "def"),
+            "file:///abc/def")
+        self.assertEqual(
+            ZConfig.url.urldefrag("file:/abc/def#frag"),
+            ("file:///abc/def", "frag"))
+
 
 def test_suite():
     return unittest.makeSuite(LoaderTestCase)
