@@ -18,9 +18,7 @@ import unittest
 
 import ZConfig
 
-from ZConfig.loader import ConfigLoader
-from ZConfig.url import urljoin
-from ZConfig.tests.test_config import CONFIG_BASE
+from ZConfig.tests.support import TestBase
 
 
 def uppercase(value):
@@ -35,39 +33,7 @@ class MySection:
         self.length = len(value)
 
 
-class BaseSchemaTest(unittest.TestCase):
-    """Utility methods which can be used with the schema support."""
-
-    def load_both(self, schema_url, conf_url):
-        schema = self.load_schema(schema_url)
-        conf = self.load_config(schema, conf_url)
-        return schema, conf
-
-    def load_schema(self, relurl):
-        self.url = urljoin(CONFIG_BASE, relurl)
-        self.schema = ZConfig.loadSchema(self.url)
-        self.assert_(self.schema.issection())
-        return self.schema
-
-    def load_schema_text(self, text, url=None):
-        sio = StringIO.StringIO(text)
-        self.schema = ZConfig.loadSchemaFile(sio, url)
-        return self.schema
-
-    def load_config(self, schema, conf_url, num_handlers=0):
-        conf_url = urljoin(CONFIG_BASE, conf_url)
-        self.conf, self.handlers = ConfigLoader(schema).loadURL(conf_url)
-        self.assertEqual(len(self.handlers), num_handlers)
-        return self.conf
-
-    def load_config_text(self, schema, text, num_handlers=0, url=None):
-        sio = StringIO.StringIO(text)
-        self.conf, self.handlers = ZConfig.loadConfigFile(schema, sio, url)
-        self.assertEqual(len(self.handlers), num_handlers)
-        return self.conf
-
-
-class SchemaTestCase(BaseSchemaTest):
+class SchemaTestCase(TestBase):
     """Tests of the basic schema support itself."""
 
     def test_minimal_schema(self):

@@ -16,7 +16,7 @@
 import unittest
 import ZConfig
 
-from ZConfig.tests.test_schema import BaseSchemaTest
+from ZConfig.tests.support import TestBase
 
 try:
     True
@@ -114,7 +114,7 @@ def constructor(value):
     pos, kw = _get_arglist(arglist)
     return klass, pos, kw
 
-class ZopeSchemaTestCase(BaseSchemaTest):
+class ZopeSchemaTestCase(TestBase):
 
     # tests
 

@@ -25,7 +25,7 @@ import ZConfig
 import ZConfig.loader
 import ZConfig.url
 
-from ZConfig.tests.test_config import CONFIG_BASE
+from ZConfig.tests.support import CONFIG_BASE
 
 
 try:

@@ -17,21 +17,13 @@ import os
 import StringIO
 import tempfile
 import unittest
-import urllib
 
 import ZConfig
 
 from ZConfig.Context import Context
 from ZConfig.url import urljoin
 
-try:
-    __file__
-except NameError:
-    import sys
-    __file__ = sys.argv[0]
-
-d = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
-CONFIG_BASE = "file://%s/" % urllib.pathname2url(d)
+from ZConfig.tests.support import CONFIG_BASE
 
 
 class TestBase(unittest.TestCase):
