@@ -87,16 +87,22 @@ class LoaderTestCase(unittest.TestCase):
         schema = loader.loadFile(sio)
         self.assert_(schema.gettype("widget-a") is not None)
 
-    def xxx_test_import_from_package_extended(self):
+    def test_import_from_package_extended(self):
         loader = ZConfig.loader.SchemaLoader(library=LIBRARY_DIR)
         sio = StringIO("<schema>"
                        "  <import package='thing'/>"
+                       "  <section name='*' type='thing' attribute='thing'/>"
                        "</schema>")
         schema = loader.loadFile(sio)
-        self.assert_(schema.gettype("thing-a") is not None)
-        self.assert_(schema.gettype("thing-b") is not None)
-        self.assert_(schema.gettype("thing-ext") is not None)
-        self.assert_(schema.gettype("thing"))
+        schema.gettype("thing")
+        schema.gettype("thing-a")
+        schema.gettype("thing-b")
+        schema.gettype("thing-ext")
+
+        # Make sure the extension is wired in properly:
+        sio = StringIO("<thing-ext thing/>")
+        conf, handlers = ZConfig.loadConfigFile(schema, sio)
+        self.assertEqual(conf.thing.thing_ext_key, "thing-ext-default")
 
 
 def test_suite():
