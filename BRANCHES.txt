@@ -1,0 +1,8 @@
+Branches defined specifically for the ZConfig package are listed
+below.  The canonical version of this list is on the HEAD of the
+ZConfig package.
+
+zconfig-brace-syntax
+    An example of an alternate syntax for ZConfig.  This syntax was
+    developed while trying the package initially, but was rejected.
+    It is saved on a branch to avoid losing historical information.
