@@ -77,8 +77,16 @@ class LoaderTestCase(unittest.TestCase):
         sio = StringIO("<schema>"
                        "  <import package='ZConfig.tests.test_loader'/>"
                        "</schema>")
-        self.assertRaises(ZConfig.SchemaError, ZConfig.loadSchemaFile,
-                          sio)
+        try:
+            ZConfig.loadSchemaFile(sio)
+        except ZConfig.SchemaResourceError, e:
+            self.assertEqual(e.filename, "component.xml")
+            self.assertEqual(e.package, "ZConfig.tests.test_loader")
+            self.assert_(e.path is None)
+            # make sure the str() doesn't raise an unexpected exception
+            str(e)
+        else:
+            self.fail("expected SchemaResourceError")
 
     def test_import_from_package(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -112,7 +120,16 @@ class LoaderTestCase(unittest.TestCase):
                        "  <import package='ZConfig.tests.library.widget'"
                        "          file='notthere.xml' />"
                        "</schema>")
-        self.assertRaises(ZConfig.SchemaError, loader.loadFile, sio)
+        try:
+            loader.loadFile(sio)
+        except ZConfig.SchemaResourceError, e:
+            self.assertEqual(e.filename, "notthere.xml")
+            self.assertEqual(e.package, "ZConfig.tests.library.widget")
+            self.assert_(e.path)
+            # make sure the str() doesn't raise an unexpected exception
+            str(e)
+        else:
+            self.fail("expected SchemaResourceError")
 
     def test_import_from_package_with_directory_file(self):
         loader = ZConfig.loader.SchemaLoader()
