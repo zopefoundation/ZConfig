@@ -32,6 +32,7 @@ _log_format_variables = {
     'relativeCreated': 1,
     'thread': 1,
     'message': 'amessage',
+    'process': 1,
     }
 
 def log_format(value):
