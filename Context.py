@@ -7,6 +7,7 @@ import urlparse
 
 from Common import *
 from Config import Configuration, ImportingConfiguration
+from Substitution import isname, substitute
 
 
 class Context:
@@ -199,3 +200,18 @@ class Resource:
     def __init__(self, file, url):
         self.file = file
         self.url = url
+        self._definitions = {}
+
+    def define(self, name, value):
+        key = name.lower()
+        if self._definitions.has_key(key):
+            raise ConfigurationError("cannot redefine " + `name`)
+        if not isname(name):
+            raise ConfigurationError(
+                "not a substitution legal name: " + `name`)
+        self._definitions[key] = value
+
+    def substitute(self, s):
+        # XXX  I don't really like calling this substitute(),
+        # XXX  but it will do for now.
+        return substitute(s, self._definitions)

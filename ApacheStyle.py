@@ -20,6 +20,7 @@ def Parse(resource, context, section):
         if line[0] == "#":
             # comment
             continue
+
         if line[:2] == "</":
             # section end
             if line[-1] != ">":
@@ -38,6 +39,7 @@ def Parse(resource, context, section):
                 raise ConfigurationSyntaxError(e[0], resource.url, lineno)
             section = stack.pop()
             continue
+
         if line[0] == "<":
             # section start
             if line[-1] != ">":
@@ -63,6 +65,7 @@ def Parse(resource, context, section):
                 stack.append(section)
                 section = newsect
             continue
+
         if line[0] == "%":
             # directive: import, include
             m = _keyvalue_rx.match(line, 1)
@@ -70,7 +73,7 @@ def Parse(resource, context, section):
                 raise ConfigurationSyntaxError(
                     "missing or unrecognized directive", resource.url, lineno)
             name, arg = m.group('key', 'value')
-            if name not in ("import", "include"):
+            if name not in ("define", "import", "include"):
                 raise ConfigurationSyntaxError(
                     "unknown directive: " + `name`, resource.url, lineno)
             if not arg:
@@ -87,9 +90,20 @@ def Parse(resource, context, section):
             elif name == "include":
                 newurl = urlparse.urljoin(resource.url, arg)
                 context.includeConfiguration(section, newurl)
+            elif name == "define":
+                parts = arg.split(None, 1)
+                defname = parts[0]
+                defvalue = ''
+                if len(parts) == 2:
+                    defvalue = parts[1]
+                try:
+                    resource.define(defname, defvalue)
+                except ConfigurationError, e:
+                    raise ConfigurationSyntaxError(e[0], resource.url, lineno)
             else:
                 assert 0, "unexpected directive for " + `line`
             continue
+
         # key-value
         m = _keyvalue_rx.match(line)
         if not m:
@@ -98,10 +112,13 @@ def Parse(resource, context, section):
         key, value = m.group('key', 'value')
         if not value:
             value = ''
+        else:
+            value = resource.substitute(value)
         try:
             section.addValue(key, value)
         except ConfigurationError, e:
             raise ConfigurationSyntaxError(e[0], resource.url, lineno)
+
     if stack:
         raise ConfigurationSyntaxError(
             "unclosed sections no allowed", resource.url, lineno + 1)

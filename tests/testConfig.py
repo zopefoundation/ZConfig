@@ -25,6 +25,7 @@ import ZConfig
 from ZConfig.Context import Context
 from ZConfig.Common import ConfigurationError, ConfigurationTypeError
 from ZConfig.Common import ConfigurationMissingSectionError
+from ZConfig.Common import ConfigurationSyntaxError
 
 try:
     __file__
@@ -49,6 +50,10 @@ class TestBase(unittest.TestCase):
         self.assert_(conf.type is None)
         self.assert_(conf.delegate is None)
         return conf
+
+    def loadtext(self, text):
+        sio = StringIO.StringIO(text)
+        return ZConfig.loadfile(sio)
 
     def check_simple_gets(self, conf):
         self.assertEqual(conf.get('empty'), '')
@@ -229,6 +234,22 @@ class ConfigurationTestCase(TestBase):
         self.assertEqual(conf.get("VAR2"), "value2")
         self.assertEqual(conf.get("var3"), "value3")
         self.assertEqual(conf.get("VAR3"), "value3")
+
+    def test_define(self):
+        conf = self.load("simple.conf")
+        self.assertEqual(conf.get("getname"), "value")
+        self.assertEqual(conf.get("getnametwice"), "valuevalue")
+        self.assertEqual(conf.get("getdollars"), "$$")
+        self.assertEqual(conf.get("getempty"), "xy")
+        self.assertEqual(conf.get("getwords"), "abc two words def")
+
+    def test_define_errors(self):
+        self.assertRaises(ConfigurationSyntaxError,
+                          self.loadtext, "%define\n")
+        self.assertRaises(ConfigurationSyntaxError,
+                          self.loadtext, "%define abc-def\n")
+        self.assertRaises(ConfigurationSyntaxError,
+                          self.loadtext, "%define a value\n%define a value\n")
 
     def test_fragment_ident_disallowed(self):
         self.assertRaises(ConfigurationError,
