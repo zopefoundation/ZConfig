@@ -26,6 +26,8 @@ try:
 except NameError:
     here = sys.argv[0]
 
+here = os.path.abspath(here)
+
 class DatatypeTestCase(unittest.TestCase):
     types = ZConfig.datatypes.Registry()
 
