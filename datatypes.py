@@ -271,8 +271,7 @@ stock_datatypes = {
                                            }),
     }
 
-class Registry(object):
-    __slots__ = '_stock', '_other', '_basic_key'
+class Registry:
 
     def __init__(self, stock=None):
         if stock is None:
