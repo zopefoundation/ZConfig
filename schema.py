@@ -129,6 +129,7 @@ class BaseParser(xml.sax.ContentHandler):
     def push_prefix(self, attrs):
         name = attrs.get("prefix")
         if name:
+            name = str(name)
             if name.startswith(".") and self._prefixes:
                 prefix = self._prefixes[-1] + name
             elif name.startswith("."):
@@ -145,6 +146,7 @@ class BaseParser(xml.sax.ContentHandler):
         del self._prefixes[-1]
 
     def get_classname(self, name):
+        name = str(name)
         if name.startswith("."):
             return self._prefixes[-1] + name
         else:
