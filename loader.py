@@ -153,21 +153,25 @@ class SchemaLoader(BaseLoader):
         try:
             __import__(package)
         except ImportError, e:
-            raise ZConfig.SchemaError("could not load package %s: %s"
-                                      % (package, str(e)))
+            raise ZConfig.SchemaResourceError(
+                "could not load package %s: %s" % (package, str(e)),
+                filename=file,
+                package=package)
         pkg = sys.modules[package]
         if not hasattr(pkg, "__path__"):
-            raise ZConfig.SchemaError(
-                "import name does not refer to a package: " + `package`)
+            raise ZConfig.SchemaResourceError(
+                "import name does not refer to a package",
+                filename=file, package=package)
         for dir in pkg.__path__:
             dirname = os.path.abspath(dir)
             fn = os.path.join(dirname, file)
             if os.path.exists(fn):
                 return "file://" + urllib.pathname2url(fn)
         else:
-            raise ZConfig.SchemaError(
-                "schema component not found: %s (file='%s')"
-                % (package, file))
+            raise ZConfig.SchemaResourceError("schema component not found",
+                                              filename=file,
+                                              package=package,
+                                              path=pkg.__path__)
 
 
 class ConfigLoader(BaseLoader):
@@ -235,8 +239,7 @@ class ConfigLoader(BaseLoader):
         parser.parse(matcher)
 
 
-class CompositeHandler(object):
-    __slots__ = '_handlers', '_convert'
+class CompositeHandler:
 
     def __init__(self, handlers, schema):
         self._handlers = handlers
