@@ -665,6 +665,26 @@ class SchemaTestCase(TestBase):
                           </schema>
                           """)
 
+    def test_sectiontype_derived_keytype(self):
+        schema = self.load_schema_text("""\
+            <schema>
+              <sectiontype name='sect' keytype='identifier'/>
+              <sectiontype name='derived' extends='sect'>
+                <key name='foo' attribute='foo'/>
+                <key name='Foo' attribute='Foo'/>
+              </sectiontype>
+              <section name='foo' type='derived'/>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, """\
+            <derived foo>
+              foo bar
+              Foo BAR
+            </derived>
+            """)
+        self.assertEqual(conf.foo.foo, "bar")
+        self.assertEqual(conf.foo.Foo, "BAR")
+
     def test_schema_keytype(self):
         schema = self.load_schema_text("""\
             <schema keytype='ipaddr-or-hostname'>
