@@ -5,11 +5,11 @@ import urlparse
 from Common import *
 
 
-def Parse(file, context, section, url):
+def Parse(resource, context, section):
     lineno = 0
     stack = []
     while 1:
-        line = file.readline()
+        line = resource.file.readline()
         if not line:
             break
         lineno += 1
@@ -24,25 +24,25 @@ def Parse(file, context, section, url):
             # section end
             if line[-1] != ">":
                 raise ConfigurationSyntaxError(
-                    "malformed section end", url, lineno)
+                    "malformed section end", resource.url, lineno)
             if not stack:
                 raise ConfigurationSyntaxError(
-                    "unexpected section end", url, lineno)
+                    "unexpected section end", resource.url, lineno)
             type = line[2:-1].rstrip()
             if type.lower() != section.type:
                 raise ConfigurationSyntaxError(
-                    "unbalanced section end", url, lineno)
+                    "unbalanced section end", resource.url, lineno)
             try:
                 section.finish()
             except ConfigurationError, e:
-                raise ConfigurationSyntaxError(e[0], url, lineno)
+                raise ConfigurationSyntaxError(e[0], resource.url, lineno)
             section = stack.pop()
             continue
         if line[0] == "<":
             # section start
             if line[-1] != ">":
                 raise ConfigurationSyntaxError(
-                    "malformed section start", url, lineno)
+                    "malformed section start", resource.url, lineno)
             isempty = line[-2] == "/"
             if isempty:
                 text = line[1:-2].rstrip()
@@ -52,13 +52,13 @@ def Parse(file, context, section, url):
             m = _section_start_rx.match(text)
             if not m:
                 raise ConfigurationSyntaxError(
-                    "malformed section header", url, lineno)
+                    "malformed section header", resource.url, lineno)
             type, name, delegatename = m.group('type', 'name', 'delegatename')
             try:
                 newsect = context.nestSection(section, type, name,
                                               delegatename)
             except ConfigurationError, e:
-                raise ConfigurationSyntaxError(e[0], url, lineno)
+                raise ConfigurationSyntaxError(e[0], resource.url, lineno)
             if not isempty:
                 stack.append(section)
                 section = newsect
@@ -67,17 +67,17 @@ def Parse(file, context, section, url):
         m = _keyvalue_rx.match(line)
         if not m:
             raise ConfigurationSyntaxError(
-                "malformed configuration data", url, lineno)
+                "malformed configuration data", resource.url, lineno)
         key, value = m.group('key', 'value')
         if key == "import":
             if stack:
                 raise ConfigurationSyntaxError(
                     "import only allowed at the outermost level of a resource",
-                    url, lineno)
-            newurl = urlparse.urljoin(url, value)
+                    resource.url, lineno)
+            newurl = urlparse.urljoin(resource.url, value)
             context.importConfiguration(section, newurl)
         elif key == "include":
-            newurl = urlparse.urljoin(section.url, value)
+            newurl = urlparse.urljoin(resource.url, value)
             context.includeConfiguration(section, newurl)
         else:
             if not value:
@@ -85,10 +85,10 @@ def Parse(file, context, section, url):
             try:
                 section.addValue(key, value)
             except ConfigurationError, e:
-                raise ConfigurationSyntaxError(e[0], url, lineno)
+                raise ConfigurationSyntaxError(e[0], resource.url, lineno)
     if stack:
         raise ConfigurationSyntaxError(
-            "unclosed sections no allowed", url, lineno + 1)
+            "unclosed sections no allowed", resource.url, lineno + 1)
 
 
 import re

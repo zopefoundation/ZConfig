@@ -12,7 +12,6 @@ from Config import Configuration, ImportingConfiguration
 class Context:
 
     def __init__(self):
-        #Configuration.__init__(self, None, None, url)
         self._imports = []         # URL  -> Configuration
         self._named_sections = {}  # name -> Configuration
         self._needed_names = {}    # name -> [needy Configuration, ...]
@@ -32,14 +31,17 @@ class Context:
     def createToplevelSection(self, url):
         return ImportingConfiguration(url)
 
+    def createResource(self, file, url):
+        return Resource(file, url)
+
     def getDelegateType(self, type):
         # Applications must provide delegation typing information by
         # overriding the Context.getDelegateType() method.
         return type.lower()
 
-    def parse(self, file, section, url):
+    def parse(self, resource, section):
         from ApacheStyle import Parse
-        Parse(file, self, section, url)
+        Parse(resource, self, section)
 
     def _normalize_url(self, url):
         if os.path.exists(url):
@@ -72,8 +74,9 @@ class Context:
         self._all_sections.append(top)
         self._imports = [top]
         self._current_imports.append(top)
+        r = Resource(file, url)
         try:
-            self.parse(file, top, url)
+            self.parse(r, top)
         finally:
             del self._current_imports[-1]
         self._finish()
@@ -95,8 +98,9 @@ class Context:
     def includeConfiguration(self, section, url):
         # XXX we always re-parse, unlike import
         file = urllib2.urlopen(url)
+        r = Resource(file, url)
         try:
-            self.parse(file, section, url)
+            self.parse(r, section)
         finally:
             file.close()
 
@@ -147,8 +151,9 @@ class Context:
                 "fragment identifiers are not currently supported")
         file = urllib2.urlopen(url)
         self._current_imports.append(section)
+        r = Resource(file, url)
         try:
-            self.parse(file, section, url)
+            self.parse(r, section)
         finally:
             del self._current_imports[-1]
             file.close()
@@ -188,3 +193,9 @@ class Context:
             if sect.delegate is not None:
                 sect.finish()
         self._all_sections = None
+
+
+class Resource:
+    def __init__(self, file, url):
+        self.file = file
+        self.url = url
