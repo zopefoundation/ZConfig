@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.7 2003/01/13 17:31:42 fdrake Exp $
+$Id: __init__.py,v 1.8 2003/04/13 02:25:22 chrism Exp $
 """
 
 from ZConfig.loader import loadConfig, loadConfigFile
@@ -103,9 +103,9 @@ class DataConversionError(ConfigurationError, ValueError):
         self.lineno, self.colno, self.url = position
 
     def __str__(self):
-        s = "%s (line %d" % (self.message, self.lineno)
+        s = "%s (line %s" % (self.message, self.lineno)
         if self.colno is not None:
-            s += ", %d" % self.colno
+            s += ", %s" % self.colno
         if self.url:
             s += ", in %s)" % self.url
         else:
