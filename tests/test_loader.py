@@ -97,6 +97,15 @@ class LoaderTestCase(unittest.TestCase):
         schema = loader.loadFile(sio)
         self.assert_(schema.gettype("extra-type") is not None)
 
+    def test_import_from_package_extra_directory(self):
+        loader = ZConfig.loader.SchemaLoader()
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.library.thing'"
+                       "          file='extras.xml' />"
+                       "</schema>")
+        schema = loader.loadFile(sio)
+        self.assert_(schema.gettype("extra-thing") is not None)
+
     def test_import_from_package_with_missing_file(self):
         loader = ZConfig.loader.SchemaLoader()
         sio = StringIO("<schema>"
