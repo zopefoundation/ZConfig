@@ -26,7 +26,7 @@ TESTDIR = os.path.dirname(os.path.abspath(__file__))
 TOPDIR = os.path.dirname(os.path.dirname(TESTDIR))
 
 if TOPDIR not in sys.path:
-    sys.path.append(TOPDIR)
+    sys.path.insert(0, TOPDIR)
 
 def load_tests(name):
     name = "ZConfig.tests." + name
