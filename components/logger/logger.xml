@@ -14,7 +14,8 @@
 
   <sectiontype name="logger"
                datatype=".LoggerFactory"
-               extends="ZConfig.logger.base-logger">
+               extends="ZConfig.logger.base-logger"
+               implements="ZConfig.logger.log">
     <key name="propagate"
          datatype="boolean"
          default="true">
@@ -32,7 +33,8 @@
 
   <sectiontype name="eventlog"
                datatype=".EventLogFactory"
-               extends="ZConfig.logger.base-logger">
+               extends="ZConfig.logger.base-logger"
+               implements="ZConfig.logger.log">
     <description>
       Logger bound to the name "event".  Propogation of events to the
       root logger is disabled.
