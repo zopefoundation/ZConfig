@@ -103,32 +103,6 @@ class IdentifierConversion(RegularExpressionConversion):
         RegularExpressionConversion.__init__(self, "[_a-zA-Z][_a-zA-Z0-9]*")
 
 
-class LogLevelConversion:
-    # This uses the 'logging' package conventions; only makes sense
-    # for Zope 2.7 (and newer) and Zope 3.  Not sure what the
-    # compatibility should be.
-
-    _levels = {
-        "critical": 50,
-        "fatal": 50,
-        "error": 40,
-        "warn": 30,
-        "info": 20,
-        "debug": 10,
-        "all": 0,
-        }
-
-    def __call__(self, value):
-        s = str(value).lower()
-        if self._levels.has_key(s):
-            return self._levels[s]
-        else:
-            v = int(s)
-            if v < 0 or v > 50:
-                raise ValueError("log level not in range: " + `v`)
-            return v
-
-
 if sys.version[:3] < "2.3":
     def integer(value):
         try:
@@ -311,7 +285,6 @@ stock_datatypes = {
     "locale":            MemoizedConversion(check_locale),
     "port-number":       port_number,
     "basic-key":         BasicKeyConversion(),
-    "logging-level":     LogLevelConversion(),
     "inet-address":      inet_address,
     "socket-address":    SocketAddress,
     "ipaddr-or-hostname":IpaddrOrHostname(),

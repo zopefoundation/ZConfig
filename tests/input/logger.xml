@@ -6,7 +6,7 @@
   </sectiontype>
 
   <sectiontype name="logger">
-     <key name="level" datatype="logging-level" default="info"/>
+     <key name="level" datatype="integer" default="info"/>
      <multisection type="loghandler" attribute="handlers" name="*"/>
   </sectiontype>
 </schema>
