@@ -44,10 +44,10 @@ def parseResource(resource, registry, loader):
     return parser._schema
 
 
-class SchemaParser(xml.sax.ContentHandler):
+class BaseParser(xml.sax.ContentHandler):
 
     _cdata_tags = "description", "metadefault", "example", "default"
-    _handled_tags = ("schema", "import", "sectiongroup", "sectiontype",
+    _handled_tags = ("import", "sectiongroup", "sectiontype",
                      "key", "multikey", "section", "multisection")
 
     def __init__(self, registry, loader, url):
@@ -103,17 +103,25 @@ class SchemaParser(xml.sax.ContentHandler):
         else:
             data = ''.join(self._cdata).strip()
             self._cdata = None
-            if name == "default":
-                # value for a key
-                self._stack[-1].adddefault(data, self._position)
-            else:
-                setattr(self._stack[-1], name, data)
+            getattr(self, "characters_" + name)(data)
 
     def endDocument(self):
         if self._schema is None:
             self.error("no schema found")
 
     # schema loading logic
+
+    def characters_default(self, data):
+        self._stack[-1].adddefault(data, self._position)
+
+    def characters_description(self, data):
+        self._stack[-1].description = data
+
+    def characters_example(self, data):
+        self._stack[-1].example = data
+
+    def characters_metadefault(self, data):
+        self._stack[-1].metadefault = data
 
     def start_import(self, attrs):
         src = attrs.get("src", "").strip()
@@ -144,7 +152,7 @@ class SchemaParser(xml.sax.ContentHandler):
         if self._locator:
             return (self._locator.getLineNumber(),
                     self._locator.getColumnNumber(),
-                    self._url)
+                    (self._locator.getSystemId() or self._url))
         else:
             return None, None, self._url
 
@@ -192,24 +200,6 @@ class SchemaParser(xml.sax.ContentHandler):
         valuetype = self.get_datatype(attrs, "valuetype", "string")
         datatype = self.get_datatype(attrs, "datatype", "null")
         return keytype, valuetype, datatype
-
-    def start_schema(self, attrs):
-        self.push_prefix(attrs)
-        handler = self.get_handler(attrs)
-        keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
-        name = attrs.get("type")
-        if name is not None:
-            name = self.basic_key(name)
-        self._schema = info.SchemaType(name, keytype, valuetype, datatype,
-                                       handler, self._url, self._registry)
-        if name is not None:
-            # XXX circular reference
-            self._schema.addtype(self._schema)
-        self._stack = [self._schema]
-
-    def end_schema(self):
-        del self._prefixes[-1]
-        assert not self._prefixes
 
     def start_sectiontype(self, attrs):
         name = attrs.get("type")
@@ -415,3 +405,29 @@ class SchemaParser(xml.sax.ContentHandler):
 
     def error(self, message):
         raise self.initerror(ZConfig.SchemaError(message))
+
+
+class SchemaParser(BaseParser):
+
+    # needed by startElement() and endElement()
+    _handled_tags = BaseParser._handled_tags + ("schema",)
+
+    def start_schema(self, attrs):
+        self.push_prefix(attrs)
+        handler = self.get_handler(attrs)
+        keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
+        name = attrs.get("type")
+        if name is not None:
+            name = self.basic_key(name)
+        self._schema = info.SchemaType(name, keytype, valuetype, datatype,
+                                       handler, self._url, self._registry)
+        if name is not None:
+            # XXX circular reference
+            self._schema.addtype(self._schema)
+        self._stack = [self._schema]
+
+    def end_schema(self):
+        del self._stack[-1]
+        assert not self._stack
+        del self._prefixes[-1]
+        assert not self._prefixes
