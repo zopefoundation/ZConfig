@@ -73,6 +73,12 @@ class LoaderTestCase(unittest.TestCase):
                                    "  <import src='library.xml'"
                                    "          file='other.xml'/>"
                                    "</schema>"))
+        # cannot specify module as package
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.test_loader'/>"
+                       "</schema>")
+        self.assertRaises(ZConfig.SchemaError, ZConfig.loadSchemaFile,
+                          sio)
 
     def test_import_from_package(self):
         loader = ZConfig.loader.SchemaLoader()
