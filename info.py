@@ -247,6 +247,7 @@ class SectionType:
         self.keytype = keytype
         self.valuetype = valuetype
         self.handler = None
+        self.description = None
         self.registry = registry
         self._children = []    # [(key, info), ...]
         self._attrmap = {}     # {attribute: info, ...}
