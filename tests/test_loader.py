@@ -13,6 +13,8 @@
 ##############################################################################
 """Tests of ZConfig.loader classes and helper functions."""
 
+import os.path
+import sys
 import unittest
 
 from StringIO import StringIO
@@ -23,6 +25,15 @@ import ZConfig.loader
 from ZConfig.url import urljoin
 
 from ZConfig.tests.test_config import CONFIG_BASE
+
+
+try:
+    myfile = __file__
+except NameError:
+    myfile = sys.argv[0]
+
+myfile = os.path.abspath(myfile)
+LIBRARY_DIR = os.path.join(os.path.dirname(myfile), "library")
 
 
 class LoaderTestCase(unittest.TestCase):
@@ -67,6 +78,25 @@ class LoaderTestCase(unittest.TestCase):
                                    "  <import src='library.xml'"
                                    "          package='ZConfig'/>"
                                    "</schema>"))
+
+    def test_import_from_package(self):
+        loader = ZConfig.loader.SchemaLoader(library=LIBRARY_DIR)
+        sio = StringIO("<schema>"
+                       "  <import package='widget'/>"
+                       "</schema>")
+        schema = loader.loadFile(sio)
+        self.assert_(schema.gettype("widget-a") is not None)
+
+    def xxx_test_import_from_package_extended(self):
+        loader = ZConfig.loader.SchemaLoader(library=LIBRARY_DIR)
+        sio = StringIO("<schema>"
+                       "  <import package='thing'/>"
+                       "</schema>")
+        schema = loader.loadFile(sio)
+        self.assert_(schema.gettype("thing-a") is not None)
+        self.assert_(schema.gettype("thing-b") is not None)
+        self.assert_(schema.gettype("thing-ext") is not None)
+        self.assert_(schema.gettype("thing"))
 
 
 def test_suite():

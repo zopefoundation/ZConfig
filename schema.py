@@ -129,8 +129,9 @@ class SchemaParser(xml.sax.ContentHandler):
                 self.error("import src many not include a fragment identifier")
             urls = [src]
         else:
-            raise NotImpementedError(
-                "<import package='...'/> not yet implemented")
+            urls = self._loader.schemaPackageURLs(pkg)
+            if not urls:
+                self.error("could not locate schema component " + `pkg`)
         for s in urls:
             schema = self._loader.loadURL(s)
             for n in schema.gettypenames():

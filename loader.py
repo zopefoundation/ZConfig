@@ -14,6 +14,7 @@
 """Schema loader utility."""
 
 import os.path
+import sys
 import urllib
 import urllib2
 
@@ -29,6 +30,8 @@ except NameError:
     True = 1
     False = 0
 
+
+LIBRARY_DIR = os.path.join(sys.prefix, "lib", "zconfig")
 
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                             "resources")
@@ -114,12 +117,15 @@ def _url_from_file(file):
 
 
 class SchemaLoader(BaseLoader):
-    def __init__(self, registry=None):
+    def __init__(self, registry=None, library=None):
         if registry is None:
             registry = datatypes.Registry()
+        BaseLoader.__init__(self)
         self.registry = registry
         self._cache = {}
-        BaseLoader.__init__(self)
+        if library is None:
+            library = LIBRARY_DIR
+        self._library = library
 
     def loadResource(self, resource):
         if resource.url and self._cache.has_key(resource.url):
@@ -136,6 +142,31 @@ class SchemaLoader(BaseLoader):
     def allowFragments(self):
         return True
 
+    # schema parser support API
+
+    def schemaPackageURLs(self, package):
+        parts = package.split(".")
+        if not parts:
+            raise ZConfig.SchemaError(
+                "illegal schema component name: " + `package`)
+        if len(filter(None, parts)) != len(parts):
+            # '' somewhere in the package spec; still illegal
+            raise ZConfig.SchemaError(
+                "illegal schema component name: " + `package`)
+        dirname = os.path.join(self._library, *parts)
+        fn = os.path.join(dirname, "schema.xml")
+        if not os.path.exists(fn):
+            raise ZConfig.SchemaError(
+                "schema component not found: " + `package`)
+        urls = [fn]
+        for fn in os.listdir(dirname):
+            if fn == "schema.xml":
+                continue
+            path = os.path.join(dirname, fn, "schema.xml")
+            if os.path.exists(path):
+                urls.append(path)
+        return urls
+
 
 class ConfigLoader(BaseLoader):
     def __init__(self, schema):
@@ -151,7 +182,7 @@ class ConfigLoader(BaseLoader):
         self._parse_resource(sm, resource)
         return sm.finish(), CompositeHandler(self.handlers, self.schema)
 
-    # parser support API
+    # config parser support API
 
     def startSection(self, parent, type, name, delegatename):
         if delegatename:
