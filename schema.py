@@ -235,8 +235,8 @@ class BaseParser(xml.sax.ContentHandler):
         handler = self.get_handler(attrs)
         return name or any, datatype, handler, attribute
 
-    def get_name_info(self, attrs, element):
-        name = attrs.get("name")
+    def get_name_info(self, attrs, element, default=None):
+        name = attrs.get("name", default)
         if not name:
             self.error(element + " name must be specified and non-empty")
         aname = attrs.get("attribute")
@@ -354,7 +354,7 @@ class BaseParser(xml.sax.ContentHandler):
         sectiontype = self.get_sectiontype(attrs)
         handler = self.get_handler(attrs)
         min = self.get_required(attrs) and 1 or 0
-        any, name, attribute = self.get_name_info(attrs, "section")
+        any, name, attribute = self.get_name_info(attrs, "section", "*")
         if any and not attribute:
             self.error(
                 "attribute must be specified if section name is '*' or '+'")
@@ -369,7 +369,7 @@ class BaseParser(xml.sax.ContentHandler):
     def start_multisection(self, attrs):
         sectiontype = self.get_sectiontype(attrs)
         min, max = self.get_ordinality(attrs)
-        any, name, attribute = self.get_name_info(attrs, "multisection")
+        any, name, attribute = self.get_name_info(attrs, "multisection", "*")
         if any not in ("*", "+"):
             self.error("multisection must specify '*' or '+' for the name")
         handler = self.get_handler(attrs)

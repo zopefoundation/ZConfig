@@ -20,8 +20,8 @@
 \title{ZConfig Package Reference}
 
 %\date{27 October 2003}
-\release{2.2}
-\setshortversion{2.2}
+\release{2.3--}
+\setshortversion{2.3}
 
 \author{Zope Corporation}
 \authoraddress{
@@ -692,12 +692,13 @@ The following elements are used to describe a schema:
 
   \begin{attributedesc}{name}{\datatype{basic-key}}
     The name of the section, as it must be given in a configuration
-    instance, \code{*}, or \code{+}.  If the value is \code{*}, any
-    name not already specified as a key may be used.  If the value is
-    \code{*} or \code{+}, the \attribute{attribute} attribute must be
-    specified.  If the value is \code{*}, any name is allowed, or the
-    name may be omitted.  If the value is \code{+}, any name is
-    allowed, but some name must be provided.
+    instance, \code{*}, or \code{+}.  If the value is \code{*} or this
+    attribute is omitted, any name not already specified as a key may
+    be used.  If the value is \code{*} or \code{+}, the
+    \attribute{attribute} attribute must be specified.  If the value
+    is \code{*}, any name is allowed, or the name may be omitted.  If
+    the value is \code{+}, any name is allowed, but some name must be
+    provided.
   \end{attributedesc}
 
   \begin{attributedesc}{required}{\code{yes|no}}
@@ -739,10 +740,11 @@ The following elements are used to describe a schema:
     For a \element{multisection}, any name not already specified as a
     key may be used.  If the value is \code{*} or \code{+}, the
     \attribute{attribute} attribute must be specified.  If the value
-    is \code{*}, any name is allowed, or the name may be omitted.  If
-    the value is \code{+}, any name is allowed, but some name must be
-    provided.  No other value for the \attribute{name} attribute is
-    allowed for a \element{multisection}.
+    is \code{*} or this attribute is omitted, any name is allowed, or
+    the name may be omitted.  If the value is \code{+}, any name is
+    allowed, but some name must be provided.  No other value for the
+    \attribute{name} attribute is allowed for a
+    \element{multisection}.
   \end{attributedesc}
 
   \begin{attributedesc}{required}{\code{yes|no}}

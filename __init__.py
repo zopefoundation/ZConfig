@@ -15,7 +15,7 @@
 
 $Id: __init__.py,v 1.18 2004/04/15 20:33:32 fdrake Exp $
 """
-version_info = (2, 2)
+version_info = (2, 3)
 __version__ = ".".join([str(n) for n in version_info])
 
 from ZConfig.loader import loadConfig, loadConfigFile

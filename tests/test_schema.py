@@ -606,6 +606,19 @@ class SchemaTestCase(TestBase):
         conf = self.load_config_text(schema, "<sect/>")
         self.assertEqual(conf.attr.key, "value")
 
+    def test_simple_anonymous_section_without_name(self):
+        # make sure we get the same behavior without name='*'
+        schema = self.load_schema_text("""\
+            <schema>
+              <sectiontype name='sect'>
+                <key name='key' default='value'/>
+              </sectiontype>
+              <section type='sect' attribute='attr'/>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, "<sect/>")
+        self.assertEqual(conf.attr.key, "value")
+
     def test_simple_anynamed_section(self):
         schema = self.load_schema_text("""\
             <schema>
@@ -640,6 +653,24 @@ class SchemaTestCase(TestBase):
                                      </t2>
                                      """)
 
+    def test_nested_abstract_sectiontype_without_name(self):
+        # make sure we get the same behavior without name='*'
+        schema = self.load_schema_text("""\
+            <schema>
+              <abstracttype name='abstract'/>
+              <sectiontype name='t1' implements='abstract'/>
+              <sectiontype name='t2' implements='abstract'>
+                <section type='abstract' name='s1'/>
+              </sectiontype>
+              <section type='abstract' attribute='s2'/>
+            </schema>
+            """)
+        conf = self.load_config_text(schema, """\
+                                     <t2>
+                                       <t1 s1/>
+                                     </t2>
+                                     """)
+
     def test_reserved_attribute_prefix(self):
         template = """\
             <schema>
@@ -657,9 +688,9 @@ class SchemaTestCase(TestBase):
         check("<multikey name='a' attribute='getSection'/>")
         check("<multikey name='a' attribute='getSectionThing'/>")
         check("<section type='s' name='*' attribute='getSection'/>")
-        check("<section type='s' name='*' attribute='getSectionThing'/>")
+        check("<section type='s' attribute='getSectionThing'/>")
         check("<multisection type='s' name='*' attribute='getSection'/>")
-        check("<multisection type='s' name='*' attribute='getSectionThing'/>")
+        check("<multisection type='s' attribute='getSectionThing'/>")
 
     def test_sectiontype_as_schema(self):
         schema = self.load_schema_text("""\
