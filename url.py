@@ -21,7 +21,23 @@ import posixpath as _posixpath
 import urlparse as _urlparse
 
 from urllib import splittype as _splittype
-from urlparse import urlsplit
+
+try:
+    from urlparse import urlsplit
+except ImportError:
+    def urlsplit(url):
+        # Check for the fragment here, since Python 2.1.3 didn't get
+        # it right for things like "http://www.python.org#frag".
+        if '#' in url:
+            url, fragment = url.split('#', 1)
+        else:
+            fragment = ''
+        parts = list(_urlparse.urlparse(url))
+        parts[-1] = fragment
+        param = parts.pop(3)
+        if param:
+            parts[2] += ";" + param
+        return tuple(parts)
 
 
 def urlnormalize(url):
@@ -36,7 +52,9 @@ def urlnormalize(url):
 
 
 def urlunsplit(parts):
-    url = _urlparse.urlunsplit(parts)
+    parts = list(parts)
+    parts.insert(3, '')
+    url = _urlparse.urlunparse(tuple(parts))
     if (  parts[0] == "file"
           and url.startswith("file:/")
           and not url.startswith("file:///")):
