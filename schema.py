@@ -62,6 +62,7 @@ class BaseParser(xml.sax.ContentHandler):
         self._stack = []
         self._group = None
         self._url = url
+        self._components = {}
 
     # SAX 2 ContentHandler methods
 
@@ -250,15 +251,35 @@ class BaseParser(xml.sax.ContentHandler):
             src, fragment = url.urldefrag(src)
             if fragment:
                 self.error("import src many not include a fragment identifier")
-            urls = [src]
-        else:
-            urls = self._loader.schemaPackageURLs(pkg)
-            if not urls:
-                self.error("could not locate schema component " + `pkg`)
-        for s in urls:
-            schema = self._loader.loadURL(s)
+            schema = self._loader.loadURL(src)
             for n in schema.gettypenames():
                 self._schema.addtype(schema.gettype(n))
+        elif self._components.has_key(pkg):
+            # already loaded, or in progress
+            pass
+        else:
+            pi = self._loader.schemaPackageInfo(pkg)
+            if not pi:
+                self.error("could not locate schema component " + `pkg`)
+            self._components[pkg] = pi
+            self.loadComponent(pi)
+
+    def loadComponent(self, info):
+        base, extensions = info
+        r = self._loader.openResource(base)
+        parser = ComponentParser(self._registry, self._loader, base,
+                                 self._schema)
+        parser._components = self._components
+        try:
+            xml.sax.parse(r.file, parser)
+        finally:
+            r.close()
+        for ext in extensions:
+            r = self._loader.openResource(ext)
+            try:
+                parser.loadExtension(r)
+            finally:
+                r.close()
 
     def end_import(self):
         pass
@@ -272,9 +293,9 @@ class BaseParser(xml.sax.ContentHandler):
         keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
         if attrs.has_key("extends"):
             basename = self.basic_key(attrs["extends"])
-            if basename == name:
-                self.error("sectiontype cannot extend itself")
             base = self._schema.gettype(basename)
+            if not self._localtypes.has_key(basename):
+                self.error("cannot extend type derived outside component")
             if base.istypegroup():
                 self.error("sectiontype cannot extend an abstract type")
             if attrs.has_key("keytype"):
@@ -421,6 +442,7 @@ class SchemaParser(BaseParser):
             name = self.basic_key(name)
         self._schema = info.SchemaType(name, keytype, valuetype, datatype,
                                        handler, self._url, self._registry)
+        self._localtypes = self._schema._types
         if name is not None:
             # XXX circular reference
             self._schema.addtype(self._schema)
@@ -431,3 +453,80 @@ class SchemaParser(BaseParser):
         assert not self._stack
         self.pop_prefix()
         assert not self._prefixes
+
+
+
+class BaseComponentParser(BaseParser):
+
+    def __init__(self, registry, loader, url, localtypes):
+        self._localtypes = localtypes
+        BaseParser.__init__(self, registry, loader, url)
+
+    def characters_description(self, data):
+        if self._stack:
+            self._stack[-1].description = data
+
+    def start_key(self, attrs):
+        if not self._stack:
+            self.error(
+                "cannot define top-level keys in a schema " + self._top_level)
+        BaseParser.start_key(self, attrs)
+
+    def start_multikey(self, attrs):
+        if not self._stack:
+            self.error(
+                "cannot define top-level multikeys in a schema "
+                + self._top_level)
+        BaseParser.start_multikey(self, attrs)
+
+    def start_section(self, attrs):
+        if not self._stack:
+            self.error(
+                "cannot define top-level sections in a schema "
+                + self._top_level)
+        BaseParser.start_section(self, attrs)
+
+    def start_multisection(self, attrs):
+        if not self._stack:
+            self.error(
+                "cannot define top-level multisections in a schema "
+                + self._top_level)
+        BaseParser.start_multisection(self, attrs)
+
+
+class ComponentParser(BaseComponentParser):
+
+    _handled_tags = BaseComponentParser._handled_tags + ("component",)
+    _top_level = "component"
+
+    def __init__(self, registry, loader, url, schema):
+        BaseComponentParser.__init__(self, registry, loader, url, {})
+        self._parent = schema
+
+    def start_component(self, attrs):
+        self._schema = self._parent
+
+    def end_component(self):
+        pass
+
+    def loadExtension(self, resource):
+        parser = ExtensionParser(self._registry, self._loader, resource.url,
+                                 self._parent, self._localtypes)
+        parser._components = self._components
+        xml.sax.parse(resource.file, parser)
+
+
+class ExtensionParser(BaseComponentParser):
+
+    _handled_tags = BaseComponentParser._handled_tags + ("extension",)
+    _top_level = "extension"
+
+    def __init__(self, registry, loader, url, schema, localtypes):
+        BaseComponentParser.__init__(self, registry, loader, url, localtypes)
+        self._parent = schema
+
+    def start_extension(self, attrs):
+        self._schema = self._parent
+
+    def end_extension(self):
+        pass

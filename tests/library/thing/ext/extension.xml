@@ -1,5 +1,5 @@
-<schema>
+<extension>
   <sectiontype type='thing-ext' group='thing'>
     <key name='thing-ext-key' default='thing-ext-default'/>
   </sectiontype>
-</schema>
+</extension>
