@@ -18,6 +18,12 @@ Changes since ZConfig 2.1:
 
 - Always use an absolute pathname when opening a FileHandler.
 
+- A fix to the logger 'format' key to allow the %(process)d expansion variable
+  that the logging package supports.
+
+- A new timedelta built-in datatype was added.  Similar to time-interval
+  except that it returns a datetime.timedelta object instead.
+
 Changes since ZConfig 2.0:
 
 - Removed compatibility with Python 2.1 and 2.2.
