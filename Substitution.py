@@ -5,6 +5,8 @@ class SubstitutionError(Exception):
 
     def __init__(self, msg, context):
         self.message = msg
+        if context is not None:
+            context = context[:]
         self.context = context
 
     def __str__(self):
@@ -14,8 +16,6 @@ class SubstitutionSyntaxError(SubstitutionError):
     """Raised when interpolation source text contains syntactical errors."""
 
     def __init__(self, msg, context):
-        if context is not None:
-            context = context[:]
         SubstitutionError.__init__(self, msg, context)
 
 class SubstitutionRecursionError(SubstitutionError):
@@ -25,7 +25,7 @@ class SubstitutionRecursionError(SubstitutionError):
         self.name = name
         msg = ("recursion on %s; current context:\n%s"
                % (repr(name), ", ".join(context)))
-        SubstitutionError.__init__(self, msg, context[:])
+        SubstitutionError.__init__(self, msg, context)
 
 
 def get(section, name, default=None):
