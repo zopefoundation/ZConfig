@@ -17,6 +17,7 @@ import os.path
 import sys
 import tempfile
 import unittest
+import urllib2
 
 from StringIO import StringIO
 
@@ -130,7 +131,37 @@ class LoaderTestCase(unittest.TestCase):
             ZConfig.url.urldefrag("file:/abc/def#frag"),
             ("file:///abc/def", "frag"))
 
-    def test_nonexistant_file(self):
+class TestNonExistantResources(unittest.TestCase):
+
+    # XXX Not sure if this is the best approach for these.  These
+    # tests make sure that the error reported by ZConfig for missing
+    # resources is handled in a consistent way.  Since ZConfig uses
+    # urllib2.urlopen() for opening all resources, what we do is
+    # replace that function with one that always raises an exception.
+    # Since urllib2.urlopen() can raise either IOError or OSError
+    # (depending on the version of Python), we run test for each
+    # exception.  urllib2.urlopen() is restored after running the
+    # test.
+
+    def setUp(self):
+        self.urllib2_urlopen = urllib2.urlopen
+        urllib2.urlopen = self.fake_urlopen
+
+    def tearDown(self):
+        urllib2.urlopen = self.urllib2_urlopen
+
+    def fake_urlopen(self, url):
+        raise self.error()
+
+    def test_nonexistant_file_ioerror(self):
+        self.error = IOError
+        self.check_nonexistant_file()
+
+    def test_nonexistant_file_oserror(self):
+        self.error = OSError
+        self.check_nonexistant_file()
+
+    def check_nonexistant_file(self):
         fn = tempfile.mktemp()
         schema = ZConfig.loadSchemaFile(StringIO("<schema/>"))
         self.assertRaises(ZConfig.ConfigurationError,
@@ -149,7 +180,9 @@ class LoaderTestCase(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.makeSuite(LoaderTestCase)
+    suite = unittest.makeSuite(LoaderTestCase)
+    suite.addTest(unittest.makeSuite(TestNonExistantResources))
+    return suite
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
