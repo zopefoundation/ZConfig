@@ -741,9 +741,9 @@ class SchemaTestCase(TestBase):
         self._verifySimpleConf(self.load_config(schema, "simple.conf"))
 
     def test_extends_fragment_failure(self):
-       self.assertRaises(ZConfig.SchemaError,
-                         self.load_schema_text,
-           "<schema extends='%s/library.xml#foo'/>" % CONFIG_BASE)
+        self.assertRaises(ZConfig.SchemaError,
+                          self.load_schema_text,
+            "<schema extends='%s/library.xml#foo'/>" % CONFIG_BASE)
 
     def test_multi_extends_implicit_OK(self):
         self.load_schema_text("""\
@@ -772,16 +772,16 @@ class SchemaTestCase(TestBase):
            """ % (CONFIG_BASE, CONFIG_BASE, __name__))
 
     def test_multi_extends_datatype_conflict(self):
-       self.assertRaises(ZConfig.SchemaError,
-                         self.load_schema_text, """\
-           <schema extends='%s/base-datatype1.xml %s/base-datatype2.xml'/>
-           """ % (CONFIG_BASE, CONFIG_BASE))
+        self.assertRaises(ZConfig.SchemaError,
+                          self.load_schema_text, """\
+            <schema extends='%s/base-datatype1.xml %s/base-datatype2.xml'/>
+            """ % (CONFIG_BASE, CONFIG_BASE))
 
     def test_multi_extends_keytype_conflict(self):
-       self.assertRaises(ZConfig.SchemaError,
-                         self.load_schema_text, """\
-           <schema extends='%s/base-keytype1.xml %s/base-keytype2.xml'/>
-           """ % (CONFIG_BASE, CONFIG_BASE))
+        self.assertRaises(ZConfig.SchemaError,
+                          self.load_schema_text, """\
+            <schema extends='%s/base-keytype1.xml %s/base-keytype2.xml'/>
+            """ % (CONFIG_BASE, CONFIG_BASE))
 
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)
