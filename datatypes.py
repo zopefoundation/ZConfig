@@ -227,27 +227,31 @@ class IpaddrOrHostname(RegularExpressionConversion):
         return RegularExpressionConversion.__call__(self, value).lower()
 
 def existing_directory(v):
-    if os.path.isdir(v):
-        return v
+    nv = os.path.expanduser(v)
+    if os.path.isdir(nv):
+        return nv
     raise ValueError, '%s is not an existing directory' % v
 
 def existing_path(v):
-    if os.path.exists(v):
-        return v
+    nv = os.path.expanduser(v)
+    if os.path.exists(nv):
+        return nv
     raise ValueError, '%s is not an existing path' % v
 
 def existing_file(v):
-    if os.path.exists(v):
-        return v
+    nv = os.path.expanduser(v)
+    if os.path.exists(nv):
+        return nv
     raise ValueError, '%s is not an existing file' % v
 
 def existing_dirpath(v):
-    dir = os.path.dirname(v)
+    nv = os.path.expanduser(v)
+    dir = os.path.dirname(nv)
     if not dir:
         # relative pathname with no directory component
-        return v
+        return nv
     if os.path.isdir(dir):
-        return v
+        return nv
     raise ValueError, ('The directory named as part of the path %s '
                        'does not exist.' % v)
 
