@@ -31,6 +31,13 @@ here = os.path.abspath(here)
 
 StringType = type("")
 
+try:
+    unicode
+except NameError:
+    have_unicode = 0
+else:
+    have_unicode = 1
+
 
 class DatatypeTestCase(unittest.TestCase):
     types = ZConfig.datatypes.Registry()
@@ -91,6 +98,11 @@ class DatatypeTestCase(unittest.TestCase):
         raises(ValueError, convert, "-inf")
         raises(ValueError, convert, "nan")
 
+        if have_unicode:
+            raises(ValueError, convert, unicode("inf"))
+            raises(ValueError, convert, unicode("-inf"))
+            raises(ValueError, convert, unicode("nan"))
+
     def test_datatype_identifier(self):
         convert = self.types.get("identifier")
         raises = self.assertRaises
@@ -112,6 +124,11 @@ class DatatypeTestCase(unittest.TestCase):
         v = convert(value)
         self.assertEqual(v, value)
         self.assert_(isinstance(v, StringType))
+        if have_unicode:
+            unicode_value = unicode(value)
+            v = convert(unicode_value)
+            self.assertEqual(v, value)
+            self.assert_(isinstance(v, StringType))
 
     def check_never_namelike(self, convert):
         raises = self.assertRaises

@@ -17,16 +17,17 @@ import os
 import re
 import sys
 
-# types.StringTypes was added in Python 2.2
+# types.StringTypes was added in Python 2.2; basestring in 2.3
 try:
     unicode
 except NameError:
-    StringTypes = type(''), type(unicode(''))
-    UnicodeType = StringTypes[1]
-else:
-    StringTypes = type(''),
     UnicodeType = None
+    StringTypes = type(''),
+else:
+    UnicodeType = type(unicode(''))
+    StringTypes = type(''), UnicodeType
 
+# True, False were added in Python 2.2.1
 try:
     True
 except NameError:
