@@ -246,17 +246,6 @@ def get_arglist(s):
             args[0] = '%s, %s' % (arg, args[0])
     return pos, kw
 
-def constructor_conversion(v):
-    klass, arglist = parse_constructor(v)
-    pos, kw = get_arglist(arglist)
-    return klass, pos, kw
-
-def space_sep_key_value_conversion(v):
-    l = v.split(' ', 1)
-    if len(l) < 2:
-        l.append('')
-    return l
-
 
 class SuffixMultiplier:
     # d is a dictionary of suffixes to integer multipliers.  If no suffixes
@@ -298,8 +287,6 @@ stock_datatypes = {
     "existing-path":     existing_path,
     "existing-file":     existing_file,
     "existing-dirpath":  existing_dirpath,
-    #"constructor":       constructor_conversion,
-    #"key-value":         space_sep_key_value_conversion,
     "byte-size":         SuffixMultiplier({'kb': 1024,
                                            'mb': 1024*1024,
                                            'gb': 1024*1024*1024L,
