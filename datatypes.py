@@ -13,9 +13,9 @@
 ##############################################################################
 """Selection of standard datatypes for ZConfig."""
 
+import os
 import re
 import sys
-import os
 
 try:
     True
@@ -157,7 +157,7 @@ class SocketAddress:
     def __init__(self, s):
         # returns (family, address) tuple
         import socket
-        if "/" in s:
+        if "/" in s or s.find(os.sep) >= 0:
             self.family = getattr(socket, "AF_UNIX", None)
             self.address = s
         else:
