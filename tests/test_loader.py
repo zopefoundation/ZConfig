@@ -133,6 +133,31 @@ class LoaderTestCase(unittest.TestCase):
         schema.gettype("widget-a")
         schema.gettype("extra-type")
 
+    def test_import_component_twice_1(self):
+        # Make sure we can import a component twice from a schema.
+        # This is most likely to occur when the component is imported
+        # from each of two other components, or from the top-level
+        # schema and a component.
+        loader = ZConfig.loader.SchemaLoader()
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.library.widget' />"
+                       "  <import package='ZConfig.tests.library.widget' />"
+                       "</schema>")
+        schema = loader.loadFile(sio)
+        schema.gettype("widget-a")
+
+    def test_import_component_twice_2(self):
+        # Make sure we can import a component from a config file even
+        # if it has already been imported from the schema.
+        loader = ZConfig.loader.SchemaLoader()
+        sio = StringIO("<schema>"
+                       "  <import package='ZConfig.tests.library.widget' />"
+                       "</schema>")
+        schema = loader.loadFile(sio)
+        loader = ZConfig.loader.ConfigLoader(schema)
+        sio = StringIO("%import ZConfig.tests.library.widget")
+        loader.loadFile(sio)
+
     def test_urlsplit_urlunsplit(self):
         # Extracted from Python's test.test_urlparse module:
         for url, parsed, split in [

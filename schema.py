@@ -303,8 +303,8 @@ class BaseParser(xml.sax.ContentHandler):
         else:
             if os.path.dirname(file):
                 self.error("file may not include a directory part")
-            if not self._schema.hasComponent(pkg):
-                src = self._loader.schemaComponentSource(pkg, file)
+            src = self._loader.schemaComponentSource(pkg, file)
+            if not self._schema.hasComponent(src):
                 self._schema.addComponent(src)
                 self.loadComponent(src)
 
