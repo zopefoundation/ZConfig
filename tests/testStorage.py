@@ -23,7 +23,12 @@ class StorageTestCase(unittest.TestCase):
         except:
             pass
         try:
-            os.remove(self.tmpfn)
+            # Full storage creates a directory
+            if os.path.isdir(self.tmpfn):
+                # XXX Doesn't work on Window
+                os.system('rm -rf %s' % self.tmpfn)
+            else:
+                os.remove(self.tmpfn)
         except os.error:
             pass
 
