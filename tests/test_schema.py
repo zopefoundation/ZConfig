@@ -691,6 +691,31 @@ class SchemaTestCase(TestBase):
         self.assertRaises(ZConfig.ConfigurationError,
                           self.load_config_text, schema, "abc.  127.0.0.1")
 
+    def test_keytype_identifier(self):
+        schema = self.load_schema_text("""\
+           <schema keytype='identifier'>
+             <key name='foo' attribute='foo'/>
+             <key name='Foo' attribute='Foo'/>
+           </schema>
+           """)
+        conf = self.load_config_text(schema,
+                                     "Foo Foo-value\n"
+                                     "foo foo-value\n")
+        self.assertEqual(conf.foo, "foo-value")
+        self.assertEqual(conf.Foo, "Foo-value")
+        # key mis-match based on case:
+        self.assertRaises(ZConfig.ConfigurationError,
+                          self.load_config_text, schema, "FOO frob\n")
+        # attribute names conflict, since the keytype isn't used to
+        # generate attribute names
+        self.assertRaises(ZConfig.SchemaError,
+                          self.load_schema_text, """\
+                          <schema keytype='identifier'>
+                            <key name='foo'/>
+                            <key name='Foo'/>
+                          </schema>
+                          """)
+
     def test_datatype_casesensitivity(self):
         self.load_schema_text("<schema datatype='NULL'/>")
 
