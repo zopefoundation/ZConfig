@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002 Zope Corporation and Contributors.
+# Copyright (c) 2002, 2003 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -18,11 +18,11 @@ import StringIO
 import tempfile
 import unittest
 import urllib
-import urlparse
 
 import ZConfig
 
 from ZConfig.Context import Context
+from ZConfig.url import urljoin
 
 try:
     __file__
@@ -37,11 +37,11 @@ CONFIG_BASE = "file://%s/" % urllib.pathname2url(d)
 class TestBase(unittest.TestCase):
 
     def load(self, relurl, context=None):
-        url = urlparse.urljoin(CONFIG_BASE, relurl)
+        url = urljoin(CONFIG_BASE, relurl)
         if context is None:
-            conf = ZConfig.load(url)
+            conf = ZConfig.loadURL(url)
         else:
-            conf = context.load(url)
+            conf = context.loadURL(url)
         self.assertEqual(conf.url, url)
         self.assert_(conf.name is None)
         self.assert_(conf.type is None)
@@ -50,7 +50,7 @@ class TestBase(unittest.TestCase):
 
     def loadtext(self, text):
         sio = StringIO.StringIO(text)
-        return ZConfig.loadfile(sio)
+        return ZConfig.loadFile(sio)
 
     def check_simple_gets(self, conf):
         self.assertEqual(conf.get('empty'), '')
@@ -190,38 +190,11 @@ class ConfigurationTestCase(TestBase):
         L2 = conf.getChildSections("TRIVIAL")
         self.assertEqual(L, L2)
 
-    def test_basic_import(self):
-        conf = self.load("importer.conf")
-        self.assertEqual(conf.get("var1"), "def")
-        self.assertEqual(conf.get("VAR1"), "def")
-        self.assertEqual(conf.get("int-var"), "12")
-        self.assertEqual(conf.get("INT-VAR"), "12")
-
-    def test_imported_section_override(self):
-        conf = self.load("importsections.conf")
-        sect = conf.getSection("override", "over-b")
-        self.assertEqual(sect.get("var"), "a-2")
-        self.assert_(sect.get("var2") is None)
-        sect = conf.getSection("override", "over-a")
-        self.assertEqual(sect.get("var"), "a-2")
-        self.assert_(sect.get("var2") is None)
-
-    def test_imported_section_delegation(self):
-        conf = self.load("importsections.conf")
-        sect = conf.getSection("section", "a")
-        self.assertEqual(sect.get("var"), "1")
-        self.assertEqual(sect.get("cvar"), "value")
-        sect = conf.getSection("section", "b")
-        self.assertEqual(sect.get("var"), "2")
-        self.assertEqual(sect.get("cvar"), "value")
-        sect = conf.getSection("section", "c")
-        self.assertEqual(sect.get("var"), "3")
-        self.assertEqual(sect.get("cvar"), "value")
-
     def test_no_delegation(self):
-        url = urlparse.urljoin(CONFIG_BASE, "simplesections.conf")
+        url = urljoin(CONFIG_BASE, "simplesections.conf")
         context = NoDelegationContext()
-        self.assertRaises(ZConfig.ConfigurationTypeError, context.load, url)
+        self.assertRaises(ZConfig.ConfigurationTypeError,
+                          context.loadURL, url)
 
     def test_include(self):
         conf = self.load("include.conf")
@@ -275,7 +248,7 @@ class ConfigurationTestCase(TestBase):
                                 "<section>\n"
                                 "  name value2\n"
                                 "</section>\n")
-        cf = ZConfig.loadfile(sio)
+        cf = ZConfig.loadFile(sio)
         self.assertEqual(cf.get("Name"), "value")
         self.assertEqual(cf.getSection("Section").get("Name"), "value2")
 
@@ -288,7 +261,7 @@ class ConfigurationTestCase(TestBase):
 
     def check_load_from_path(self, path):
         context = Context()
-        context.load(path)
+        context.loadURL(path)
 
 
 class NoDelegationContext(Context):

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002 Zope Corporation and Contributors.
+# Copyright (c) 2002, 2003 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -13,15 +13,103 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.3 2002/12/05 05:17:45 fdrake Exp $
+$Id: __init__.py,v 1.4 2003/01/03 21:05:51 fdrake Exp $
 """
 
-from ZConfig.Exceptions import *
+from ZConfig.loader import loadConfig, loadConfigFile
+from ZConfig.loader import loadSchema, loadSchemaFile
 
-def load(url):
-    import Context
-    return Context.Context().load(url)
 
-def loadfile(file, url=None):
+def loadURL(url):
     import Context
-    return Context.Context().loadfile(file, url)
+    return Context.Context().loadURL(url)
+
+def loadFile(file, url=None):
+    import Context
+    return Context.Context().loadFile(file, url)
+
+
+class ConfigurationError(Exception):
+    def __init__(self, msg):
+        self.message = msg
+        Exception.__init__(self, msg)
+
+    def __str__(self):
+        return self.message
+
+
+class _ParseError(ConfigurationError):
+    def __init__(self, msg, url, lineno, colno=None):
+        self.url = url
+        self.lineno = lineno
+        self.colno = colno
+        ConfigurationError.__init__(self, msg)
+
+    def __str__(self):
+        s = self.message
+        if self.url:
+            s += "\n("
+        elif (self.lineno, self.colno) != (None, None):
+            s += " ("
+        if self.lineno:
+            s += "line %d" % self.lineno
+            if self.colno is not None:
+                s += ", column %d" % self.colno
+            if self.url:
+                s += " in %s)" % self.url
+            else:
+                s += ")"
+        elif self.url:
+            s += self.url + ")"
+        return s
+
+
+class SchemaError(_ParseError):
+    """Raised when there's an error in the schema itself."""
+
+    def __init__(self, msg, url=None, lineno=None, colno=None):
+        _ParseError.__init__(self, msg, url, lineno, colno)
+
+
+class ConfigurationMissingSectionError(ConfigurationError):
+    def __init__(self, type, name=None):
+        self.type = type
+        self.name = name
+        details = 'Missing section (type: %s' % type
+        if name is not None:
+            details += ', name: %s' % name
+        ConfigurationError.__init__(self, details + ')')
+
+
+class ConfigurationConflictingSectionError(ConfigurationError):
+    def __init__(self, type, name=None):
+        self.type = type
+        self.name = name
+        details = 'Conflicting sections (type: %s' % type
+        if name is not None:
+            details += ', name: %s' % name
+        ConfigurationError.__init__(self, details + ')')
+
+
+class ConfigurationSyntaxError(_ParseError):
+    """Raised when there's a syntax error in a configuration file."""
+
+
+class ConfigurationTypeError(ConfigurationError):
+    def __init__(self, msg, found, expected):
+        self.found = found
+        self.expected = expected
+        ConfigurationError.__init__(self, msg)
+
+
+class SubstitutionSyntaxError(ConfigurationError):
+    """Raised when interpolation source text contains syntactical errors."""
+
+
+class SubstitutionReplacementError(ConfigurationError, LookupError):
+    """Raised when no replacement is available for a reference."""
+
+    def __init__(self, source, name):
+        self.source = source
+        self.name = name
+        ConfigurationError.__init__(self, "no replacement for " + `name`)

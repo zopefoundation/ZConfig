@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002 Zope Corporation and Contributors.
+# Copyright (c) 2002, 2003 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -13,5 +13,5 @@
 ##############################################################################
 """Tests for the configuration data structures and loader.
 
-$Id: __init__.py,v 1.1 2002/10/08 21:42:17 fdrake Exp $
+$Id: __init__.py,v 1.2 2003/01/03 21:05:56 fdrake Exp $
 """

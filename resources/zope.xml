@@ -1,0 +1,192 @@
+<schema prefix="ZConfig.tests.test_zopeschema">
+
+  <!-- type definitions -->
+
+  <import src="logger.xml"/>
+
+  <sectiongroup type="server">
+
+    <sectiontype type="http_server" handler=".http_server">
+       <key name="port" datatype="port-number"/>
+       <key name="force_connection_close" datatype="boolean" default="off"/>
+    </sectiontype>
+
+    <sectiontype type="ftp_server" handler=".ftp_server">
+       <key name="port" datatype="port-number"/>
+    </sectiontype>
+
+    <sectiontype type="webdav_source_server" handler=".webdav_source_server">
+       <key name="port" datatype="port-number"/>
+       <key name="force_connection_close" datatype="boolean" default="off"/>
+    </sectiontype>
+
+    <sectiontype type="pcgi_server" handler=".pcgi_server">
+      <key name="file"/>
+    </sectiontype>
+
+    <sectiontype type="fcgi_server" handler=".fcgi_server">
+      <key name="resource"/>
+    </sectiontype>
+
+    <sectiontype type="monitor_server" handler=".monitor_server">
+       <key name="port" datatype="port-number"/>
+    </sectiontype>
+
+    <sectiontype type="icp_server" handler=".icp_server">
+       <key name="port" datatype="port-number"/>
+    </sectiontype>
+
+  </sectiongroup>
+
+  <sectiongroup type="storage">
+
+    <sectiontype type="filestorage" handler=".filestorage">
+      <key name="file_name" required="yes"/>
+      <key name="create" datatype="boolean"/>
+      <key name="read_only" datatype="boolean"/>
+      <key name="stop"/>
+      <key name="quota" datatype="integer"/>
+    </sectiontype>
+
+    <sectiontype type="mappingstorage" handler=".mappingstorage">
+      <key name="name" default="Mapping Storage"/>
+    </sectiontype>
+
+    <sectiontype type="clientstorage" handler=".clientstorage">
+      <key name="addr" required="yes"/>
+      <key name="storage" default="1"/>
+      <key name="cache_size" datatype="integer" default="20000000"/>
+      <key name="name" default=""/>
+      <key name="client"/>
+      <key name="debug" datatype="boolean"/>
+      <key name="var"/>
+      <key name="min_disconnect_poll" datatype="integer" default="5"/>
+      <key name="max_disconnect_poll" datatype="integer" default="300"/>
+      <key name="wait" datatype="boolean" default="on"/>
+      <key name="read_only" datatype="boolean" default="off"/>
+      <key name="read_only_fallback" datatype="boolean" default="off"/>
+    </sectiontype>
+
+  </sectiongroup>
+
+  <sectiontype type="database" datatype="null">
+
+      <multisection type="storage" name="*" attribute="storages"/>
+
+      <key name="mount_point"/>
+
+      <key name="db_class" default="ZODB.DB"/>
+
+      <key name="cache_size" datatype="integer" default="5000"/>
+
+      <key name="pool_size" datatype="integer" default="7"/>
+
+      <key name="cache_deactivate_after" datatype="integer" default="60"/>
+
+      <key name="version_pool_size" datatype="integer" default="3"/>
+
+      <key name="version_cache_size" datatype="integer" default="100"/>
+
+      <key name="version_cache_deactivate_after" datatype="integer"
+         default="10"/>
+
+  </sectiontype>
+
+  <!-- end of type definitions -->
+
+  <!-- schema begins  -->
+
+  <key name="zope_home" datatype="existing-directory"/>
+
+  <key name="instance_home" datatype="existing-directory"/>
+
+  <key name="software_home" datatype="existing-directory"/>
+
+  <key name="client_home" datatype="existing-directory"/>
+
+  <key name="debug_mode" datatype="boolean" default="on"/>
+
+  <key name="effective_user"/>
+
+  <key name="enable_product_installation" datatype="boolean" default="on"/>
+
+  <key name="locale" datatype="locale"/>
+
+  <key name="zserver_threads" datatype="integer" default="4"/>
+
+  <key name="python_check_interval" datatype="integer" default="500"/>
+
+  <key name="use_daemon_process" datatype="boolean" default="on"/>
+
+  <key name="zserver_read_only_mode" datatype="boolean" default="off"/>
+
+  <key name="pid_filename" datatype="existing-dirpath"/>
+
+  <key name="lock_filename" datatype="existing-dirpath"/>
+
+  <section type="logger" name="access"/>
+ 
+  <section type="logger" name="event"/>
+
+  <section type="logger" name="trace"/>
+
+  <key name="structured_text_header_level" datatype="integer" default="3"/>
+
+  <key name="maximum_security_manager_stack_size" datatype="integer"
+       default="100"/>
+
+  <key name="publisher_profile_file"/>
+
+  <key name="webdav_source_user_agents"/>
+
+  <key name="module"/>
+
+  <multikey name="cgi_environment_variable" datatype="key-value"
+       attribute="cgi_environment_variables"/>
+
+  <key name="dns_ip_address" datatype="ipaddr-or-hostname"/>
+
+  <key name="ip_address" datatype="ipaddr-or-hostname"/>
+
+  <key name="http_realm" default="Zope"/>
+
+  <key name="default_servers" datatype="boolean" default="on"/>
+
+  <multisection type="server" name="*" attribute="servers"/>
+
+  <key name="automatically_quote_dtml_request_data" datatype="boolean"
+     default="on"/>
+
+  <key name="skip_authentication_checking" datatype="boolean"
+     default="off"/>
+
+  <key name="skip_ownership_checking" datatype="boolean"
+     default="off"/>
+
+  <key name="maximum_number_of_session_objects" datatype="integer"
+     default="1000"/>
+
+  <key name="session_add_notify_script_path"/>
+
+  <key name="session_delete_notify_script_path"/>
+
+  <key name="session_timeout_minutes" datatype="integer"
+     default="20"/>
+
+  <key name="suppress_all_access_rules" datatype="boolean"
+     default="off"/>
+
+  <key name="suppress_all_site_roots" datatype="boolean"
+     default="off"/>
+
+  <key name="database_quota_size" datatype="integer"/>
+
+  <key name="read_only_database" datatype="boolean"/>
+
+  <key name="zeo_client_name"/>
+
+  <multisection type="database" name="*" attribute="databases"/>
+
+  <!-- schema ends  -->
+
+</schema>

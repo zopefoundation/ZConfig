@@ -1,0 +1,7 @@
+<schema>
+  <description>
+    Sample library of reusable data types.
+  </description>
+  <sectiontype type="type-a"/>
+  <sectiontype type="type-b"/>
+</schema>

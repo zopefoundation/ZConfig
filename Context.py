@@ -1,40 +1,41 @@
+##############################################################################
+#
+# Copyright (c) 2002, 2003 Zope Corporation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.0 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
 """Top-level configuration handle."""
 
-import os
-import urllib
-import urllib2
 import urlparse
 
 import ZConfig
 
-from Config import Configuration, ImportingConfiguration
-from Substitution import isname, substitute
+from ZConfig import loader
+from ZConfig.Config import Configuration
 
 
-class Context:
+class Context(loader.BaseLoader):
 
     def __init__(self):
-        self._imports = []         # URL  -> Configuration
+        loader.BaseLoader.__init__(self)
         self._named_sections = {}  # name -> Configuration
         self._needed_names = {}    # name -> [needy Configuration, ...]
-        self._current_imports = []
         self._all_sections = []
 
     # subclass-support API
 
-    def createImportedSection(self, section, url):
-        return ImportingConfiguration(url)
-
     def createNestedSection(self, section, type, name, delegatename):
-        if name:
-            name = name.lower()
-        return Configuration(section, type.lower(), name, section.url)
+        return Configuration(section, type, name, section.url)
 
     def createToplevelSection(self, url):
-        return ImportingConfiguration(url)
-
-    def createResource(self, file, url):
-        return Resource(file, url)
+        return Configuration(None, None, None, url)
 
     def getDelegateType(self, type):
         # Applications must provide delegation typing information by
@@ -42,78 +43,26 @@ class Context:
         return type.lower()
 
     def parse(self, resource, section):
-        from ApacheStyle import Parse
-        Parse(resource, self, section)
+        from ZConfig.cfgparser import ZConfigParser
+        ZConfigParser(resource, self).parse(section)
 
-    def _normalize_url(self, url):
-        if os.path.exists(url):
-            url = "file://" + urllib.pathname2url(os.path.abspath(url))
-        else:
-            parts = urlparse.urlparse(url)
-            if not parts[0]:
-                raise ValueError("invalid URL, or file does not exist:\n"
-                                 + repr(url))
-        return url
-
-    # public API
-
-    def load(self, url):
-        """Load a resource from a URL or pathname."""
-        url = self._normalize_url(url)
-        top = self.createToplevelSection(url)
+    def loadResource(self, resource):
+        top = self.createToplevelSection(resource.url)
         self._all_sections.append(top)
-        self._imports = [top]
-        self._parse_url(url, top)
+        self.parse(resource, top)
         self._finish()
         return top
-
-    loadURL = load # Forward-compatible alias
-
-    def loadfile(self, file, url=None):
-        if not url:
-            name = getattr(file, "name", None)
-            if name and name[0] != "<" and name[-1] != ">":
-                url = "file://" + urllib.pathname2url(os.path.abspath(name))
-        top = self.createToplevelSection(url)
-        self._all_sections.append(top)
-        self._imports = [top]
-        self._current_imports.append(top)
-        r = self.createResource(file, url)
-        try:
-            self.parse(r, top)
-        finally:
-            del self._current_imports[-1]
-        self._finish()
-        return top
-
-    loadFile = loadfile # Forward-compatible alias
-
 
     # interface for parser
 
-    def importConfiguration(self, section, url):
-        for config in self._imports:
-            if config.url == url:
-                return config
-        newsect = self.createImportedSection(section, url)
-        self._all_sections.append(newsect)
-        self._imports.append(newsect)
-        section.addImport(newsect)
-        self._parse_url(url, newsect)
-
     def includeConfiguration(self, section, url):
-        # XXX we always re-parse, unlike import
-        file = urllib2.urlopen(url)
-        r = self.createResource(file, url)
+        r = self.openResource(url)
         try:
             self.parse(r, section)
         finally:
-            file.close()
+            r.close()
 
-    def nestSection(self, section, type, name, delegatename):
-        if name:
-            name = name.lower()
-        type = type.lower()
+    def startSection(self, section, type, name, delegatename):
         if name and self._named_sections.has_key(name):
             # Make sure sections of the same name are not defined
             # twice in the same resource, and that once a name has
@@ -139,30 +88,12 @@ class Context:
         section.addChildSection(newsect)
         if name:
             self._named_sections[name] = newsect
-            current = self._current_imports[-1]
-            if section is not current:
-                current.addNamedSection(newsect)
-            for config in self._current_imports[:-1]:
-                # XXX seems very painful
-                if not config._sections_by_name.has_key((type, name)):
-                    config.addNamedSection(newsect)
         return newsect
 
-    # internal helpers
+    def endSection(self, parent, type, name, delegatename, section):
+        section.finish()
 
-    def _parse_url(self, url, section):
-        url, fragment = urlparse.urldefrag(url)
-        if fragment:
-            raise ZConfig.ConfigurationError(
-                "fragment identifiers are not currently supported")
-        file = urllib2.urlopen(url)
-        self._current_imports.append(section)
-        r = self.createResource(file, url)
-        try:
-            self.parse(r, section)
-        finally:
-            del self._current_imports[-1]
-            file.close()
+    # internal helpers
 
     def _finish(self):
         # Resolve section delegations
@@ -199,24 +130,3 @@ class Context:
             if sect.delegate is not None:
                 sect.finish()
         self._all_sections = None
-
-
-class Resource:
-    def __init__(self, file, url):
-        self.file = file
-        self.url = url
-        self._definitions = {}
-
-    def define(self, name, value):
-        key = name.lower()
-        if self._definitions.has_key(key):
-            raise ZConfig.ConfigurationError("cannot redefine " + `name`)
-        if not isname(name):
-            raise ZConfig.ConfigurationError(
-                "not a substitution legal name: " + `name`)
-        self._definitions[key] = value
-
-    def substitute(self, s):
-        # XXX  I don't really like calling this substitute(),
-        # XXX  but it will do for now.
-        return substitute(s, self._definitions)

@@ -1,12 +1,22 @@
+##############################################################################
+#
+# Copyright (c) 2002, 2003 Zope Corporation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.0 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
 """Configuration data structure."""
 
 import ZConfig
 
-try:
-    True
-except NameError:
-    True = 1
-    False = 0
+from ZConfig.datatypes import asBoolean
+
 
 class Configuration:
     def __init__(self, container, type, name, url):
@@ -103,12 +113,10 @@ class Configuration:
 
     def has_key(self, key):
         key = key.lower()
-        if self._data.has_key(key):
-            return True
-        elif self.delegate:
-            return self.delegate.has_key(key)
-        else:
-            return False
+        have = self._data.has_key(key)
+        if self.delegate and not have:
+            have = self.delegate.has_key(key)
+        return have
 
     def items(self):
         """Returns a list of key-value pairs for this section.
@@ -190,32 +198,3 @@ class Configuration:
             return default
         else:
             return s.split()
-
-
-class ImportingConfiguration(Configuration):
-    def __init__(self, url):
-        self._imports = []
-        Configuration.__init__(self, None, None, None, url)
-
-    def addImport(self, section):
-        self._imports.append(section)
-
-    def get(self, key, default=None):
-        s = Configuration.get(self, key, default)
-        if s is default:
-            for config in self._imports:
-                s = config.get(key, default)
-                if s is not default:
-                    break
-        return s
-
-
-def asBoolean(s):
-    """Convert a string value to a boolean value."""
-    ss = str(s).lower()
-    if ss in ('yes', 'true', 'on'):
-        return True
-    elif ss in ('no', 'false', 'off'):
-        return False
-    else:
-        raise ValueError("not a valid boolean value: " + repr(s))
