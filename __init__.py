@@ -13,7 +13,7 @@
 ##############################################################################
 """Configuration data structures and loader for the ZRS.
 
-$Id: __init__.py,v 1.13 2004/01/02 17:28:10 fdrake Exp $
+$Id: __init__.py,v 1.14 2004/02/11 21:06:58 fdrake Exp $
 """
 version_info = (2, 1)
 __version__ = ".".join([str(n) for n in version_info])
@@ -109,13 +109,6 @@ class ConfigurationConflictingSectionError(ConfigurationError):
 
 class ConfigurationSyntaxError(_ParseError):
     """Raised when there's a syntax error in a configuration file."""
-
-
-class ConfigurationTypeError(ConfigurationError):
-    def __init__(self, msg, found, expected):
-        self.found = found
-        self.expected = expected
-        ConfigurationError.__init__(self, msg)
 
 
 class DataConversionError(ConfigurationError, ValueError):
