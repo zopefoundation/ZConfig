@@ -14,9 +14,9 @@
 """Tests of the configuration data structures and loader."""
 
 import os
-import sys
 import tempfile
 import unittest
+import urllib
 import urlparse
 import warnings
 
@@ -27,14 +27,14 @@ from ZConfig.Common import ConfigurationError, ConfigurationTypeError
 warnings.filterwarnings("ignore", r".*\bmktemp\b.*",
                         RuntimeWarning, __name__)
 
-if __name__ == "__main__":
+try:
+    __file__
+except NameError:
+    import sys
     __file__ = sys.argv[0]
 
-d = os.path.abspath(os.path.dirname(__file__)) + "/input/"
-if os.sep == "\\":
-    CONFIG_BASE = "file:" + d
-else:
-    CONFIG_BASE = "file://" + d
+d = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
+CONFIG_BASE = "file://%s/" % urllib.pathname2url(d)
 
 
 class TestBase(unittest.TestCase):
