@@ -35,7 +35,7 @@ class Configuration:
         if section.name:
             self.addNamedSection(section)
         elif not section.type:
-            raise ValeuError("'type' must be specified")
+            raise ValueError("'type' must be specified")
         self._sections.append(section)
 
     def addNamedSection(self, section):
@@ -43,7 +43,7 @@ class Configuration:
         name = section.name
         type = section.type
         if not type:
-            raise ValeuError("'type' must be specified")
+            raise ValueError("'type' must be specified")
         key = type, name
         child = self._sections_by_name.get(key)
         if child is None or child.url != self.url:
