@@ -1,6 +1,7 @@
 """Top-level configuration handle."""
 
 import os
+import urllib
 import urllib2
 import urlparse
 
@@ -43,13 +44,8 @@ class Context:
 
     def load(self, url):
         """Load a resource from a URL or pathname."""
-        parts = urlparse.urlsplit(url)
-        if not parts[0]:
-            # must be a filename
-            path = os.path.abspath(url)
-            if os.sep != "/":
-                path = path.replace(os.sep, "/")
-            url = "file://" + path
+        if os.path.exists(url):
+            url = "file://" + urllib.pathname2url(os.path.abspath(url))
         top = self.createToplevelSection(url)
         self._imports = [top]
         self._parse_url(url, top)
