@@ -307,6 +307,7 @@ class BaseParser(xml.sax.ContentHandler):
         else:
             sectinfo = self._schema.createSectionType(
                 name, keytype, valuetype, datatype)
+        self._localtypes[name] = sectinfo
         if attrs.has_key("implements"):
             ifname = self.basic_key(attrs["implements"])
             interface = self._schema.gettype(ifname)
