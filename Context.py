@@ -13,8 +13,6 @@
 ##############################################################################
 """Top-level configuration handle."""
 
-import urlparse
-
 import ZConfig
 
 from ZConfig import loader
