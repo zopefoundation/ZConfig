@@ -70,6 +70,8 @@ class RangeCheckedConversion:
 
 
 class RegularExpressionConversion:
+    reason = "value did not match regular expression"
+
     def __init__(self, regex):
         self._rx = re.compile(regex)
 
@@ -78,8 +80,7 @@ class RegularExpressionConversion:
         if m and m.group() == value:
             return value
         else:
-            raise ValueError("value did not match regular expression: "
-                             + `value`)
+            raise ValueError("%s: %s" % (self.reason, repr(value)))
 
 
 def check_locale(value):
@@ -119,17 +120,23 @@ class ASCIIConversion(RegularExpressionConversion):
 _ident_re = "[_a-zA-Z][_a-zA-Z0-9]*"
 
 class IdentifierConversion(ASCIIConversion):
+    reason = "not a valid Python identifier"
+
     def __init__(self):
         ASCIIConversion.__init__(self, _ident_re)
 
 
 class DottedNameConversion(ASCIIConversion):
+    reason = "not a valid dotted name"
+
     def __init__(self):
         ASCIIConversion.__init__(self,
                                  r"%s(?:\.%s)*" % (_ident_re, _ident_re))
 
 
 class DottedNameSuffixConversion(ASCIIConversion):
+    reason = "not a valid dotted name or suffix"
+
     def __init__(self):
         ASCIIConversion.__init__(self,
                                  r"(?:%s)(?:\.%s)*|(?:\.%s)+"
