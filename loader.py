@@ -88,6 +88,9 @@ class BaseLoader:
             "BaseLoader.loadResource() must be overridden by a subclass")
 
     def openResource(self, url):
+        # ConfigurationError exceptions raised here should be
+        # str()able to generate a message for an end user.
+        #
         # XXX This should be replaced to use a local cache for remote
         # resources.  The policy needs to support both re-retrieve on
         # change and provide the cached resource when the remote
@@ -95,6 +98,13 @@ class BaseLoader:
         url = str(url)
         try:
             file = urllib2.urlopen(url)
+        except urllib2.URLError, e:
+            # urllib2.URLError has a particularly hostile str(), so we
+            # generally don't want to pass it along to the user.
+            error = ZConfig.ConfigurationError("error opening resource %s: %s"
+                                               % (url, e.reason))
+            error.url = url
+            raise error
         except (IOError, OSError), e:
             # Python 2.1 raises a different error from Python 2.2+,
             # so we catch both to make sure we detect the situation.
