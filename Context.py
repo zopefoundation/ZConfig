@@ -67,6 +67,8 @@ class Context:
         self._finish()
         return top
 
+    loadURL = load # Forward-compatible alias
+
     def loadfile(self, file, url=None):
         if not url:
             name = getattr(file, "name", None)
