@@ -1,18 +1,9 @@
 """Substitution support for ZConfig values."""
 
-try:
-    False
-except NameError:
-    False = 0
+from Common import *
 
-class SubstitutionError(Exception):
+class SubstitutionError(ConfigurationError):
     """Base class for exceptions raised by ZConfig.Substitution."""
-
-    def __init__(self, msg):
-        self.message = msg
-
-    def __str__(self):
-        return self.message
 
 class SubstitutionSyntaxError(SubstitutionError):
     """Raised when interpolation source text contains syntactical errors."""
