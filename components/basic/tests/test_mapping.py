@@ -14,10 +14,7 @@
 
 """Tests of the 'basic' section types provided as part of ZConfig.basic."""
 
-import StringIO
 import unittest
-
-import ZConfig
 
 from ZConfig.tests import support
 
