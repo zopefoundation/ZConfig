@@ -317,11 +317,11 @@ class SchemaTestCase(BaseSchemaTest):
         self.assert_(t.istypegroup())
         t1 = schema.gettype("t1")
         self.assert_(not t1.istypegroup())
-        self.assert_(t.gettype("t1") is t1)
+        self.assert_(t.getsubtype("t1") is t1)
         t2 = schema.gettype("t2")
         self.assert_(not t2.istypegroup())
-        self.assert_(t.gettype("t2") is t2)
-        self.assertRaises(ZConfig.ConfigurationError, t.gettype, "group")
+        self.assert_(t.getsubtype("t2") is t2)
+        self.assertRaises(ZConfig.ConfigurationError, t.getsubtype, "group")
         self.assert_(t1 is not t2)
         # try loading a config that relies on this schema
         conf = self.load_config_text(schema,
@@ -350,7 +350,7 @@ class SchemaTestCase(BaseSchemaTest):
             "  <section name='thing' type='group'/>"
             "</schema>")
         group = schema.gettype("group")
-        self.assert_(schema.gettype("extra") is group.gettype("extra"))
+        self.assert_(schema.gettype("extra") is group.getsubtype("extra"))
 
         # make sure we can use the extension in a config:
         conf = self.load_config_text(schema, "<extra thing/>")
@@ -516,6 +516,22 @@ class SchemaTestCase(BaseSchemaTest):
         check("<section type='s' name='*' attribute='getSectionThing'/>")
         check("<multisection type='s' name='*' attribute='getSection'/>")
         check("<multisection type='s' name='*' attribute='getSectionThing'/>")
+
+    def test_sectiontype_as_schema(self):
+        schema = self.load_schema_text(
+            "<schema>"
+            "  <sectiontype type='s'>"
+            "    <key name='skey' default='skey-default'/>"
+            "  </sectiontype>"
+            "  <sectiontype type='t'>"
+            "    <key name='tkey' default='tkey-default'/>"
+            "    <section name='*' type='s' attribute='section'/>"
+            "  </sectiontype>"
+            "</schema>")
+        t = schema.gettype("t")
+        conf = self.load_config_text(t, "<s/>")
+        self.assertEqual(conf.tkey, "tkey-default")
+        self.assertEqual(conf.section.skey, "skey-default")
 
 
 def test_suite():

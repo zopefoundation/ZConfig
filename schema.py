@@ -189,11 +189,10 @@ class SchemaParser(xml.sax.ContentHandler):
         if name is not None:
             name = self.basic_key(name)
         self._schema = info.SchemaType(name, keytype, valuetype, datatype,
-                                       handler, self._url)
+                                       handler, self._url, self._registry)
         if name is not None:
             # XXX circular reference
             self._schema.addtype(self._schema)
-        self._schema.registry = self._registry
         self._stack = [self._schema]
 
     def end_schema(self):
@@ -207,19 +206,19 @@ class SchemaParser(xml.sax.ContentHandler):
         name = self.basic_key(name)
         self.push_prefix(attrs)
         keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
-        sectinfo = info.SectionType(name, keytype, valuetype, datatype)
-        self._schema.addtype(sectinfo)
+        sectinfo = self._schema.createSectionType(
+            name, keytype, valuetype, datatype)
         if self._group is not None:
             if attrs.has_key("group"):
                 self.error("sectiontype cannot specify group"
                            " if nested in a sectiongroup")
-            self._group.addtype(sectinfo)
+            self._group.addsubtype(sectinfo)
         elif attrs.has_key("group"):
             groupname = self.basic_key(attrs["group"])
             group = self._schema.gettype(groupname)
             if not group.istypegroup():
                 self.error("type specified as group is not a sectiongroup")
-            group.addtype(sectinfo)
+            group.addsubtype(sectinfo)
         self._stack.append(sectinfo)
 
     def end_sectiontype(self):

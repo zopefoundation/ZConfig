@@ -182,16 +182,47 @@ class SectionInfo(BaseInfo):
         else:
             return None
 
-class TypeContainer:
-    def __init__(self):
-        self._types = {}
 
-    def addtype(self, typeinfo):
-        n = typeinfo.name.lower()
-        if self._types.has_key(n):
-            raise ZConfig.SchemaError("type name cannot be redefined: "
-                                             + `typeinfo.name`)
-        self._types[n] = typeinfo
+class GroupType:
+    def __init__(self, name):
+        self._subtypes = {}
+        self.name = name
+
+    def addsubtype(self, type):
+        self._subtypes[type.name] = type
+
+    def getsubtype(self, name):
+        try:
+            return self._subtypes[name]
+        except KeyError:
+            raise ZConfig.SchemaError("no subtype %s in group %s"
+                                      % (`name`, `self.name`))
+
+    def getsubtypenames(self):
+        L = self._subtypes.keys()
+        L.sort()
+        return L
+
+    def istypegroup(self):
+        return True
+
+
+class SectionType:
+    def __init__(self, name, keytype, valuetype, datatype, registry, types):
+        # name      - name of the section, or '*' or '+'
+        # datatype  - type for the section itself
+        # keytype   - type for the keys themselves
+        # valuetype - default type for key values
+        self.name = name
+        self.datatype = datatype
+        self.keytype = keytype
+        self.valuetype = valuetype
+        self.handler = None
+        self.registry = registry
+        self._children = []    # [(key, info), ...]
+        self._attrmap = {}     # {attribute: index, ...}
+        self._keymap = {}      # {key: index, ...}
+        self._types = types
 
     def gettype(self, name):
         n = name.lower()
@@ -202,30 +233,6 @@ class TypeContainer:
 
     def gettypenames(self):
         return self._types.keys()
-
-
-class GroupType(TypeContainer):
-    def __init__(self, name):
-        TypeContainer.__init__(self)
-        self.name = name
-
-    def istypegroup(self):
-        return True
-
-
-class SectionType:
-    def __init__(self, name, keytype, valuetype, datatype):
-        # name      - name of the section, or '*' or '+'
-        # datatype  - type for the section itself
-        # keytype   - type for the keys themselves
-        # valuetype - default type for key values
-        self.name = name
-        self.datatype = datatype
-        self.keytype = keytype
-        self.valuetype = valuetype
-        self._children = []    # [(key, info), ...]
-        self._attrmap = {}     # {attribute: index, ...}
-        self._keymap = {}      # {key: index, ...}
 
     def __len__(self):
         return len(self._children)
@@ -296,7 +303,7 @@ class SectionType:
                     st = info.sectiontype
                     if st.istypegroup():
                         try:
-                            st = st.gettype(type)
+                            st = st.getsubtype(type)
                         except ZConfig.ConfigurationError:
                             raise ZConfig.ConfigurationError(
                                 "section type %s not allowed for name %s"
@@ -318,7 +325,7 @@ class SectionType:
                     raise ZConfig.ConfigurationError(
                         "cannot define section with a sectiongroup type")
                 try:
-                    st = st.gettype(type)
+                    st = st.getsubtype(type)
                 except ZConfig.ConfigurationError:
                     # not this one; maybe a different one
                     pass
@@ -337,12 +344,20 @@ class SectionType:
         return False
 
 
-class SchemaType(TypeContainer, SectionType):
-    def __init__(self, name, keytype, valuetype, datatype, handler, url):
-        SectionType.__init__(self, name, keytype, valuetype, datatype)
-        TypeContainer.__init__(self)
+class SchemaType(SectionType):
+    def __init__(self, name, keytype, valuetype, datatype, handler, url,
+                 registry):
+        SectionType.__init__(self, name, keytype, valuetype, datatype,
+                             registry, {})
         self.handler = handler
         self.url = url
+
+    def addtype(self, typeinfo):
+        n = typeinfo.name.lower()
+        if self._types.has_key(n):
+            raise ZConfig.SchemaError("type name cannot be redefined: "
+                                             + `typeinfo.name`)
+        self._types[n] = typeinfo
 
     def allowUnnamed(self):
         return True
@@ -361,3 +376,9 @@ class SchemaType(TypeContainer, SectionType):
         if self.name and self.name in alltypes:
             alltypes.remove(self.name)
         return alltypes
+
+    def createSectionType(self, name, keytype, valuetype, datatype):
+        t = SectionType(name, keytype, valuetype, datatype,
+                        self.registry, self._types)
+        self.addtype(t)
+        return t
