@@ -95,10 +95,6 @@ class Configuration:
         else:
             raise ConfigurationError("cannot add existing key")
 
-    def setValue(self, key, value):
-        key = key.lower()
-        self._data[key] = value
-
     def has_key(self, key):
         key = key.lower()
         if self._data.has_key(key):
