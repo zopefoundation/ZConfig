@@ -30,8 +30,11 @@ warnings.filterwarnings("ignore", r".*\bmktemp\b.*",
 if __name__ == "__main__":
     __file__ = sys.argv[0]
 
-CONFIG_BASE = ("file://" + os.path.abspath(os.path.dirname(__file__))
-               + "/input/")
+d = os.path.abspath(os.path.dirname(__file__)) + "/input/"
+if os.sep == "\\":
+    CONFIG_BASE = "file:" + d
+else:
+    CONFIG_BASE = "file://" + d
 
 
 class TestBase(unittest.TestCase):
