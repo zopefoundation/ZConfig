@@ -734,57 +734,54 @@ class SchemaTestCase(TestBase):
 
     def test_simple_extends(self):
         schema = self.load_schema_text("""\
-           <schema extends="%s/simple.xml %s/library.xml">
-             <section name="A" type="type-a" />
+           <schema extends='%s/simple.xml %s/library.xml'>
+             <section name='A' type='type-a' />
            </schema>
-           """ % (CONFIG_BASE,CONFIG_BASE))
+           """ % (CONFIG_BASE, CONFIG_BASE))
         self._verifySimpleConf(self.load_config(schema, "simple.conf"))
 
     def test_extends_fragment_failure(self):
        self.assertRaises(ZConfig.SchemaError,
-                          self.load_schema_text, """\
-           <schema extends="%s/library.xml#foo" />
-           """ % CONFIG_BASE)
+                         self.load_schema_text,
+           "<schema extends='%s/library.xml#foo'/>" % CONFIG_BASE)
 
     def test_multi_extends_implicit_OK(self):
-        schema = self.load_schema_text("""\
-           <schema extends="%s/base.xml %s/library.xml">
-             <section name="A" type="type-a" />
-             <section name="X" type="type-X" />
+        self.load_schema_text("""\
+           <schema extends='%s/base.xml %s/library.xml'>
+             <section name='A' type='type-a' />
+             <section name='X' type='type-X' />
            </schema>
-           """ % (CONFIG_BASE,CONFIG_BASE))
+           """ % (CONFIG_BASE, CONFIG_BASE))
 
     def test_multi_extends_explicit_datatype_OK(self):
-        schema = self.load_schema_text("""\
-           <schema extends="%s/base-datatype1.xml %s/base-datatype2.xml"
-                   datatype="null">
-             <section name="One" type="type-1" />
-             <section name="Two" type="type-2" />
+        self.load_schema_text("""\
+           <schema extends='%s/base-datatype1.xml %s/base-datatype2.xml'
+                   datatype='null'>
+             <section name='One' type='type-1' />
+             <section name='Two' type='type-2' />
            </schema>
-           """ % (CONFIG_BASE,CONFIG_BASE))
-
+           """ % (CONFIG_BASE, CONFIG_BASE))
 
     def test_multi_extends_explicit_keytype_OK(self):
-        schema = self.load_schema_text("""\
-           <schema extends="%s/base-keytype1.xml %s/base-keytype2.xml"
-                   keytype="%s.uppercase">
-             <section name="One" type="type-1" />
-             <section name="Two" type="type-2" />
+        self.load_schema_text("""\
+           <schema extends='%s/base-keytype1.xml %s/base-keytype2.xml'
+                   keytype='%s.uppercase'>
+             <section name='One' type='type-1' />
+             <section name='Two' type='type-2' />
            </schema>
-           """ % (CONFIG_BASE,CONFIG_BASE,__name__))
-
+           """ % (CONFIG_BASE, CONFIG_BASE, __name__))
 
     def test_multi_extends_datatype_conflict(self):
        self.assertRaises(ZConfig.SchemaError,
-                          self.load_schema_text, """\
-           <schema extends="%s/base-datatype1.xml %s/base-datatype2.xml"/>
-           """ % (CONFIG_BASE,CONFIG_BASE))
+                         self.load_schema_text, """\
+           <schema extends='%s/base-datatype1.xml %s/base-datatype2.xml'/>
+           """ % (CONFIG_BASE, CONFIG_BASE))
 
     def test_multi_extends_keytype_conflict(self):
        self.assertRaises(ZConfig.SchemaError,
-                          self.load_schema_text, """\
-           <schema extends="%s/base-keytype1.xml %s/base-keytype2.xml"/>
-           """ % (CONFIG_BASE,CONFIG_BASE))
+                         self.load_schema_text, """\
+           <schema extends='%s/base-keytype1.xml %s/base-keytype2.xml'/>
+           """ % (CONFIG_BASE, CONFIG_BASE))
 
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)
