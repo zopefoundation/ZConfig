@@ -77,6 +77,11 @@ def _interp(accum, rest, section, context):
 
 
 def _split(s, context=None):
+    # Return a triple:  prefix, name, suffix
+    # - prefix is text that can be used literally in the result (may be '')
+    # - name is a referenced name, or None
+    # - suffix is trailling text that may contain additional references
+    #   (may be '' or None)
     if "$" in s:
         i = s.find("$")
         c = s[i+1:i+2]
