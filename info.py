@@ -125,8 +125,20 @@ class BaseKeyInfo(BaseInfo):
         elif self.name != "+" and key is not None:
             raise ZConfig.SchemaError(
                 "unexpected key for default value")
-
         self.add_valueinfo(ValueInfo(value, position), key)
+
+    def add_valueinfo(self, vi, key):
+        """Actually add a ValueInfo to this key-info object.
+
+        The appropriate value of None-ness of key has already been
+        checked with regard to the name of the key, and has been found
+        permissible to add.
+
+        This method is a requirement for subclasses, and should not be
+        called by client code.
+        """
+        raise NotImplementedError(
+            "add_valueinfo() must be implemented by subclasses of BaseKeyInfo")
 
 
 class KeyInfo(BaseKeyInfo):
