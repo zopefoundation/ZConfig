@@ -6,26 +6,26 @@ XXX document syntax here
 class InterpolationError(Exception):
     """Base exception for string interpolation errors."""
 
+    def __init__(self, msg, context):
+        self.message = msg
+        self.context = context
+
 class InterpolationSyntaxError(InterpolationError):
     """Raised when interpolation source text contains syntactical errors."""
 
     def __init__(self, msg, context):
-        self.message = msg
-        if context is None:
-            self.context = context
-        else:
-            self.context = context[:]
-        InterpolationError.__init__(self, msg, self.context)
+        if context is not None:
+            context = context[:]
+        InterpolationError.__init__(self, msg, context)
 
 class InterpolationRecursionError(InterpolationError):
     """Raised when a nested interpolation is recursive."""
 
     def __init__(self, name, context):
         self.name = name
-        self.context = context[:]
-        self.message = ("recursion on %s; current context:\n%s"
-                        % (repr(name), ", ".join(context)))
-        InterpolationError.__init__(self, name, self.context)
+        msg = ("recursion on %s; current context:\n%s"
+               % (repr(name), ", ".join(context)))
+        InterpolationError.__init__(self, msg, context[:])
 
 
 def get(section, name, default=None):
