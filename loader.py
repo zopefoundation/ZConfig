@@ -166,7 +166,8 @@ class SchemaLoader(BaseLoader):
                 return "file://" + urllib.pathname2url(fn)
         else:
             raise ZConfig.SchemaError(
-                "schema component not found: " + `package`)
+                "schema component not found: %s (file='%s')"
+                % (package, file))
 
 
 class ConfigLoader(BaseLoader):
