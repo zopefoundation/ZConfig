@@ -17,10 +17,7 @@ ZConfig and urllib2 expect file: URLs to consistently use the '//'
 hostpart seperator; the functions here enforce this constraint.
 """
 
-import posixpath as _posixpath
 import urlparse as _urlparse
-
-from urllib import splittype as _splittype
 
 try:
     from urlparse import urlsplit
