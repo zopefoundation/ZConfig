@@ -21,8 +21,7 @@ from StringIO import StringIO
 
 import ZConfig
 import ZConfig.loader
-
-from ZConfig.url import urljoin
+import ZConfig.url
 
 from ZConfig.tests.test_config import CONFIG_BASE
 
@@ -40,14 +39,14 @@ class LoaderTestCase(unittest.TestCase):
 
     def test_schema_caching(self):
         loader = ZConfig.loader.SchemaLoader()
-        url = urljoin(CONFIG_BASE, "simple.xml")
+        url = ZConfig.url.urljoin(CONFIG_BASE, "simple.xml")
         schema1 = loader.loadURL(url)
         schema2 = loader.loadURL(url)
         self.assert_(schema1 is schema2)
 
     def test_schema_components(self):
         loader = ZConfig.loader.SchemaLoader()
-        url = urljoin(CONFIG_BASE, "library.xml")
+        url = ZConfig.url.urljoin(CONFIG_BASE, "library.xml")
         schema = loader.loadURL(url)
         type_a = loader.loadURL(url + "#type-a")
         type_b = loader.loadURL(url + "#type-b")
@@ -59,13 +58,13 @@ class LoaderTestCase(unittest.TestCase):
 
     def test_simple_import_with_cache(self):
         loader = ZConfig.loader.SchemaLoader()
-        url1 = urljoin(CONFIG_BASE, "library.xml")
+        url1 = ZConfig.url.urljoin(CONFIG_BASE, "library.xml")
         schema1 = loader.loadURL(url1)
         sio = StringIO("<schema>"
                        "  <import src='library.xml'/>"
                        "  <section type='type-a' name='section'/>"
                        "</schema>")
-        url2 = urljoin(CONFIG_BASE, "stringio")
+        url2 = ZConfig.url.urljoin(CONFIG_BASE, "stringio")
         schema2 = loader.loadFile(sio, url2)
         self.assert_(schema1.gettype("type-a") is schema2.gettype("type-a"))
 
@@ -103,6 +102,30 @@ class LoaderTestCase(unittest.TestCase):
         sio = StringIO("<thing-ext thing/>")
         conf, handlers = ZConfig.loadConfigFile(schema, sio)
         self.assertEqual(conf.thing.thing_ext_key, "thing-ext-default")
+
+    def test_urlsplit_urlunsplit(self):
+        # Extracted from Python's test.test_urlparse module:
+        for url, parsed, split in [
+            ('http://www.python.org',
+             ('http', 'www.python.org', '', '', '', ''),
+             ('http', 'www.python.org', '', '', '')),
+            ('http://www.python.org#abc',
+             ('http', 'www.python.org', '', '', '', 'abc'),
+             ('http', 'www.python.org', '', '', 'abc')),
+            ('http://www.python.org/#abc',
+             ('http', 'www.python.org', '/', '', '', 'abc'),
+             ('http', 'www.python.org', '/', '', 'abc')),
+            ("http://a/b/c/d;p?q#f",
+             ('http', 'a', '/b/c/d', 'p', 'q', 'f'),
+             ('http', 'a', '/b/c/d;p', 'q', 'f')),
+            ('file:///tmp/junk.txt',
+             ('file', '', '/tmp/junk.txt', '', '', ''),
+             ('file', '', '/tmp/junk.txt', '', '')),
+            ]:
+            result = ZConfig.url.urlsplit(url)
+            self.assertEqual(result, split)
+            result2 = ZConfig.url.urlunsplit(result)
+            self.assertEqual(result2, url)
 
 
 def test_suite():
