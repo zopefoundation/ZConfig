@@ -38,7 +38,6 @@ class SchemaTestCase(TestBase):
     def test_minimal_schema(self):
         schema = self.load_schema_text("<schema/>")
         self.assertEqual(len(schema), 0)
-        self.assertEqual(schema.getchildnames(), [])
         self.assertRaises(IndexError,
                           lambda schema=schema: schema[0])
         self.assertRaises(ZConfig.ConfigurationError,

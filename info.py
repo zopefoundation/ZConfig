@@ -301,9 +301,6 @@ class SectionType:
         except KeyError:
             raise ZConfig.ConfigurationError("no key matching " + `key`)
 
-    def getchildnames(self):
-        return [key for (key, info) in self._children]
-
     def getrequiredtypes(self):
         d = {}
         if self.name:
