@@ -320,10 +320,8 @@ class SectionType:
                         stack.append(t)
         return d.keys()
 
-    def getsectionindex(self, type, name):
-        index = -1
+    def getsectioninfo(self, type, name):
         for key, info in self._children:
-            index += 1
             if key:
                 if key == name:
                     if not info.issection():
@@ -341,13 +339,13 @@ class SectionType:
                         raise ZConfig.ConfigurationError(
                             "name %s must be used for a %s section"
                             % (`name`, `st.name`))
-                    return index
+                    return info
             # else must be a sectiontype or an abstracttype:
             elif info.sectiontype.name == type:
                 if not (name or info.allowUnnamed()):
                     raise ZConfig.ConfigurationError(
                         `type` + " sections must be named")
-                return index
+                return info
             elif info.sectiontype.isabstract():
                 st = info.sectiontype
                 if st.name == type:
@@ -359,50 +357,8 @@ class SectionType:
                     # not this one; maybe a different one
                     pass
                 else:
-                    return index
+                    return info
         raise ZConfig.ConfigurationError("no matching section defined")
-
-    def getsectioninfo(self, type, name):
-        i = self.getsectionindex(type, name)
-        st = self._children[i][1]
-        if st.isabstract():
-            st = st.gettype(type)
-        return st
-
-    def getinfobyname(self, name):
-        """Return the info object corresponding to the section 'name'.
-
-        Returns None if there is no matching info.  The resulting info
-        may represent either a section or a key; if it's a section, it
-        may be abstract or a multi-section.
-        """
-        if name in ("*", "+"):
-            raise ZConfig.ConfigurationError(
-                "'*' and '+' may not be used as key or section names")
-        for key, info in self._children:
-            if info.name == name:
-                return info
-        return None
-
-    def getsectionbytype(self, type):
-        L = []
-        for key, info in self._children:
-            if not info.issection():
-                continue
-            if info.sectiontype.name == type:
-                L.append(info)
-            if info.sectiontype.isabstract():
-                st = info.sectiontype
-                if st.hassubtype(type):
-                    L.append(info)
-        if len(L) == 1:
-            return L[0]
-        elif L:
-            raise ZConfig.ConfigurationError(
-                "section type not found in context")
-        else:
-            raise ZConfig.ConfigurationError(
-                "section type ambiguous in context")
 
     def isabstract(self):
         return False

@@ -24,7 +24,16 @@ class BaseMatcher:
     def __init__(self, info, type, handlers):
         self.info = info
         self.type = type
-        self._values = [None] * len(type)
+        self._values = {}
+        for key, info in type:
+            if info.name == "+" and not info.issection():
+                v = {}
+            elif info.ismulti():
+                v = []
+            else:
+                v = None
+            assert info.attribute is not None
+            self._values[info.attribute] = v
         self._sectionnames = {}
         if handlers is None:
             handlers = []
@@ -42,16 +51,13 @@ class BaseMatcher:
                     "section names must not be re-used within the"
                     " same container:" + `name`)
             self._sectionnames[name] = name
-        i = self.type.getsectionindex(type, name)
         ci = self.type.getsectioninfo(type, name)
-        v = self._values[i]
-        if v is None:
-            if ci.ismulti():
-                self._values[i] = [sectvalue]
-            else:
-                self._values[i] = sectvalue
-        elif ci.ismulti():
+        attr = ci.attribute
+        v = self._values[attr]
+        if ci.ismulti():
             v.append(sectvalue)
+        elif v is None:
+            self._values[attr] = sectvalue
         else:
             raise ZConfig.ConfigurationError(
                 "too many instances of %s section" % `ci.sectiontype.name`)
@@ -61,19 +67,18 @@ class BaseMatcher:
             realkey = self.type.keytype(key)
         except ValueError, e:
             raise ZConfig.DataConversionError(e, key, position)
-        length = len(self.type)
         arbkey_info = None
-        for i in range(length):
+        for i in range(len(self.type)):
             k, ci = self.type[i]
             if k == realkey:
                 break
             if ci.name == "+" and not ci.issection():
-                arbkey_info = i, k, ci
+                arbkey_info = k, ci
         else:
             if arbkey_info is None:
                 raise ZConfig.ConfigurationError(
                     `key` + " is not a known key name")
-            i, k, ci = arbkey_info
+            k, ci = arbkey_info
         if ci.issection():
             if ci.name:
                 extra = " in %s sections" % `self.type.name`
@@ -83,13 +88,15 @@ class BaseMatcher:
                 "%s is not a valid key name%s" % (`key`, extra))
 
         ismulti = ci.ismulti()
-        v = self._values[i]
+        attr = ci.attribute
+        assert attr is not None
+        v = self._values[attr]
         if v is None:
             if k == '+':
                 v = {}
             elif ismulti:
                 v = []
-            self._values[i] = v
+            self._values[attr] = v
         elif not ismulti:
             if k != '+':
                 raise ZConfig.ConfigurationError(
@@ -113,7 +120,7 @@ class BaseMatcher:
         elif ismulti:
             v.append(value)
         else:
-            self._values[i] = value
+            self._values[attr] = value
 
     def createChildMatcher(self, type, name):
         ci = self.type.getsectioninfo(type.name, name)
@@ -127,22 +134,17 @@ class BaseMatcher:
     def finish(self):
         """Check the constraints of the section and convert to an application
         object."""
-        length = len(self.type)
         values = self._values
-        # XXX attrnames should be provided by the type, so it can be
-        # computed once per section type
-        attrnames = [None] * length
-        for i in range(length):
-            key, ci = self.type[i]
-            attrnames[i] = ci.attribute or key
-            v = values[i]
-            if v is None and ci.name == '+' and not ci.issection():
-                if ci.minOccurs > 0:
+        for key, ci in self.type:
+            assert ci.attribute is not None
+            attr = ci.attribute
+            v = values[attr]
+            if ci.name == '+' and not ci.issection():
+                # v is a dict
+                if ci.minOccurs > len(v):
                     raise ZConfig.ConfigurationError(
                         "no keys defined for the %s key/value map; at least %d"
                         " must be specified" % (ci.attribute, ci.minOccurs))
-                v = {}
-                values[i] = v
             if v is None and ci.minOccurs:
                 default = ci.getdefault()
                 if default is None:
@@ -153,10 +155,10 @@ class BaseMatcher:
                     raise ZConfig.ConfigurationError(
                         "no values for %s; %s required" % (s, ci.minOccurs))
                 else:
-                    v = values[i] = default[:]
+                    v = values[attr] = default[:]
             if ci.ismulti():
-                if v is None:
-                    v = values[i] = ci.getdefault()[:]
+                if not v:
+                    v[:] = ci.getdefault()
                 if len(v) < ci.minOccurs:
                     raise ZConfig.ConfigurationError(
                         "not enough values for %s; %d found, %d required"
@@ -166,17 +168,18 @@ class BaseMatcher:
                     v = ci.getdefault()[:]
                 else:
                     v = ci.getdefault()
-                values[i] = v
-        return self.constuct(attrnames)
+                values[attr] = v
+        return self.constuct()
 
-    def constuct(self, attrnames):
+    def constuct(self):
         values = self._values
-        for i in range(len(values)):
-            name, ci = self.type[i]
+        for name, ci in self.type:
+            assert ci.attribute is not None
+            attr = ci.attribute
             if ci.ismulti():
                 if ci.issection():
                     v = []
-                    for s in values[i]:
+                    for s in values[attr]:
                         if s is not None:
                             st = s.getSectionDefinition()
                             try:
@@ -186,36 +189,36 @@ class BaseMatcher:
                                     e, s, (-1, -1, None))
                         v.append(s)
                 elif ci.name == '+':
-                    v = values[i]
+                    v = values[attr]
                     for key, val in v.items():
                         v[key] = [vi.convert(ci.datatype) for vi in val]
                 else:
-                    v = [vi.convert(ci.datatype) for vi in values[i]]
+                    v = [vi.convert(ci.datatype) for vi in values[attr]]
             elif ci.issection():
-                if values[i] is not None:
-                    st = values[i].getSectionDefinition()
+                if values[attr] is not None:
+                    st = values[attr].getSectionDefinition()
                     try:
-                        v = st.datatype(values[i])
+                        v = st.datatype(values[attr])
                     except ValueError, e:
                         raise ZConfig.DataConversionError(
-                            e, values[i], (-1, -1, None))
+                            e, values[attr], (-1, -1, None))
                 else:
                     v = None
             elif name == '+':
-                v = values[i]
+                v = values[attr]
                 for key, val in v.items():
                     v[key] = val.convert(ci.datatype)
             else:
-                v = values[i]
+                v = values[attr]
                 if v is not None:
                     v = v.convert(ci.datatype)
-            values[i] = v
+            values[attr] = v
             if ci.handler is not None:
                 self.handlers.append((ci.handler, v))
-        return self.createValue(attrnames)
+        return self.createValue()
 
-    def createValue(self, attrnames):
-        return SectionValue(attrnames, self._values, None, self)
+    def createValue(self):
+        return SectionValue(self._values, None, self)
 
 
 class SectionMatcher(BaseMatcher):
@@ -227,8 +230,8 @@ class SectionMatcher(BaseMatcher):
                 `type.name` + " sections may not be unnamed")
         BaseMatcher.__init__(self, info, type, handlers)
 
-    def createValue(self, attrnames):
-        return SectionValue(attrnames, self._values, self.name, self)
+    def createValue(self):
+        return SectionValue(self._values, self.name, self)
 
 
 class SchemaMatcher(BaseMatcher):
@@ -252,13 +255,10 @@ class SectionValue:
     before attempting to modify self.
     """
 
-    def __init__(self, attrnames, values, name, matcher):
-        assert len(attrnames) == len(values)
-        d = self.__dict__
-        for i in range(len(attrnames)):
-            setattr(self, attrnames[i], values[i])
-        d['_name'] = name
-        d['_matcher'] = matcher
+    def __init__(self, values, name, matcher):
+        self.__dict__.update(values)
+        self._name = name
+        self._matcher = matcher
 
     def __repr__(self):
         if self._name:
@@ -272,9 +272,10 @@ class SectionValue:
 
     def __str__(self):
         l = []
-        for i in range(len(self._attrnames)):
-            k = self._attrnames[i]
-            v = self._values[i]
+        attrnames = [s for s in self.__dict__.keys() if s[0] != "_"]
+        attrnames.sort()
+        for k in attrnames:
+            v = getattr(self, k)
             l.append('%-40s: %s' % (k, v))
         return '\n'.join(l)
 
