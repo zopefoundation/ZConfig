@@ -48,8 +48,8 @@ class BaseLoader:
     def __init__(self):
         pass
 
-    def createResource(self, file, url, fragment=None):
-        return Resource(file, url, fragment)
+    def createResource(self, file, url):
+        return Resource(file, url)
 
     def loadURL(self, url):
         url = self.normalizeURL(url)
@@ -77,29 +77,17 @@ class BaseLoader:
         # change and provide the cached resource when the remote
         # resource is not accessible.
         url = str(url)
-        parts = urlsplit(url)
-        fragment = parts[-1]
-        if fragment:
-            parts = list(parts)
-            parts[-1] = ''
-            url = urlunsplit(tuple(parts))
         file = urllib2.urlopen(url)
-        return self.createResource(file, url, fragment or None)
+        return self.createResource(file, url)
 
     def normalizeURL(self, url):
         if os.path.exists(url):
             url = "file://" + urllib.pathname2url(os.path.abspath(url))
-        else:
-            url = urlnormalize(url)
-        if url and not self.allowFragments():
-            url, fragment = urldefrag(url)
-            if fragment:
-                raise ZConfig.ConfigurationError(
-                    "fragment identifiers are not supported")
+        url, fragment = urldefrag(url)
+        if fragment:
+            raise ZConfig.ConfigurationError(
+                "fragment identifiers are not supported")
         return url
-
-    def allowFragments(self):
-        return False
 
 
 def _url_from_file(file):
@@ -125,13 +113,7 @@ class SchemaLoader(BaseLoader):
             from ZConfig.schema import parseResource
             schema = parseResource(resource, self.registry, self)
             self._cache[resource.url] = schema
-        if resource.fragment:
-            type = self.registry.get("basic-key")(resource.fragment)
-            schema = schema.gettype(type)
         return schema
-
-    def allowFragments(self):
-        return True
 
     # schema parser support API
 
@@ -246,10 +228,9 @@ class CompositeHandler:
 
 
 class Resource:
-    def __init__(self, file, url, fragment=None):
+    def __init__(self, file, url):
         self.file = file
         self.url = url
-        self.fragment = fragment
 
     def close(self):
         if self.file is not None:
