@@ -253,9 +253,10 @@ class SectionValue:
     """
 
     def __init__(self, attrnames, values, name, matcher):
+        assert len(attrnames) == len(values)
         d = self.__dict__
-        d['_attrnames'] = attrnames
-        d['_values'] = values
+        for i in range(len(attrnames)):
+            setattr(self, attrnames[i], values[i])
         d['_name'] = name
         d['_matcher'] = matcher
 
@@ -268,34 +269,6 @@ class SectionValue:
             name = "at %#x" % id(self)
         clsname = self.__class__.__name__
         return "<%s for %s %s>" % (clsname, self._matcher.type.name, name)
-
-    def __len__(self):
-        return len(self._values)
-
-    def __getitem__(self, index):
-        if isinstance(index, types.SliceType):
-            raise TypeError("SectionValue does not support slicing")
-        return self._values[index]
-
-    def __setitem__(self, index, value):
-        if isinstance(index, types.SliceType):
-            raise TypeError("SectionValue does not support slicing")
-        self._values[index] = value
-
-    def __getattr__(self, name):
-        try:
-            i = self._attrnames.index(name)
-        except ValueError:
-            raise AttributeError, name
-        return self._values[i]
-
-    def __setattr__(self, name, value):
-        try:
-            i = self._attrnames.index(name)
-        except ValueError:
-            self.__dict__[name] = value
-        else:
-            self._values[i] = value
 
     def __str__(self):
         l = []
