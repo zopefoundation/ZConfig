@@ -13,9 +13,10 @@
 ##############################################################################
 """Configuration parser."""
 
-from ZConfig import ConfigurationError, ConfigurationSyntaxError
+import ZConfig
+import ZConfig.url
+
 from ZConfig.substitution import isname, substitute
-from ZConfig.url import urljoin
 
 try:
     True
@@ -95,7 +96,7 @@ class ZConfigParser:
         try:
             newsect = self.context.startSection(section, type, name,
                                                 delegatename)
-        except ConfigurationError, e:
+        except ZConfig.ConfigurationError, e:
             self.error(e[0])
 
         if isempty:
@@ -115,7 +116,7 @@ class ZConfigParser:
         try:
             self.context.endSection(
                 prevsection, type, name, delegatename, section)
-        except ConfigurationError, e:
+        except ZConfig.ConfigurationError, e:
             self.error(e[0])
         return prevsection
 
@@ -130,7 +131,7 @@ class ZConfigParser:
             value = substitute(value, self.defs)
         try:
             section.addValue(key, value, (self.lineno, None, self.url))
-        except ConfigurationError, e:
+        except ZConfig.ConfigurationError, e:
             self.error(e[0])
 
     def handle_directive(self, section, rest):
@@ -150,7 +151,7 @@ class ZConfigParser:
             assert 0, "unexpected directive for " + `"%" + rest`
 
     def handle_include(self, section, rest):
-        newurl = urljoin(self.url, rest)
+        newurl = ZConfig.url.urljoin(self.url, rest)
         self.context.includeConfiguration(section, newurl, self.defs)
 
     def handle_define(self, section, rest):
@@ -166,7 +167,7 @@ class ZConfigParser:
         self.defs[defname] = substitute(defvalue, self.defs)
 
     def error(self, message):
-        raise ConfigurationSyntaxError(message, self.url, self.lineno)
+        raise ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)
 
 
 import re

@@ -19,10 +19,11 @@ import urllib
 import urllib2
 
 import ZConfig
-
-from ZConfig import datatypes
-from ZConfig import matcher
-from ZConfig.url import urlnormalize, urldefrag, urljoin, urlsplit, urlunsplit
+import ZConfig.cfgparser
+import ZConfig.datatypes
+import ZConfig.matcher
+import ZConfig.schema
+import ZConfig.url
 
 try:
     True
@@ -83,7 +84,7 @@ class BaseLoader:
     def normalizeURL(self, url):
         if os.path.exists(url):
             url = "file://" + urllib.pathname2url(os.path.abspath(url))
-        url, fragment = urldefrag(url)
+        url, fragment = ZConfig.url.urldefrag(url)
         if fragment:
             raise ZConfig.ConfigurationError(
                 "fragment identifiers are not supported")
@@ -101,7 +102,7 @@ def _url_from_file(file):
 class SchemaLoader(BaseLoader):
     def __init__(self, registry=None):
         if registry is None:
-            registry = datatypes.Registry()
+            registry = ZConfig.datatypes.Registry()
         BaseLoader.__init__(self)
         self.registry = registry
         self._cache = {}
@@ -110,8 +111,8 @@ class SchemaLoader(BaseLoader):
         if resource.url and self._cache.has_key(resource.url):
             schema = self._cache[resource.url]
         else:
-            from ZConfig.schema import parseResource
-            schema = parseResource(resource, self.registry, self)
+            schema = ZConfig.schema.parseResource(resource,
+                                                  self.registry, self)
             self._cache[resource.url] = schema
         return schema
 
@@ -155,9 +156,11 @@ class ConfigLoader(BaseLoader):
 
     def loadResource(self, resource):
         self.handlers = []
-        sm = matcher.SchemaMatcher(self.schema, self.handlers)
+        sm = ZConfig.matcher.SchemaMatcher(self.schema, self.handlers)
         self._parse_resource(sm, resource)
-        return sm.finish(), CompositeHandler(self.handlers, self.schema)
+        result = sm.finish(), CompositeHandler(self.handlers, self.schema)
+        del self.handlers
+        return result
 
     # config parser support API
 
@@ -175,7 +178,7 @@ class ConfigLoader(BaseLoader):
             raise ZConfig.ConfigurationError(
                 "%s is not an allowed name for %s sections"
                 % (`name`, `ci.sectiontype.name`))
-        return matcher.SectionMatcher(ci, t, name, self.handlers)
+        return ZConfig.matcher.SectionMatcher(ci, t, name, self.handlers)
 
     def endSection(self, parent, type, name, delegatename, matcher):
         assert not delegatename
@@ -189,8 +192,7 @@ class ConfigLoader(BaseLoader):
     # internal helper
 
     def _parse_resource(self, matcher, resource, defines=None):
-        from ZConfig.cfgparser import ZConfigParser
-        parser = ZConfigParser(resource, self, defines)
+        parser = ZConfig.cfgparser.ZConfigParser(resource, self, defines)
         parser.parse(matcher)
 
 
