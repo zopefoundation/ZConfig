@@ -60,6 +60,20 @@ class LoggerFactoryBase(Factory):
                 lowest = factory.getLevel()
         return lowest
 
+    def reopen(self):
+        """Re-open any handlers for which this is a meaningful operation.
+
+        This only works on handlers on the logger provided by this
+        factory directly; handlers for child loggers are not affected.
+        (This can be considered a bug, but is sufficient at the
+        moment.)
+        """
+        logger = self()
+        for handler in logger.handlers:
+            reopen = getattr(handler, "reopen", None)
+            if reopen is not None and callable(reopen):
+                reopen()
+
 
 class EventLogFactory(LoggerFactoryBase):
     """Logger factory that returns the root logger."""
