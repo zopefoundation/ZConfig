@@ -167,11 +167,17 @@ class BaseParser(xml.sax.ContentHandler):
     def push_prefix(self, attrs):
         name = attrs.get("prefix")
         if name:
-            name = str(name)
-            if name.startswith(".") and self._prefixes:
+            if self._prefixes:
+                convert = self._registry.get("dotted-suffix")
+            else:
+                convert = self._registry.get("dotted-name")
+            try:
+                name = convert(name)
+            except ValueError, err:
+                self.error("not a valid prefix: %s (%s)"
+                           % (_srepr(name), str(err)))
+            if name[0] == ".":
                 prefix = self._prefixes[-1] + name
-            elif name.startswith("."):
-                self.error("prefix may not begin with '.'")
             else:
                 prefix = name
         elif self._prefixes:
@@ -306,6 +312,7 @@ class BaseParser(xml.sax.ContentHandler):
         else:
             if os.path.dirname(file):
                 self.error("file may not include a directory part")
+            pkg = self.get_classname(pkg)
             src = self._loader.schemaComponentSource(pkg, file)
             if not self._schema.hasComponent(src):
                 self._schema.addComponent(src)

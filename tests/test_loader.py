@@ -25,7 +25,7 @@ import ZConfig
 import ZConfig.loader
 import ZConfig.url
 
-from ZConfig.tests.support import CONFIG_BASE
+from ZConfig.tests.support import CONFIG_BASE, TestBase
 
 
 try:
@@ -37,7 +37,7 @@ myfile = os.path.abspath(myfile)
 LIBRARY_DIR = os.path.join(os.path.dirname(myfile), "library")
 
 
-class LoaderTestCase(unittest.TestCase):
+class LoaderTestCase(TestBase):
 
     def test_schema_caching(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -57,6 +57,13 @@ class LoaderTestCase(unittest.TestCase):
         url2 = ZConfig.url.urljoin(CONFIG_BASE, "stringio")
         schema2 = loader.loadFile(sio, url2)
         self.assert_(schema1.gettype("type-a") is schema2.gettype("type-a"))
+
+    def test_simple_import_using_prefix(self):
+        self.load_schema_text("""\
+            <schema prefix='ZConfig.tests.library'>
+              <import package='.thing'/>
+            </schema>
+            """)
 
     def test_import_errors(self):
         # must specify exactly one of package or src
