@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 import unittest
 from StringIO import StringIO
@@ -25,8 +26,7 @@ class StorageTestCase(unittest.TestCase):
         try:
             # Full storage creates a directory
             if os.path.isdir(self.tmpfn):
-                # XXX Doesn't work on Window
-                os.system('rm -rf %s' % self.tmpfn)
+                shutil.rmtree(self.tmpfn)
             else:
                 os.remove(self.tmpfn)
         except os.error:
@@ -105,7 +105,6 @@ class StorageTestCase(unittest.TestCase):
         try:
             from bsddb3Storage.Full import Full
         except ImportError:
-            print 'ImportError'
             return
         sample = """
         <Storage>
@@ -120,11 +119,39 @@ class StorageTestCase(unittest.TestCase):
         storageconf = rootconf.getSection("Storage")
         cls, args = Storage.getStorageInfo(storageconf)
         self.assertEqual(cls, Full)
+        # It's too hard to test the config instance equality
         args = args.copy()
         del args['config']
         self.assertEqual(args, {"name": self.tmpfn})
         self.storage = Storage.createStorage(storageconf)
         self.assert_(isinstance(self.storage, Full))
+        # XXX _config isn't public
+        self.assert_(self.storage._config.cachesize, 1000)
+
+    def testMinimalStorage(self):
+        try:
+            from bsddb3Storage.Minimal import Minimal
+        except ImportError:
+            return
+        sample = """
+        <Storage>
+        type       Minimal
+        name       %s
+        cachesize  1000
+        </Storage>
+        """ % self.tmpfn
+        os.mkdir(self.tmpfn)
+        io = StringIO(sample)
+        rootconf = ZConfig.loadfile(io)
+        storageconf = rootconf.getSection("Storage")
+        cls, args = Storage.getStorageInfo(storageconf)
+        self.assertEqual(cls, Minimal)
+        # It's too hard to test the config instance equality
+        args = args.copy()
+        del args['config']
+        self.assertEqual(args, {"name": self.tmpfn})
+        self.storage = Storage.createStorage(storageconf)
+        self.assert_(isinstance(self.storage, Minimal))
         # XXX _config isn't public
         self.assert_(self.storage._config.cachesize, 1000)
 
