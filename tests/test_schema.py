@@ -334,7 +334,9 @@ class SchemaTestCase(BaseSchemaTest):
     def test_load_abstracttype(self):
         schema = self.load_schema_text(
             "<schema>"
-            "  <abstracttype name='group'/>"
+            "  <abstracttype name='group'>"
+            "    <description>This is an abstract section type.</description>"
+            "  </abstracttype>"
             "  <sectiontype name='t1' implements='group'>"
             "    <key name='k1' default='default1'/>"
             "  </sectiontype>"
