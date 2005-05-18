@@ -1,3 +1,10 @@
+Changes since ZConfig 2.2:
+
+- Added "inet-binding-address" and "inet-connection-address" to the
+  set of standard datatypes.  These are similar to the "inet-address"
+  type, but the default hostname is more sensible.  The datatype used
+  should reflect how the value will be used.
+
 Changes since ZConfig 2.1:
 
 - More documentation has been written.

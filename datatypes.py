@@ -18,7 +18,6 @@ import re
 import sys
 import datetime
 
-# types.StringTypes was added in Python 2.2; basestring in 2.3
 try:
     unicode
 except NameError:
