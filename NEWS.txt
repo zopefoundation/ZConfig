@@ -5,6 +5,12 @@ Changes since ZConfig 2.2:
   type, but the default hostname is more sensible.  The datatype used
   should reflect how the value will be used.
 
+- Alternate rotating logfile handler for Windows, to avoid platform
+  limitations on renaming open files.  Contributed by Sidnei da Silva.
+
+- For <section> and <multisection>, if the name attribute is omitted,
+  assume name="*", since this is what is used most often.
+
 Changes since ZConfig 2.1:
 
 - More documentation has been written.
