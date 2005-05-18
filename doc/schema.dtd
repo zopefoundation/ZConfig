@@ -84,7 +84,7 @@
 
 <!ELEMENT section (description?)>
 <!ATTLIST section
-          name       CDATA    #REQUIRED
+          name       CDATA    "*"
           attribute  NMTOKEN  #IMPLIED
           type       NMTOKEN  #REQUIRED
           handler    NMTOKEN  #IMPLIED
@@ -92,7 +92,7 @@
 
 <!ELEMENT multisection (description?)>
 <!ATTLIST multisection
-          name       CDATA    #REQUIRED
+          name       CDATA    "*"
           attribute  NMTOKEN  #IMPLIED
           type       NMTOKEN  #REQUIRED
           handler    NMTOKEN  #IMPLIED
