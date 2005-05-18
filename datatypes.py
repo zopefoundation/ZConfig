@@ -168,42 +168,64 @@ def string_list(s):
 port_number = RangeCheckedConversion(integer, min=1, max=0xffff).__call__
 
 
+class InetAddress:
+
+    def __init__(self, default_host):
+        self.DEFAULT_HOST = default_host
+
+    def __call__(self, s):
+        # returns (host, port) tuple
+        host = ''
+        port = None
+        if ":" in s:
+            host, s = s.split(":", 1)
+            if s:
+                port = port_number(s)
+            host = host.lower()
+        else:
+            try:
+                port = port_number(s)
+            except ValueError:
+                if len(s.split()) != 1:
+                    raise ValueError("not a valid host name: " + repr(s))
+                host = s.lower()
+        if not host:
+            host = self.DEFAULT_HOST
+        return host, port
+
+
 if sys.platform[:3] == "win":
     DEFAULT_HOST = "localhost"
 else:
     DEFAULT_HOST = ""
 
-def inet_address(s):
-    # returns (host, port) tuple
-    host = ''
-    port = None
-    if ":" in s:
-        host, s = s.split(":", 1)
-        if s:
-            port = port_number(s)
-        host = host.lower()
-    else:
-        try:
-            port = port_number(s)
-        except ValueError:
-            if len(s.split()) != 1:
-                raise ValueError("not a valid host name: " + repr(s))
-            host = s.lower()
-    if not host:
-        host = DEFAULT_HOST
-    return host, port
-
+inet_address = InetAddress(DEFAULT_HOST)
+inet_connection_address = InetAddress("127.0.0.1")
+inet_binding_address = InetAddress("")
 
 class SocketAddress:
     def __init__(self, s):
-        # returns (family, address) tuple
         import socket
         if "/" in s or s.find(os.sep) >= 0:
             self.family = getattr(socket, "AF_UNIX", None)
             self.address = s
         else:
             self.family = socket.AF_INET
-            self.address = inet_address(s)
+            self.address = self._parse_address(s)
+
+    def _parse_address(self, s):
+        return inet_address(s)
+
+class SocketBindingAddress(SocketAddress):
+
+    def _parse_address(self, s):
+        return inet_binding_address(s)
+
+class SocketConnectionAddress(SocketAddress):
+
+    def _parse_address(self, s):
+        return inet_connection_address(s)
+
 
 def float_conversion(v):
     if isinstance(v, basestring):
@@ -330,7 +352,11 @@ stock_datatypes = {
     "port-number":       port_number,
     "basic-key":         BasicKeyConversion(),
     "inet-address":      inet_address,
+    "inet-binding-address":    inet_binding_address,
+    "inet-connection-address": inet_connection_address,
     "socket-address":    SocketAddress,
+    "socket-binding-address":    SocketBindingAddress,
+    "socket-connection-address": SocketConnectionAddress,
     "ipaddr-or-hostname":IpaddrOrHostname(),
     "existing-directory":existing_directory,
     "existing-path":     existing_path,

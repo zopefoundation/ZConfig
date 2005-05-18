@@ -188,6 +188,26 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
         self.assertRaises(ValueError, convert, "40 # foo")
 
+    def test_datatype_inet_binding_address(self):
+        convert = self.types.get("inet-binding-address")
+        eq = self.assertEqual
+        defhost = ""
+        eq(convert("Host.Example.Com:80"), ("host.example.com", 80))
+        eq(convert(":80"),                 (defhost, 80))
+        eq(convert("80"),                  (defhost, 80))
+        eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
+        self.assertRaises(ValueError, convert, "40 # foo")
+
+    def test_datatype_inet_connection_address(self):
+        convert = self.types.get("inet-connection-address")
+        eq = self.assertEqual
+        defhost = "127.0.0.1"
+        eq(convert("Host.Example.Com:80"), ("host.example.com", 80))
+        eq(convert(":80"),                 (defhost, 80))
+        eq(convert("80"),                  (defhost, 80))
+        eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
+        self.assertRaises(ValueError, convert, "40 # foo")
+
     def test_datatype_integer(self):
         convert = self.types.get("integer")
         eq = self.assertEqual
