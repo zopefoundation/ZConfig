@@ -186,6 +186,8 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert(":80"),                 (defhost, 80))
         eq(convert("80"),                  (defhost, 80))
         eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
+        # test getservbyname - breaks if services file is bad
+        eq(convert(":chargen"),            (defhost,19))
         self.assertRaises(ValueError, convert, "40 # foo")
 
     def test_datatype_inet_binding_address(self):
@@ -196,6 +198,8 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert(":80"),                 (defhost, 80))
         eq(convert("80"),                  (defhost, 80))
         eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
+        # test getservbyname - breaks if services file is bad
+        eq(convert(":chargen"),            (defhost,19))
         self.assertRaises(ValueError, convert, "40 # foo")
 
     def test_datatype_inet_connection_address(self):
@@ -206,6 +210,8 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert(":80"),                 (defhost, 80))
         eq(convert("80"),                  (defhost, 80))
         eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
+        # test getservbyname - breaks if services file is bad
+        eq(convert(":chargen"),            (defhost,19))
         self.assertRaises(ValueError, convert, "40 # foo")
 
     def test_datatype_integer(self):
