@@ -164,24 +164,7 @@ def string_list(s):
     return s.split()
 
 
-def port_number(portliteral,protocol='tcp'):
-        "replacement for simple rangecheck to allow etc/services entries as ports"
-        import socket
-        try:
-            p=integer(portliteral)
-        except ValueError:
-            try:
-                p=socket.getservbyname(portliteral,protocol)
-            except socket.error:
-                raise ValueError("%r is not in etc/services" % portliteral)
-            return p
-        if p < 1:
-            raise ValueError("%s is below lower bound (%s)"
-                             % (`p`, 1))
-        if p > 0xffff:
-            raise ValueError("%s is above upper bound (%s)"
-                             % (`p`, 0xffff))
-        return p
+port_number = RangeCheckedConversion(integer, min=1, max=0xffff).__call__
 
 
 class InetAddress:
