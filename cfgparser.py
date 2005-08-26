@@ -83,9 +83,9 @@ class ZConfigParser:
         if not m:
             self.error("malformed section header")
         type, name = m.group('type', 'name')
-        type = type.lower()
+        type = self._normalize_case(type)
         if name:
-            name = name.lower()
+            name = self._normalize_case(name)
         try:
             newsect = self.context.startSection(section, type, name)
         except ZConfig.ConfigurationError, e:
@@ -101,7 +101,7 @@ class ZConfigParser:
     def end_section(self, section, rest):
         if not self.stack:
             self.error("unexpected section end")
-        type = rest.rstrip().lower()
+        type = self._normalize_case(rest.rstrip())
         opentype, name, prevsection = self.stack.pop()
         if type != opentype:
             self.error("unbalanced section end")
@@ -155,7 +155,7 @@ class ZConfigParser:
 
     def handle_define(self, section, rest):
         parts = rest.split(None, 1)
-        defname = parts[0].lower()
+        defname = self._normalize_case(parts[0])
         defvalue = ''
         if len(parts) == 2:
             defvalue = parts[1]
@@ -175,6 +175,9 @@ class ZConfigParser:
 
     def error(self, message):
         raise ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)
+
+    def _normalize_case(self, string):
+        return string.lower()
 
 
 import re
