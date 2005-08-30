@@ -1,3 +1,8 @@
+Changes since ZConfig 2.3:
+
+- Isolated some of the case-normalization code so it will at least be
+  easier to override.  This remains non-trivial.
+
 Changes since ZConfig 2.2:
 
 - Added "inet-binding-address" and "inet-connection-address" to the
