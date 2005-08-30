@@ -121,7 +121,7 @@ class OptionBag:
             optpath, val, pos = item
             s = optpath[0]
             bk = self.basic_key(s, pos)
-            if name and s.lower() == name:
+            if name and self._normalize_case(s) == name:
                 L.append((optpath[1:], val, pos))
             elif bk == type:
                 L.append((optpath[1:], val, pos))
@@ -137,6 +137,9 @@ class OptionBag:
         if self.sectitems or self.keypairs:
             raise ZConfig.ConfigurationError(
                 "not all command line options were consumed")
+
+    def _normalize_case(self, string):
+        return string.lower()
 
 
 class MatcherMixin:
