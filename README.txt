@@ -30,6 +30,11 @@ available at
 You may either create an RPM and install this, or install directly from
 the source distribution.
 
+There is a mailing list for discussions and questions about ZConfig;
+more information on the list is available at
+
+  http://mail.zope.org/mailman/listinfo/zconfig/
+
 
 Creating RPMS:
 
