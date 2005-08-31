@@ -251,19 +251,19 @@ def existing_directory(v):
     nv = os.path.expanduser(v)
     if os.path.isdir(nv):
         return nv
-    raise ValueError, '%s is not an existing directory' % v
+    raise ValueError('%s is not an existing directory' % v)
 
 def existing_path(v):
     nv = os.path.expanduser(v)
     if os.path.exists(nv):
         return nv
-    raise ValueError, '%s is not an existing path' % v
+    raise ValueError('%s is not an existing path' % v)
 
 def existing_file(v):
     nv = os.path.expanduser(v)
     if os.path.exists(nv):
         return nv
-    raise ValueError, '%s is not an existing file' % v
+    raise ValueError('%s is not an existing file' % v)
 
 def existing_dirpath(v):
     nv = os.path.expanduser(v)
@@ -273,8 +273,8 @@ def existing_dirpath(v):
         return nv
     if os.path.isdir(dir):
         return nv
-    raise ValueError, ('The directory named as part of the path %s '
-                       'does not exist.' % v)
+    raise ValueError('The directory named as part of the path %s '
+                     'does not exist.' % v)
 
 
 class SuffixMultiplier:

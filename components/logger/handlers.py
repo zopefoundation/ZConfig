@@ -43,7 +43,7 @@ def log_format(value):
         # not expect positional args.
         value % _log_format_variables
     except (ValueError, KeyError):
-        raise ValueError, 'Invalid log format string %s' % value
+        raise ValueError('Invalid log format string %s' % value)
     return value
 
 _control_char_rewrites = {r'\n': '\n', r'\t': '\t', r'\b': '\b',
@@ -133,11 +133,11 @@ def http_handler_url(value):
     import urlparse
     scheme, netloc, path, param, query, fragment = urlparse.urlparse(value)
     if scheme != 'http':
-        raise ValueError, 'url must be an http url'
+        raise ValueError('url must be an http url')
     if not netloc:
-        raise ValueError, 'url must specify a location'
+        raise ValueError('url must specify a location')
     if not path:
-        raise ValueError, 'url must specify a path'
+        raise ValueError('url must specify a path')
     q = []
     if param:
         q.append(';')
