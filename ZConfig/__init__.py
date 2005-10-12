@@ -11,10 +11,30 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Configuration data structures and loader for the ZRS.
+"""Structured, schema-driven configuration library.
+
+ZConfig is a configuration library intended for general use.  It
+supports a hierarchical schema-driven configuration model that allows
+a schema to specify data conversion routines written in Python.
+ZConfig's model is very different from the model supported by the
+ConfigParser module found in Python's standard library, and is more
+suitable to configuration-intensive applications.
+
+ZConfig schema are written in an XML-based language and are able to
+``import`` schema components provided by Python packages.  Since
+components are able to bind to conversion functions provided by Python
+code in the package (or elsewhere), configuration objects can be
+arbitrarily complex, with values that have been verified against
+arbitrary constraints.  This makes it easy for applications to
+separate configuration support from configuration loading even with
+configuration data being defined and consumed by a wide range of
+separate packages.
+
 
 $Id: __init__.py,v 1.18 2004/04/15 20:33:32 fdrake Exp $
 """
+__docformat__ = "reStructuredText"
+
 version_info = (2, 3)
 __version__ = ".".join([str(n) for n in version_info])
 
