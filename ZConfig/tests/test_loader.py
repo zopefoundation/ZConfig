@@ -284,9 +284,57 @@ class TestNonExistentResources(unittest.TestCase):
                           "http://www.zope.org/no-such-document/")
 
 
+class TestResourcesInZip(unittest.TestCase):
+
+    def setUp(self):
+        self.old_path = sys.path[:]
+        # now add our sample EGG to sys.path:
+        zipfile = os.path.join(os.path.dirname(myfile), "foosample.zip")
+        sys.path.append(zipfile)
+
+    def tearDown(self):
+        sys.path[:] = self.old_path
+
+    def test_zip_import_component_from_schema(self):
+        sio = StringIO('''
+            <schema>
+              <abstracttype name="something"/>
+              <import package="foo.sample"/>
+              <section name="*"
+                       attribute="something"
+                       type="something"
+                       />
+            </schema>
+            ''')
+        schema = ZConfig.loadSchemaFile(sio)
+        t = schema.gettype("sample")
+        self.failIf(t.isabstract())
+
+    def test_zip_import_component_from_config(self):
+        sio = StringIO('''
+            <schema>
+              <abstracttype name="something"/>
+              <section name="*"
+                       attribute="something"
+                       type="something"
+                       />
+            </schema>
+            ''')
+        schema = ZConfig.loadSchemaFile(sio)
+        sio = StringIO('''
+            %import foo.sample
+            <sample>
+              data value
+            </sample>
+            ''')
+        config, _ = ZConfig.loadConfigFile(schema, sio)
+        self.assertEqual(config.something.data, "| value |")
+
+
 def test_suite():
     suite = unittest.makeSuite(LoaderTestCase)
     suite.addTest(unittest.makeSuite(TestNonExistentResources))
+    suite.addTest(unittest.makeSuite(TestResourcesInZip))
     return suite
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@
 ##############################################################################
 """Schema loader utility."""
 
+import cStringIO
 import os.path
 import sys
 import urllib
@@ -90,16 +91,20 @@ class BaseLoader:
         # change and provide the cached resource when the remote
         # resource is not accessible.
         url = str(url)
-        try:
-            file = urllib2.urlopen(url)
-        except urllib2.URLError, e:
-            # urllib2.URLError has a particularly hostile str(), so we
-            # generally don't want to pass it along to the user.
-            self._raise_open_error(url, e.reason)
-        except (IOError, OSError), e:
-            # Python 2.1 raises a different error from Python 2.2+,
-            # so we catch both to make sure we detect the situation.
-            self._raise_open_error(url, str(e))
+        if url.startswith("package:"):
+            _, package, filename = url.split(":", 2)
+            file = openPackageResource(package, filename)
+        else:
+            try:
+                file = urllib2.urlopen(url)
+            except urllib2.URLError, e:
+                # urllib2.URLError has a particularly hostile str(), so we
+                # generally don't want to pass it along to the user.
+                self._raise_open_error(url, e.reason)
+            except (IOError, OSError), e:
+                # Python 2.1 raises a different error from Python 2.2+,
+                # so we catch both to make sure we detect the situation.
+                self._raise_open_error(url, str(e))
         return self.createResource(file, url)
 
     def _raise_open_error(self, url, message):
@@ -134,6 +139,29 @@ class BaseLoader:
         else:
             return True
 
+
+def openPackageResource(package, path):
+    __import__(package)
+    pkg = sys.modules[package]
+    try:
+        loader = pkg.__loader__
+    except AttributeError:
+        relpath = os.path.join(*path.split("/"))
+        for dir in pkg.__path__:
+            filename = os.path.join(dir, relpath)
+            if os.path.exists(filename):
+                break
+        else:
+            raise ZConfig.SchemaResourceError("schema component not found",
+                                              filename=path,
+                                              package=package,
+                                              path=pkg.__path__)
+        url = "file:" + urllib.pathname2url(filename)
+        url = ZConfig.url.urlnormalize(url)
+        return urllib2.urlopen(url)
+    else:
+        loadpath = os.path.join(os.path.dirname(pkg.__file__), path)
+        return cStringIO.StringIO(loader.get_data(loadpath))
 
 
 def _url_from_file(file):
@@ -184,16 +212,7 @@ class SchemaLoader(BaseLoader):
             raise ZConfig.SchemaResourceError(
                 "import name does not refer to a package",
                 filename=file, package=package)
-        for dir in pkg.__path__:
-            dirname = os.path.abspath(dir)
-            fn = os.path.join(dirname, file)
-            if os.path.exists(fn):
-                return "file://" + urllib.pathname2url(fn)
-        else:
-            raise ZConfig.SchemaResourceError("schema component not found",
-                                              filename=file,
-                                              package=package,
-                                              path=pkg.__path__)
+        return "package:%s:%s" % (package, file)
 
 
 class ConfigLoader(BaseLoader):
