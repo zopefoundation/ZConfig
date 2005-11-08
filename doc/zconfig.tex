@@ -1364,7 +1364,7 @@ class NoiseServerFactory(ServerFactory):
         return NoiseServer(self.ip, self.port, generator)
 \end{verbatim}
 
-You'll need to arrange for the package containing this component is
+You'll need to arrange for the package containing this component to be
 available on Python's \code{sys.path} before the configuration file is
 loaded; this is mostly easily done by manipulating the
 \envvar{PYTHONPATH} environment variable.
