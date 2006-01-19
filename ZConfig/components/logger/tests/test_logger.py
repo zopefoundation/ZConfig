@@ -27,6 +27,18 @@ from ZConfig.components.logger import handlers
 from ZConfig.components.logger import loghandler
 
 
+class CustomFormatter(logging.Formatter):
+    def formatException(self, ei):
+        """Format and return the exception information as a string.
+
+        This adds helpful advice to the end of the traceback.
+        """
+        import traceback
+        sio = StringIO.StringIO()
+        traceback.print_exception(ei[0], ei[1], ei[2], file=sio)
+        return sio.getvalue() + "... Don't panic!"
+
+
 class LoggingTestBase(unittest.TestCase):
 
     # XXX This tries to save and restore the state of logging around
@@ -157,6 +169,30 @@ class TestConfig(LoggingTestBase):
             setattr(sys, name, old_stream)
         logger.warn("woohoo!")
         self.assert_(sio.getvalue().find("woohoo!") >= 0)
+
+    def test_custom_formatter(self):
+        old_stream = sys.stdout
+        conf = self.get_config("""
+        <eventlog>
+        <logfile>
+        formatter ZConfig.components.logger.tests.test_logger.CustomFormatter
+        level info
+        path STDOUT
+        </logfile>
+        </eventlog>
+        """)
+        sio = StringIO.StringIO()
+        sys.stdout = sio
+        try:
+            logger = conf.eventlog()
+        finally:
+            sys.stdout = old_stream
+        try:
+            raise KeyError
+        except KeyError:
+            logger.exception("testing a KeyError")
+        self.assert_(sio.getvalue().find("KeyError") >= 0)
+        self.assert_(sio.getvalue().find("Don't panic") >= 0)
 
     def test_with_syslog(self):
         logger = self.check_simple_logger("<eventlog>\n"

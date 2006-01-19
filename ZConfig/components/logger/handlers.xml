@@ -10,6 +10,14 @@
       loghandler directly since it doesn't implement the loghandler
       abstract section type.
     </description>
+    <key name="formatter" datatype="dotted-name" required="no">
+      <description>
+        Logging formatter class.  The default is 'logging.Formatter'.
+        An alternative is 'zope.exceptions.log.Formatter',
+        which enhances exception tracebacks with information from
+        __traceback_info__ and __traceback_supplement__ variables.
+      </description>
+    </key>
     <key name="dateformat"
          default="%Y-%m-%dT%H:%M:%S"/>
     <key name="level"

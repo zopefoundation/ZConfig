@@ -54,6 +54,19 @@ def ctrl_char_insert(value):
         value = value.replace(pattern, replacement)
     return value
 
+def resolve(name):
+    """Given a dotted name, returns an object imported from a Python module."""
+    name = name.split('.')
+    used = name.pop(0)
+    found = __import__(used)
+    for n in name:
+        used += '.' + n
+        try:
+            found = getattr(found, n)
+        except AttributeError:
+            __import__(used)
+            found = getattr(found, n)
+    return found
 
 class HandlerFactory(Factory):
     def __init__(self, section):
@@ -67,8 +80,11 @@ class HandlerFactory(Factory):
     def create(self):
         import logging
         logger = self.create_loghandler()
-        logger.setFormatter(logging.Formatter(self.section.format,
-                                              self.section.dateformat))
+        if self.section.formatter:
+            f = resolve(self.section.formatter)
+        else:
+            f = logging.Formatter
+        logger.setFormatter(f(self.section.format, self.section.dateformat))
         logger.setLevel(self.section.level)
         return logger
 
