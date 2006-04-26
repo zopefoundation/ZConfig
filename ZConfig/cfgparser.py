@@ -177,6 +177,8 @@ class ZConfigParser:
         raise ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)
 
     def _normalize_case(self, string):
+        # This method is factored out solely to allow subclasses to modify
+        # the behavior of the parser.
         return string.lower()
 
 
