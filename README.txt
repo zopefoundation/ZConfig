@@ -1,4 +1,5 @@
-This is ZConfig.
+ZConfig: Schema-driven configuration
+====================================
 
 ZConfig is a configuration library intended for general use.  It
 supports a hierarchical schema-driven configuration model that allows
@@ -36,27 +37,28 @@ more information on the list is available at
   http://mail.zope.org/mailman/listinfo/zconfig/
 
 
-Creating RPMS:
+Installing from the source distribution
+---------------------------------------
 
-  python setup.py bdist_rpm
+For a simple installation::
 
-  If you need to force the Python interpreter to, for example, python2:
-
-    python2 setup.py bdist_rpm --python=python2
+  python setup.py install
 
 
-Installation from the source distribution:
+To install to a user's home-dir::
 
-    python setup.py install
+  python setup.py install --home=<dir>
 
-  To install to a user's home-dir:
-    python setup.py install --home=<dir>
 
-  To install to another prefix (eg. /usr/local)
-    python setup.py install --prefix=/usr/local
+To install to another prefix (for example, /usr/local)::
 
-  If you need to force the python interpreter to e.g. python2:
-    python2 setup.py install
+  python setup.py install --prefix=/usr/local
 
-  For more information please refer to
-    http://www.python.org/doc/current/inst/inst.html
+
+If you need to force the python interpreter to (for example) python2::
+
+  python2 setup.py install
+
+
+For more information on installing packages, please refer to
+`Installing Python Modules <http://docs.python.org/inst/inst.html>`__.
