@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Copyright (c) 2002, 2003 Zope Corporation and Contributors.
+% Copyright (c) 2002-2007 Zope Corporation and Contributors.
 % All Rights Reserved.
 %
 % This software is subject to the provisions of the Zope Public License,
@@ -19,9 +19,9 @@
 
 \title{ZConfig Package Reference}
 
-\date{18 May 2005}
-\release{2.3}
-\setshortversion{2.3}
+\date{29 March 2007}
+\release{2.4}
+\setshortversion{2.4}
 
 \author{Zope Corporation}
 \authoraddress{
@@ -807,6 +807,37 @@ provide type definitions.
     attribute.
   \end{attributedesc}
 \end{elementdesc}
+
+
+\subsection{Referring to Files in Packages}
+
+The \attribute{extends} attribute of the \element{schema} element is
+used to refer to files containing base schema; sometimes it makes
+sense to refer to a base schema relative to the Python package that
+provides it.  For this purpose, ZConfig supports the special
+\code{package:} URL scheme.
+
+The \code{package:} URL scheme is straightforward, and contains three
+parts: the scheme name, the package name, and a relative path.  The
+relative path is searched for using the named package's
+\code{__path__} if it's a conventional filesystem package, or using
+the package's loader if that supports resource access (such as the
+loader for eggs and other ZIP-file based packages).
+
+The basic form of the \code{package:} URL is
+
+\begin{alltt}
+package:\var{package.name}:\var{relative-path}
+\end{alltt}
+
+The package name must be fully specified; the current prefix, if any,
+is not used.  If the named package is contained in an egg or ZIP file,
+the resource identified by the relative path must reside in the same
+egg or ZIP file.
+
+The \code{package:} URL scheme is generally available everywhere
+ZConfig supports loading text from URLs directly, but applications
+using ZConfig do not automatically acquire general support for this.
 
 
 \section{Standard \module{ZConfig} Datatypes\label{standard-datatypes}}
