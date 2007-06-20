@@ -38,7 +38,10 @@ def reopenFiles():
             h.reopen()
 
 def _remove_from_reopenable(wr):
-    _reopenable_handlers.remove(wr)
+    try:
+        _reopenable_handlers.remove(wr)
+    except ValueError:
+        pass
 
 
 class FileHandler(StreamHandler):
@@ -66,6 +69,7 @@ class FileHandler(StreamHandler):
             StreamHandler.close(self)
         except KeyError:
             pass
+        _remove_from_reopenable(self._wr)
 
     def reopen(self):
         self.close()
