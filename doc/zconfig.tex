@@ -1178,7 +1178,16 @@ or \datatype{logger} section type is used, provide a \method{reopen()}
 method which may be called to close any log files and re-open them.
 This is useful when using a \UNIX{} signal to effect log file
 rotation: the signal handler can call this method, and not have to
-worry about what handlers have been registered for the logger.
+worry about what handlers have been registered for the logger.  There
+is also a function in the
+\module{ZConfig.components.logger.loghandler} module that re-opens all
+open log files created using ZConfig configuraiton:
+
+\begin{funcdesc}{reopenFiles}{}
+  Closes and re-opens all the log files held open by handlers created
+  by the factories for \code{logfile} sections.  This is intended to
+  help support log rotation for applications.
+\end{funcdesc}
 
 Building an application that uses the logging components is fairly
 straightforward.  The schema needs to import the relevant components

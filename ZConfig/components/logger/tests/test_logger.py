@@ -45,21 +45,40 @@ class LoggingTestBase(unittest.TestCase):
     # XXX This tries to save and restore the state of logging around
     # the test.  Somewhat surgical; there may be a better way.
 
-    name = None
-
     def setUp(self):
-        self._old_logger = logging.getLogger(self.name)
+        self._created = []
+        self._old_logger = logging.getLogger()
         self._old_level = self._old_logger.level
         self._old_handlers = self._old_logger.handlers[:]
         self._old_logger.handlers[:] = []
         self._old_logger.setLevel(logging.WARN)
 
+        self._old_logger_dict = logging.root.manager.loggerDict.copy()
+        logging.root.manager.loggerDict.clear()
+
     def tearDown(self):
+        logging.root.manager.loggerDict.clear()
+        logging.root.manager.loggerDict.update(self._old_logger_dict)
+
         for h in self._old_logger.handlers:
             self._old_logger.removeHandler(h)
         for h in self._old_handlers:
             self._old_logger.addHandler(h)
         self._old_logger.setLevel(self._old_level)
+
+        while self._created:
+            os.unlink(self._created.pop())
+
+    def mktemp(self):
+        fd, fn = tempfile.mkstemp()
+        os.close(fd)
+        self._created.append(fn)
+        return fn
+
+    def move(self, fn):
+        nfn = self.mktemp()
+        os.rename(fn, nfn)
+        return nfn
 
     _schema = None
 
@@ -129,8 +148,7 @@ class TestConfig(LoggingTestBase):
 
     def test_with_logfile(self):
         import os
-        fd, fn = tempfile.mkstemp()
-        os.close(fd)
+        fn = self.mktemp()
         logger = self.check_simple_logger("<eventlog>\n"
                                           "  <logfile>\n"
                                           "    path %s\n"
@@ -140,21 +158,6 @@ class TestConfig(LoggingTestBase):
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assert_(isinstance(logfile, loghandler.FileHandler))
-        # Test the move-and-reopen behavior:
-        logger.propagate = False
-        logger.error("message 1")
-        os.rename(fn, fn + "-")
-        logger.error("message 2")
-        logfile.reopen()
-        logger.error("message 3")
-        logfile.close()
-        text1 = open(fn + "-").read()
-        text2 = open(fn).read()
-        self.assert_("message 1" in text1)
-        self.assert_("message 2" in text1)
-        self.assert_("message 3" in text2)
-        os.remove(fn)
-        os.remove(fn + "-")
 
     def test_with_stderr(self):
         self.check_standard_stream("stderr")
@@ -277,8 +280,93 @@ class TestConfig(LoggingTestBase):
         return logger
 
 
+class TestReopeningLogfiles(LoggingTestBase):
+
+    # These tests should not be run on Windows.
+
+    _schematext = """
+      <schema>
+        <import package='ZConfig.components.logger'/>
+        <multisection type='logger' name='*' attribute='loggers'/>
+      </schema>
+    """
+
+    _sampleconfig_template = """
+      <logger>
+        name  foo.bar
+        <logfile>
+          path  %s
+          level debug
+        </logfile>
+        <logfile>
+          path  %s
+          level info
+        </logfile>
+      </logger>
+
+      <logger>
+        name  bar.foo
+        <logfile>
+          path  %s
+          level info
+        </logfile>
+      </logger>
+    """
+
+    def test_filehandler_reopen(self):
+
+        def mkrecord(msg):
+            return logging.LogRecord(
+                "foo.bar", logging.ERROR, __file__, 42, msg, (), ())
+
+        fn = self.mktemp()
+        h = loghandler.FileHandler(fn)
+        h.handle(mkrecord("message 1"))
+        nfn = self.move(fn)
+        h.handle(mkrecord("message 2"))
+        h.reopen()
+        h.handle(mkrecord("message 3"))
+        h.close()
+
+        # Check that the messages are in the right files::
+        text1 = open(nfn).read()
+        text2 = open(fn).read()
+        self.assert_("message 1" in text1)
+        self.assert_("message 2" in text1)
+        self.assert_("message 3" in text2)
+
+    def test_logfile_reopening(self):
+        paths = self.mktemp(), self.mktemp(), self.mktemp()
+        text = self._sampleconfig_template % paths
+        conf = self.get_config(text)
+        assert len(conf.loggers) == 2
+        # Build the loggers from the configuration, and write to them:
+        conf.loggers[0]().info("message 1")
+        conf.loggers[1]().info("message 2")
+        npaths = [self.move(fn) for fn in paths]
+        #
+        # We expect this to re-open the original files, so we'll have
+        # six files instead of three.
+        #
+        loghandler.reopenFiles()
+        #
+        # Write to them again:
+        conf.loggers[0]().info("message 3")
+        conf.loggers[1]().info("message 4")
+        #
+        # We should not have all six files:
+        for fn in paths:
+            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+        for fn in npaths:
+            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+
+
 def test_suite():
-    return unittest.makeSuite(TestConfig)
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TestConfig))
+    if os.name != "nt":
+        suite.addTest(unittest.makeSuite(TestReopeningLogfiles))
+    return suite
 
 if __name__ == '__main__':
     unittest.main(defaultTest="test_suite")

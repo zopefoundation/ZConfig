@@ -15,11 +15,30 @@
 
 import os
 import sys
+import weakref
 
 from logging import Handler, StreamHandler
 from logging.handlers import SysLogHandler, BufferingHandler
 from logging.handlers import HTTPHandler, SMTPHandler
 from logging.handlers import NTEventLogHandler as Win32EventLogHandler
+
+
+_reopenable_handlers = []
+
+def reopenFiles():
+    """Reopen all logfiles managed by ZConfig configuration."""
+    for wr in _reopenable_handlers[:]:
+        h = wr()
+        if h is None:
+            try:
+                _reopenable_handlers.remove(wr)
+            except ValueError:
+                continue
+        else:
+            h.reopen()
+
+def _remove_from_reopenable(wr):
+    _reopenable_handlers.remove(wr)
 
 
 class FileHandler(StreamHandler):
@@ -34,6 +53,8 @@ class FileHandler(StreamHandler):
         StreamHandler.__init__(self, open(filename, mode))
         self.baseFilename = filename
         self.mode = mode
+        self._wr = weakref.ref(self, _remove_from_reopenable)
+        _reopenable_handlers.append(self._wr)
 
     def close(self):
         self.stream.close()
