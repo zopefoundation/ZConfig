@@ -22,7 +22,7 @@ separate packages.
 
 setup(
     name = name,
-    version = "2.4a2",
+    version = "2.4a3",
     author = "Fred L. Drake, Jr.",
     author_email = "fred@zope.com",
     description = "Structured Configuration Library",
@@ -32,7 +32,7 @@ setup(
 
     packages = ['ZConfig'],
     include_package_data = True,
-    zip_safe=False,
+    zip_safe = False,
     classifiers = [
       'Intended Audience :: Developers',
       'Intended Audience :: System Administrators',
