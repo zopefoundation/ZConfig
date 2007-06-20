@@ -42,6 +42,7 @@ class FileHandler(StreamHandler):
         self.close()
         self.stream = open(self.baseFilename, self.mode)
 
+
 class Win32FileHandler(FileHandler):
     """File-based log handler for Windows that supports an additional 'rotate'
     method.  reopen() is generally useless since Windows cannot do a move on
@@ -63,6 +64,7 @@ if os.name == "nt":
     # Make it the default for Windows - we install a 'reopen' handler that
     # tries to rotate the logfile.
     FileHandler = Win32FileHandler
+
 
 class NullHandler(Handler):
     """Handler that does nothing."""
