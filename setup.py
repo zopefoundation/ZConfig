@@ -22,7 +22,7 @@ separate packages.
 
 setup(
     name = name,
-    version = "2.4a3",
+    version = "2.4a4",
     author = "Fred L. Drake, Jr.",
     author_email = "fred@zope.com",
     description = "Structured Configuration Library",
