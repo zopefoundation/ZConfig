@@ -16,6 +16,7 @@
 
 import cStringIO as StringIO
 import logging
+import os
 import sys
 import tempfile
 import unittest
@@ -128,7 +129,8 @@ class TestConfig(LoggingTestBase):
 
     def test_with_logfile(self):
         import os
-        fn = tempfile.mktemp()
+        fd, fn = tempfile.mkstemp()
+        os.close(fd)
         logger = self.check_simple_logger("<eventlog>\n"
                                           "  <logfile>\n"
                                           "    path %s\n"
@@ -138,8 +140,21 @@ class TestConfig(LoggingTestBase):
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assert_(isinstance(logfile, loghandler.FileHandler))
+        # Test the move-and-reopen behavior:
+        logger.propagate = False
+        logger.error("message 1")
+        os.rename(fn, fn + "-")
+        logger.error("message 2")
+        logfile.reopen()
+        logger.error("message 3")
         logfile.close()
+        text1 = open(fn + "-").read()
+        text2 = open(fn).read()
+        self.assert_("message 1" in text1)
+        self.assert_("message 2" in text1)
+        self.assert_("message 3" in text2)
         os.remove(fn)
+        os.remove(fn + "-")
 
     def test_with_stderr(self):
         self.check_standard_stream("stderr")
