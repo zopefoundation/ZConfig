@@ -37,6 +37,14 @@ class FileHandler(StreamHandler):
 
     def close(self):
         self.stream.close()
+        # This can raise a KeyError if the handler has already been
+        # removed, but a later error can be raised if
+        # StreamHandler.close() isn't called.  This seems the best
+        # compromise.  :-(
+        try:
+            StreamHandler.close(self)
+        except KeyError:
+            pass
 
     def reopen(self):
         self.close()
