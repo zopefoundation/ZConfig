@@ -72,7 +72,7 @@ class FileHandler(StreamHandler):
         _remove_from_reopenable(self._wr)
 
     def reopen(self):
-        self.close()
+        self.stream.close()
         self.stream = open(self.baseFilename, self.mode)
 
 

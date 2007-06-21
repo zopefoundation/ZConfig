@@ -319,21 +319,32 @@ class TestReopeningLogfiles(LoggingTestBase):
             return logging.LogRecord(
                 "foo.bar", logging.ERROR, __file__, 42, msg, (), ())
 
+        # This goes through the reopening operation *twice* to make
+        # sure that we don't lose our handle on the handler the first
+        # time around.
+
         fn = self.mktemp()
         h = loghandler.FileHandler(fn)
         h.handle(mkrecord("message 1"))
-        nfn = self.move(fn)
+        nfn1 = self.move(fn)
         h.handle(mkrecord("message 2"))
         h.reopen()
         h.handle(mkrecord("message 3"))
+        nfn2 = self.move(fn)
+        h.handle(mkrecord("message 4"))
+        h.reopen()
+        h.handle(mkrecord("message 5"))
         h.close()
 
         # Check that the messages are in the right files::
-        text1 = open(nfn).read()
-        text2 = open(fn).read()
+        text1 = open(nfn1).read()
+        text2 = open(nfn2).read()
+        text3 = open(fn).read()
         self.assert_("message 1" in text1)
         self.assert_("message 2" in text1)
         self.assert_("message 3" in text2)
+        self.assert_("message 4" in text2)
+        self.assert_("message 5" in text3)
 
     def test_logfile_reopening(self):
         paths = self.mktemp(), self.mktemp(), self.mktemp()
@@ -343,21 +354,33 @@ class TestReopeningLogfiles(LoggingTestBase):
         # Build the loggers from the configuration, and write to them:
         conf.loggers[0]().info("message 1")
         conf.loggers[1]().info("message 2")
-        npaths = [self.move(fn) for fn in paths]
+        npaths1 = [self.move(fn) for fn in paths]
         #
-        # We expect this to re-open the original files, so we'll have
-        # six files instead of three.
+        # We expect this to re-open the original filenames, so we'll
+        # have six files instead of three.
         #
         loghandler.reopenFiles()
         #
         # Write to them again:
         conf.loggers[0]().info("message 3")
         conf.loggers[1]().info("message 4")
+        npaths2 = [self.move(fn) for fn in paths]
         #
-        # We should not have all six files:
+        # We expect this to re-open the original filenames, so we'll
+        # have nine files instead of six.
+        #
+        loghandler.reopenFiles()
+        #
+        # Write to them again:
+        conf.loggers[0]().info("message 5")
+        conf.loggers[1]().info("message 6")
+        #
+        # We should now have all nine files:
         for fn in paths:
             self.assert_(os.path.isfile(fn), "%r must exist" % fn)
-        for fn in npaths:
+        for fn in npaths1:
+            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+        for fn in npaths2:
             self.assert_(os.path.isfile(fn), "%r must exist" % fn)
 
 
