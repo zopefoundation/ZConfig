@@ -30,6 +30,8 @@
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
     <key name="path" required="yes"/>
+    <key name="old-files" required="no" default="0" datatype="integer"/>
+    <key name="max-size" required="no" default="0" datatype="byte-size"/>
     <key name="format"
          default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
          datatype=".log_format"/>

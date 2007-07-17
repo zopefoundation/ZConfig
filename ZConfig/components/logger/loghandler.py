@@ -18,12 +18,22 @@ import sys
 import weakref
 
 from logging import Handler, StreamHandler
+from logging.handlers import RotatingFileHandler as _RotatingFileHandler
 from logging.handlers import SysLogHandler, BufferingHandler
 from logging.handlers import HTTPHandler, SMTPHandler
 from logging.handlers import NTEventLogHandler as Win32EventLogHandler
 
 
+
 _reopenable_handlers = []
+
+def closeFiles():
+    """Reopen all logfiles managed by ZConfig configuration."""
+    while _reopenable_handlers:
+        wr = _reopenable_handlers.pop()
+        h = wr()
+        if h is not None:
+            h.close()
 
 def reopenFiles():
     """Reopen all logfiles managed by ZConfig configuration."""
@@ -97,6 +107,21 @@ if os.name == "nt":
     # Make it the default for Windows - we install a 'reopen' handler that
     # tries to rotate the logfile.
     FileHandler = Win32FileHandler
+
+
+class RotatingFileHandler(_RotatingFileHandler):
+
+    def __init__(self, *args, **kw):
+        _RotatingFileHandler.__init__(self, *args, **kw)
+        self._wr = weakref.ref(self, _remove_from_reopenable)
+        _reopenable_handlers.append(self._wr)
+
+    def close(self):
+        _RotatingFileHandler.close(self)
+        _remove_from_reopenable(self._wr)
+
+    def reopen(self):
+        self.doRollover()
 
 
 class NullHandler(Handler):

@@ -69,6 +69,10 @@ class LoggingTestBase(unittest.TestCase):
         while self._created:
             os.unlink(self._created.pop())
 
+        assert loghandler._reopenable_handlers == []
+        loghandler.closeFiles()
+        loghandler._reopenable_handlers == []
+
     def mktemp(self):
         fd, fn = tempfile.mkstemp()
         os.close(fd)
@@ -147,7 +151,6 @@ class TestConfig(LoggingTestBase):
                                 loghandler.NullHandler))
 
     def test_with_logfile(self):
-        import os
         fn = self.mktemp()
         logger = self.check_simple_logger("<eventlog>\n"
                                           "  <logfile>\n"
@@ -158,12 +161,32 @@ class TestConfig(LoggingTestBase):
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assert_(isinstance(logfile, loghandler.FileHandler))
+        logger.removeHandler(logfile)
+        logfile.close()
 
     def test_with_stderr(self):
         self.check_standard_stream("stderr")
 
     def test_with_stdout(self):
         self.check_standard_stream("stdout")
+
+    def test_with_rotating_logfile(self):
+        fn = self.mktemp()
+        logger = self.check_simple_logger("<eventlog>\n"
+                                          "  <logfile>\n"
+                                          "    path %s\n"
+                                          "    level debug\n"
+                                          "    max-size 5mb\n"
+                                          "    old-files 10\n"
+                                          "  </logfile>\n"
+                                          "</eventlog>" % fn)
+        logfile = logger.handlers[0]
+        self.assertEqual(logfile.level, logging.DEBUG)
+        self.assertEqual(logfile.backupCount, 10)
+        self.assertEqual(logfile.maxBytes, 5*1024*1024)
+        self.assert_(isinstance(logfile, loghandler.RotatingFileHandler))
+        logger.removeHandler(logfile)
+        logfile.close()
 
     def check_standard_stream(self, name):
         old_stream = getattr(sys, name)
@@ -280,7 +303,7 @@ class TestConfig(LoggingTestBase):
         return logger
 
 
-class TestReopeningLogfiles(LoggingTestBase):
+class TestReopeningLogfilesBase(LoggingTestBase):
 
     # These tests should not be run on Windows.
 
@@ -289,28 +312,6 @@ class TestReopeningLogfiles(LoggingTestBase):
         <import package='ZConfig.components.logger'/>
         <multisection type='logger' name='*' attribute='loggers'/>
       </schema>
-    """
-
-    _sampleconfig_template = """
-      <logger>
-        name  foo.bar
-        <logfile>
-          path  %s
-          level debug
-        </logfile>
-        <logfile>
-          path  %s
-          level info
-        </logfile>
-      </logger>
-
-      <logger>
-        name  bar.foo
-        <logfile>
-          path  %s
-          level info
-        </logfile>
-      </logger>
     """
 
     def test_filehandler_reopen(self):
@@ -324,7 +325,7 @@ class TestReopeningLogfiles(LoggingTestBase):
         # time around.
 
         fn = self.mktemp()
-        h = loghandler.FileHandler(fn)
+        h = self.handler_factory(fn)
         h.handle(mkrecord("message 1"))
         nfn1 = self.move(fn)
         h.handle(mkrecord("message 2"))
@@ -346,9 +347,44 @@ class TestReopeningLogfiles(LoggingTestBase):
         self.assert_("message 4" in text2)
         self.assert_("message 5" in text3)
 
+class TestReopeningLogfiles(TestReopeningLogfilesBase):
+
+    handler_factory = loghandler.FileHandler
+
+    _sampleconfig_template = """
+      <logger>
+        name  foo.bar
+        <logfile>
+          path  %(path0)s
+          level debug
+        </logfile>
+        <logfile>
+          path  %(path1)s
+          level info
+        </logfile>
+      </logger>
+
+      <logger>
+        name  bar.foo
+        <logfile>
+          path  %(path2)s
+          level info
+        </logfile>
+      </logger>
+    """
+
     def test_logfile_reopening(self):
+        #
+        # This test only applies to the simple logfile reopening; it
+        # doesn't work the same way as the rotating logfile handler.
+        #
         paths = self.mktemp(), self.mktemp(), self.mktemp()
-        text = self._sampleconfig_template % paths
+        d = {
+            "path0": paths[0],
+            "path1": paths[1],
+            "path2": paths[2],
+            }
+        text = self._sampleconfig_template % d
         conf = self.get_config(text)
         assert len(conf.loggers) == 2
         # Build the loggers from the configuration, and write to them:
@@ -382,6 +418,97 @@ class TestReopeningLogfiles(LoggingTestBase):
             self.assert_(os.path.isfile(fn), "%r must exist" % fn)
         for fn in npaths2:
             self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+        #
+        # Clean up:
+        for logger in conf.loggers:
+            logger = logger()
+            for handler in logger.handlers[:]:
+                logger.removeHandler(handler)
+                handler.close()
+
+
+class TestReopeningRotatingLogfiles(TestReopeningLogfilesBase):
+
+    _sampleconfig_template = """
+      <logger>
+        name  foo.bar
+        <logfile>
+          path  %(path0)s
+          level debug
+          max-size 1mb
+          old-files 10
+        </logfile>
+        <logfile>
+          path  %(path1)s
+          level info
+          max-size 1mb
+          old-files 3
+        </logfile>
+      </logger>
+
+      <logger>
+        name  bar.foo
+        <logfile>
+          path  %(path2)s
+          level info
+          max-size 10mb
+          old-files 10
+        </logfile>
+      </logger>
+    """
+
+    handler_factory = loghandler.RotatingFileHandler
+
+    def test_logfile_reopening(self):
+        #
+        # This test only applies to the simple logfile reopening; it
+        # doesn't work the same way as the rotating logfile handler.
+        #
+        paths = self.mktemp(), self.mktemp(), self.mktemp()
+        d = {
+            "path0": paths[0],
+            "path1": paths[1],
+            "path2": paths[2],
+            }
+        text = self._sampleconfig_template % d
+        conf = self.get_config(text)
+        assert len(conf.loggers) == 2
+        # Build the loggers from the configuration, and write to them:
+        conf.loggers[0]().info("message 1")
+        conf.loggers[1]().info("message 2")
+        #
+        # We expect this to re-open the original filenames, so we'll
+        # have six files instead of three.
+        #
+        loghandler.reopenFiles()
+        #
+        # Write to them again:
+        conf.loggers[0]().info("message 3")
+        conf.loggers[1]().info("message 4")
+        #
+        # We expect this to re-open the original filenames, so we'll
+        # have nine files instead of six.
+        #
+        loghandler.reopenFiles()
+        #
+        # Write to them again:
+        conf.loggers[0]().info("message 5")
+        conf.loggers[1]().info("message 6")
+        #
+        # We should now have all nine files:
+        for fn in paths:
+            fn1 = fn + ".1"
+            fn2 = fn + ".2"
+            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+            self.assert_(os.path.isfile(fn1), "%r must exist" % fn1)
+            self.assert_(os.path.isfile(fn2), "%r must exist" % fn2)
+        #
+        # Clean up:
+        for logger in conf.loggers:
+            logger = logger()
+            for handler in logger.handlers[:]:
+                logger.removeHandler(handler)
+                handler.close()
 
 
 def test_suite():
@@ -389,6 +516,7 @@ def test_suite():
     suite.addTest(unittest.makeSuite(TestConfig))
     if os.name != "nt":
         suite.addTest(unittest.makeSuite(TestReopeningLogfiles))
+    suite.addTest(unittest.makeSuite(TestReopeningRotatingLogfiles))
     return suite
 
 if __name__ == '__main__':

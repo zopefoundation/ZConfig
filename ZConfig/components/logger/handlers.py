@@ -95,10 +95,23 @@ class FileHandlerFactory(HandlerFactory):
     def create_loghandler(self):
         from ZConfig.components.logger import loghandler
         path = self.section.path
+        max_bytes = self.section.max_size
+        old_files = self.section.old_files
         if path == "STDERR":
+            if max_bytes or old_files:
+                raise ValueError("cannot rotate STDERR")
             handler = loghandler.StreamHandler(sys.stderr)
         elif path == "STDOUT":
+            if max_bytes or old_files:
+                raise ValueError("cannot rotate STDOUT")
             handler = loghandler.StreamHandler(sys.stdout)
+        elif max_bytes or old_files:
+            if not max_bytes:
+                raise ValueError("max-bytes must be set for log rotation")
+            if not old_files:
+                raise ValueError("old-files must be set for log rotation")
+            handler = loghandler.RotatingFileHandler(
+                path, maxBytes=max_bytes, backupCount=old_files)
         else:
             handler = loghandler.FileHandler(path)
         return handler
