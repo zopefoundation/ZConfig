@@ -11,6 +11,7 @@ setup(
     url='http://www.zope.org/Members/fdrake/zconfig/',
 
     packages=find_packages("."),
+    scripts=["scripts/zconfig", "scripts/zconfig_schema2html"],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
