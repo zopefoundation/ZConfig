@@ -1,3 +1,29 @@
+Changes since ZConfig 2.3.1:
+
+- Add support for importing schema components from ZIP archives (including
+  eggs).
+
+- Added a 'formatter' configuration option in the logging handler sections
+  to allow specifying a constructor for the formatter.
+
+- Documented the package: URL scheme that can be used in extending schema.
+
+- Added support for reopening all log files opened via configurations using
+  the ZConfig.components.logger package.  For Zope, this is usable via the
+  ``zc.signalhandler`` package.
+
+- Added support for rotating log files internally by size.
+
+- Added a minimal implementation of schema-less parsing; this is mostly
+  intended for applications that want to read several fragments of ZConfig
+  configuration files and assemble a combined configuration.  Used in some
+  ``zc.buildout`` recipes.
+
+- Converted to using ``zc.buildout`` and the standard test runner from
+  ``zope.testing``.
+
+- Added more tests.
+
 Changes since ZConfig 2.3:
 
 - Isolated some of the case-normalization code so it will at least be
