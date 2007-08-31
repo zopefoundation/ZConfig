@@ -63,7 +63,9 @@ values::
   Traceback (most recent call last):
   KeyError: 'no-such-key-in-the-config'
 
-  >>> sorted(config)
+  >>> lst = list(config)
+  >>> lst.sort()
+  >>> lst
   ['another-key', 'some-key']
 
 There is also a ``sections`` attribute that lists child sections::
@@ -86,7 +88,9 @@ configuration, the section maps keys
   Traceback (most recent call last):
   KeyError: 'no-such-key-in-the-config'
 
-  >>> sorted(section)
+  >>> lst = list(section)
+  >>> lst.sort()
+  >>> lst
   ['key1', 'key2']
 
 Child sections are again available via the ``sections`` attribute::
