@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="ZConfig",
-    version="2.5.0",
+    version="2.5",
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     description="Structured Configuration Library",
