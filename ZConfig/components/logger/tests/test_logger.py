@@ -69,7 +69,7 @@ class LoggingTestBase(unittest.TestCase):
         while self._created:
             os.unlink(self._created.pop())
 
-        assert loghandler._reopenable_handlers == []
+        self.assertEqual(loghandler._reopenable_handlers, [])
         loghandler.closeFiles()
         loghandler._reopenable_handlers == []
 
@@ -386,7 +386,7 @@ class TestReopeningLogfiles(TestReopeningLogfilesBase):
             }
         text = self._sampleconfig_template % d
         conf = self.get_config(text)
-        assert len(conf.loggers) == 2
+        self.assertEqual(len(conf.loggers), 2)
         # Build the loggers from the configuration, and write to them:
         conf.loggers[0]().info("message 1")
         conf.loggers[1]().info("message 2")
@@ -472,7 +472,7 @@ class TestReopeningRotatingLogfiles(TestReopeningLogfilesBase):
             }
         text = self._sampleconfig_template % d
         conf = self.get_config(text)
-        assert len(conf.loggers) == 2
+        self.assertEqual(len(conf.loggers), 2)
         # Build the loggers from the configuration, and write to them:
         conf.loggers[0]().info("message 1")
         conf.loggers[1]().info("message 2")
