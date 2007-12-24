@@ -22,7 +22,7 @@ def alltests():
 
 setup(
     name="ZConfig",
-    version="2.5.1",
+    version="2.5.2dev",
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     description="Structured Configuration Library",
