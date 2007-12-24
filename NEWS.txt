@@ -2,7 +2,7 @@
 Change History for ZConfig
 ==========================
 
-ZConfig 2.5.1 (unreleased)
+ZConfig 2.5.1 (2007/12/24)
 --------------------------
 
 - Made it possible to run unit tests via 'python setup.py test'.
