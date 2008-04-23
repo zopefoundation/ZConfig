@@ -2,6 +2,12 @@
 Change History for ZConfig
 ==========================
 
+ZConfig 2.5.2 (unreleased)
+--------------------------
+
+- Removed dependency on setuptools from the setup.py.
+
+
 ZConfig 2.5.1 (2007/12/24)
 --------------------------
 
