@@ -1,5 +1,5 @@
-README = open('README.txt').read()
-NEWS = open('NEWS.txt').read()
+README = open("README.txt").read()
+NEWS = open("NEWS.txt").read()
 
 def alltests():
     import os
@@ -13,7 +13,7 @@ def alltests():
     configure_logging()
     here = os.path.abspath(os.path.dirname(sys.argv[0]))
     args = sys.argv[:]
-    defaults = ['--test-path', here]
+    defaults = ["--test-path", here]
     options = get_options(args, defaults)
     suites = list(find_suites(options))
     return TestSuite(suites)
@@ -24,9 +24,9 @@ options = dict(
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     description="Structured Configuration Library",
-    long_description=README + '\n\n' + NEWS,
+    long_description=README + "\n\n" + NEWS,
     license="ZPL 2.1",
-    url='http://www.zope.org/Members/fdrake/zconfig/',
+    url="http://www.zope.org/Members/fdrake/zconfig/",
     # List packages explicitly so we don't have to assume setuptools:
     packages=[
         "ZConfig",
@@ -44,17 +44,17 @@ options = dict(
     include_package_data=True,
     zip_safe=False,
     classifiers=[
-        'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: Zope Public License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: Zope Public License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Topic :: Software Development :: Libraries :: Python Modules",
         ],
     # Support for 'setup.py test' when setuptools is available:
-    test_suite='__main__.alltests',
+    test_suite="__main__.alltests",
     tests_require=[
-        'zope.testing',
+        "zope.testing",
         ],
     )
 
