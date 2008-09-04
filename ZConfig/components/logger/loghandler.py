@@ -19,6 +19,8 @@ import weakref
 
 from logging import Handler, StreamHandler
 from logging.handlers import RotatingFileHandler as _RotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler \
+     as _TimedRotatingFileHandler
 from logging.handlers import SysLogHandler, BufferingHandler
 from logging.handlers import HTTPHandler, SMTPHandler
 from logging.handlers import NTEventLogHandler as Win32EventLogHandler
@@ -118,6 +120,20 @@ class RotatingFileHandler(_RotatingFileHandler):
 
     def close(self):
         _RotatingFileHandler.close(self)
+        _remove_from_reopenable(self._wr)
+
+    def reopen(self):
+        self.doRollover()
+
+class TimedRotatingFileHandler(_TimedRotatingFileHandler):
+
+    def __init__(self, *args, **kw):
+        _TimedRotatingFileHandler.__init__(self, *args, **kw)
+        self._wr = weakref.ref(self, _remove_from_reopenable)
+        _reopenable_handlers.append(self._wr)
+
+    def close(self):
+        _TimedRotatingFileHandler.close(self)
         _remove_from_reopenable(self._wr)
 
     def reopen(self):

@@ -2,8 +2,11 @@
 Change History for ZConfig
 ==========================
 
-ZConfig 2.5.2 (unreleased)
+ZConfig 2.6.0 (2008/09/03)
 --------------------------
+
+- Added support for file rotation by time by specifying when and
+  interval, rather than max-size, for log files. 
 
 - Removed dependency on setuptools from the setup.py.
 

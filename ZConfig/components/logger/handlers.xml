@@ -32,6 +32,8 @@
     <key name="path" required="yes"/>
     <key name="old-files" required="no" default="0" datatype="integer"/>
     <key name="max-size" required="no" default="0" datatype="byte-size"/>
+    <key name="when" required="no" default="" datatype="string"/>
+    <key name="interval" required="no" default="0" datatype="integer"/>
     <key name="format"
          default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
          datatype=".log_format"/>

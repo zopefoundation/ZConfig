@@ -97,6 +97,8 @@ class FileHandlerFactory(HandlerFactory):
         path = self.section.path
         max_bytes = self.section.max_size
         old_files = self.section.old_files
+        when = self.section.when
+        interval = self.section.interval
         if path == "STDERR":
             if max_bytes or old_files:
                 raise ValueError("cannot rotate STDERR")
@@ -105,13 +107,23 @@ class FileHandlerFactory(HandlerFactory):
             if max_bytes or old_files:
                 raise ValueError("cannot rotate STDOUT")
             handler = loghandler.StreamHandler(sys.stdout)
-        elif max_bytes or old_files:
-            if not max_bytes:
-                raise ValueError("max-bytes must be set for log rotation")
+        elif when or max_bytes or old_files or interval:
             if not old_files:
                 raise ValueError("old-files must be set for log rotation")
-            handler = loghandler.RotatingFileHandler(
-                path, maxBytes=max_bytes, backupCount=old_files)
+            if when:
+                if max_bytes:
+                    raise ValueError("can't set *both* max_bytes and when")
+                if not interval:
+                    interval = 1
+                handler = loghandler.TimedRotatingFileHandler(
+                    path, when=when, interval=interval,
+                    backupCount=old_files)
+            elif max_bytes:
+                handler = loghandler.RotatingFileHandler(
+                    path, maxBytes=max_bytes, backupCount=old_files)
+            else:
+                raise ValueError(
+                    "max-bytes or when must be set for log rotation")
         else:
             handler = loghandler.FileHandler(path)
         return handler

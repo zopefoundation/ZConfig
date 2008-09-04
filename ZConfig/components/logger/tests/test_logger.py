@@ -188,6 +188,58 @@ class TestConfig(LoggingTestBase):
         logger.removeHandler(logfile)
         logfile.close()
 
+    def test_with_timed_rotating_logfile(self):
+        fn = self.mktemp()
+        logger = self.check_simple_logger("<eventlog>\n"
+                                          "  <logfile>\n"
+                                          "    path %s\n"
+                                          "    level debug\n"
+                                          "    when D\n"
+                                          "    old-files 11\n"
+                                          "  </logfile>\n"
+                                          "</eventlog>" % fn)
+        logfile = logger.handlers[0]
+        self.assertEqual(logfile.level, logging.DEBUG)
+        self.assertEqual(logfile.backupCount, 11)
+        self.assertEqual(logfile.interval, 86400)
+        self.assert_(isinstance(logfile, loghandler.TimedRotatingFileHandler))
+        logger.removeHandler(logfile)
+        logfile.close()
+
+    def test_with_timed_rotating_logfile(self):
+        fn = self.mktemp()
+        logger = self.check_simple_logger("<eventlog>\n"
+                                          "  <logfile>\n"
+                                          "    path %s\n"
+                                          "    level debug\n"
+                                          "    when D\n"
+                                          "    interval 3\n"
+                                          "    old-files 11\n"
+                                          "  </logfile>\n"
+                                          "</eventlog>" % fn)
+        logfile = logger.handlers[0]
+        self.assertEqual(logfile.level, logging.DEBUG)
+        self.assertEqual(logfile.backupCount, 11)
+        self.assertEqual(logfile.interval, 86400*3)
+        self.assert_(isinstance(logfile, loghandler.TimedRotatingFileHandler))
+        logger.removeHandler(logfile)
+        logfile.close()
+
+    def test_with_timed_rotating_logfile_and_size_should_fail(self):
+        fn = self.mktemp()
+        self.assertRaises(
+            ValueError,
+            self.check_simple_logger, "<eventlog>\n"
+                                          "  <logfile>\n"
+                                          "    path %s\n"
+                                          "    level debug\n"
+                                          "    max-size 5mb\n"
+                                          "    when D\n"
+                                          "    old-files 10\n"
+                                          "  </logfile>\n"
+                                          "</eventlog>" % fn)
+
+
     def check_standard_stream(self, name):
         old_stream = getattr(sys, name)
         conf = self.get_config("""
@@ -442,6 +494,12 @@ class TestReopeningRotatingLogfiles(TestReopeningLogfilesBase):
           path  %(path1)s
           level info
           max-size 1mb
+          old-files 3
+        </logfile>
+        <logfile>
+          path  %(path1)s
+          level info
+          when D
           old-files 3
         </logfile>
       </logger>
