@@ -44,6 +44,19 @@ from ZConfig.loader import loadSchema, loadSchemaFile
 
 class ConfigurationError(Exception):
     """Base class for ZConfig exceptions."""
+ 
+    # The 'message' attribute was deprecated for BaseException with
+    # Python 2.6; here we create descriptor properties to continue using it
+    def __set_message(self, v):
+        self.__dict__['message'] = v
+
+    def __get_message(self):
+        return self.__dict__['message']
+
+    def __del_message(self):
+        del self.__dict__['message']
+
+    message = property(__get_message, __set_message, __del_message)
 
     def __init__(self, msg, url=None):
         self.message = msg
