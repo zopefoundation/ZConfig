@@ -369,8 +369,13 @@ class TestReopeningLogfilesBase(LoggingTestBase):
     def test_filehandler_reopen(self):
 
         def mkrecord(msg):
-            return logging.LogRecord(
-                "foo.bar", logging.ERROR, __file__, 42, msg, (), ())
+            if sys.version_info[:2] == (2, 5):
+                return logging.LogRecord(
+                    "foo.bar", logging.ERROR, __file__, 42, msg, (), (), ())
+            else:
+                return logging.LogRecord(
+                    "foo.bar", logging.ERROR, __file__, 42, msg, (), ())
+
 
         # This goes through the reopening operation *twice* to make
         # sure that we don't lose our handle on the handler the first
