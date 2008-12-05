@@ -20,7 +20,7 @@ def alltests():
 
 options = dict(
     name="ZConfig",
-    version="2.6.1",
+    version="2.6.2dev",
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     description="Structured Configuration Library",
