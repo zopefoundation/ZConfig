@@ -369,8 +369,18 @@ class TestReopeningLogfilesBase(LoggingTestBase):
     def test_filehandler_reopen(self):
 
         def mkrecord(msg):
-            return logging.LogRecord(
-                "foo.bar", logging.ERROR, __file__, 42, msg, (), ())
+            #
+            # Python 2.5.0 added an additional required argument to the
+            # LogRecord constructor, making it incompatible with prior
+            # versions.  Python 2.5.1 corrected the bug by making the
+            # additional argument optional.  We deal with 2.5.0 by adding
+            # the extra arg in only that case, using the default value
+            # from Python 2.5.1.
+            #
+            args = ["foo.bar", logging.ERROR, __file__, 42, msg, (), ()]
+            if sys.version_info[:3] == (2, 5, 0):
+                args.append(None)
+            return logging.LogRecord(*args)
 
         # This goes through the reopening operation *twice* to make
         # sure that we don't lose our handle on the handler the first
