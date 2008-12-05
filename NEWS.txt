@@ -2,6 +2,14 @@
 Change History for ZConfig
 ==========================
 
+ZConfig 2.6.1 (2008/12/05)
+--------------------------
+
+- Fixed compatibility bug with Python 2.5.0.
+
+- No longer trigger deprecation warnings under Python 2.6.
+
+
 ZConfig 2.6.0 (2008/09/03)
 --------------------------
 
