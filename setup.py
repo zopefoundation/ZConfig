@@ -20,7 +20,7 @@ def alltests():
 
 options = dict(
     name="ZConfig",
-    version="2.7dev",
+    version="2.6.1dev",
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     description="Structured Configuration Library",
@@ -49,6 +49,9 @@ options = dict(
         "License :: OSI Approved :: Zope Public License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.4",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
     # Support for 'setup.py test' when setuptools is available:
