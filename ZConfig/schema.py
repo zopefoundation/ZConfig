@@ -525,7 +525,7 @@ class SchemaParser(BaseParser):
             self._extending_parser._base_datatypes.append(datatype)
 
 
-    def extendSchema(self,src):
+    def extendSchema(self, src):
         parser = SchemaParser(self._loader, src, self)
         r = self._loader.openResource(src)
         try:
