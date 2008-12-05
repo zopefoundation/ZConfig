@@ -5,6 +5,11 @@ Change History for ZConfig
 ZConfig 2.6.1 (2008/12/05)
 --------------------------
 
+- Fixed support for schema descriptions that override descriptions from a base
+  schema.  If multiple base schema provide descriptions but the derived schema
+  does not, the first base mentioned that provides a description wins.
+  https://bugs.launchpad.net/zconfig/+bug/259475
+
 - Fixed compatibility bug with Python 2.5.0.
 
 - No longer trigger deprecation warnings under Python 2.6.

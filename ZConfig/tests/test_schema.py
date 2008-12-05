@@ -1013,6 +1013,29 @@ class SchemaTestCase(TestBase):
                           self.load_schema_text,
             "<schema extends='%s/library.xml#foo'/>" % CONFIG_BASE)
 
+    def test_extends_description_override(self):
+        schema = self.load_schema_text("""\
+           <schema extends='%s/base.xml %s/library.xml'>
+             <description>
+               overriding description
+             </description>
+             <section name='A' type='type-a' />
+             <section name='X' type='type-X' />
+           </schema>
+           """ % (CONFIG_BASE, CONFIG_BASE))
+        description = schema.description.strip()
+        self.assertEqual(description, "overriding description")
+
+    def test_extends_description_first_extended_wins(self):
+        schema = self.load_schema_text("""\
+           <schema extends='%s/base.xml %s/library.xml'>
+             <section name='A' type='type-a' />
+             <section name='X' type='type-X' />
+           </schema>
+           """ % (CONFIG_BASE, CONFIG_BASE))
+        description = schema.description.strip()
+        self.assertEqual(description, "base description")
+
     def test_multi_extends_implicit_OK(self):
         self.load_schema_text("""\
            <schema extends='%s/base.xml %s/library.xml'>

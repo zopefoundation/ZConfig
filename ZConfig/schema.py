@@ -468,6 +468,7 @@ class SchemaParser(BaseParser):
         self._extending_parser = extending_parser
         self._base_keytypes = []
         self._base_datatypes = []
+        self._descriptions = []
 
     def start_schema(self, attrs):
         self.push_prefix(attrs)
@@ -524,7 +525,6 @@ class SchemaParser(BaseParser):
             self._extending_parser._base_keytypes.append(keytype)
             self._extending_parser._base_datatypes.append(datatype)
 
-
     def extendSchema(self, src):
         parser = SchemaParser(self._loader, src, self)
         r = self._loader.openResource(src)
@@ -538,6 +538,16 @@ class SchemaParser(BaseParser):
         assert not self._stack
         self.pop_prefix()
         assert not self._prefixes
+        schema = self._schema
+        if self._extending_parser is None:
+            # Top-level schema:
+            if self._descriptions and not schema.description:
+                # Use the last one, since the base schemas are processed in
+                # reverse order.
+                schema.description = self._descriptions[-1]
+        elif schema.description:
+            self._extending_parser._descriptions.append(schema.description)
+            schema.description = None
 
 
 class ComponentParser(BaseParser):
