@@ -18,7 +18,8 @@ from __future__ import nested_scopes
 
 import unittest
 
-from ZConfig import SubstitutionReplacementError, SubstitutionSyntaxError
+from ZConfig import SubstitutionReplacementError, SubstitutionSyntaxError, \
+     SubstitutionUnknownFunctionError
 from ZConfig.substitution import isname, substitute
 
 
@@ -88,6 +89,50 @@ class SubstitutionTestCase(unittest.TestCase):
         self.assert_(not isname("-def"))
         self.assert_(not isname("abc-"))
         self.assert_(not isname(""))
+
+    def test_functions(self):
+        from ZConfig.functions import registerFunction
+        registerFunction('f', lambda mapping, *args: str(args), True)
+        # check syntax
+        def check(s):
+            self.assertRaises(SubstitutionSyntaxError,
+                              substitute, s, {})
+        check('$(')
+        check('$(f')
+        check('$(f,')
+        check('$(f a,b,c')
+        check('$(f a,(b),c')
+
+        # check arguments
+        def check(*args):
+            argstring = ', '.join(args)
+            if args: argstring = ' ' + argstring
+            v = substitute('$(f%s)' % argstring, {})
+            self.assertEqual(v, str(tuple([arg.strip() for arg in args])))
+        check()
+        check('')
+        check('','','')
+        check(' a ', 'bc ', ' xy')
+        # check correct left and right boundaries
+        self.assertEqual(substitute('a $(f) b',{}), 'a () b')
+        self.assertEqual(substitute('a$(f)b',{}), 'a()b')
+        self.assertEqual(substitute('a$(f)b$(f)',{}), 'a()b()')
+        # check interpolation in arguments
+        self.assertEqual(substitute('$(F $a)',{'a' : 'A'}), str(('A',)))
+        # check unknown function
+        self.assertRaises(SubstitutionUnknownFunctionError,
+                          substitute,'$(g)',{}
+                          )
+
+    def test_function_env(self):
+        from os import environ
+        key = 'ZCONFIG_TEST_ENV_FUNCTION'; key2 = key + '_none'
+        environ[key] = '1'
+        self.assertEqual(substitute('$(env %s)' % key, {}), '1')
+        self.assertEqual(substitute('$(env %s, 0)' % key2, {}), '0')
+        self.assertRaises(KeyError,
+                          substitute,'$(env %s)' % key2, {}
+                          )
 
 
 def test_suite():

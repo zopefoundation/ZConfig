@@ -159,3 +159,6 @@ class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
         self.name = name
         ConfigurationSyntaxError.__init__(
             self, "no replacement for " + `name`, url, lineno)
+
+class SubstitutionUnknownFunctionError(SubstitutionReplacementError):
+    _messagePrefix = "no definition for function "
