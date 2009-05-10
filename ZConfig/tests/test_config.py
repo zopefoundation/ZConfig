@@ -108,6 +108,11 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertEqual(conf.var3, "value3")
         self.assertEqual(conf.var4, "value")
 
+    def test_includeGlobPattern(self):
+        conf = self.load("glob_pattern.conf")
+        self.assertEqual(conf.var1, "a")
+        self.assertEqual(conf.var2, "b")
+
     def test_includes_with_defines(self):
         self.schema = ZConfig.loadSchemaFile(StringIO.StringIO("""\
             <schema>
@@ -134,6 +139,19 @@ class ConfigurationTestCase(unittest.TestCase):
                           self.loadtext, "%define abc-def\n")
         self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define a value\n%define a value\n")
+
+    def test_redefine(self):
+        # a "redefine" is allowed to define
+        conf = self.loadtext("%redefine option v\n"
+                             "getname $option\n"
+                             )
+        self.assertEqual(conf.getname, "v")
+        # a "redefine" is allowed to override a previous definition
+        conf = self.loadtext("%define reoption v\n%redefine reoption w\n"
+                             "getname $reoption\n"
+                             )
+        self.assertEqual(conf.getname, "w")
+
 
     def test_fragment_ident_disallowed(self):
         self.assertRaises(ZConfig.ConfigurationError,

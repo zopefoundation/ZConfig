@@ -131,7 +131,9 @@ class ZConfigParser:
         if not m:
             self.error("missing or unrecognized directive")
         name, arg = m.group('key', 'value')
-        if name not in ("define", "import", "include"):
+        if name not in ("define", "import", "include",
+                        "redefine", "includeGlobPattern"
+                        ):
             self.error("unknown directive: " + `name`)
         if not arg:
             self.error("missing argument to %%%s directive" % name)
@@ -141,6 +143,10 @@ class ZConfigParser:
             self.handle_define(section, arg)
         elif name == "import":
             self.handle_import(section, arg)
+        elif name == "redefine":
+            self.handle_define(section, arg, False)
+        elif name == "includeGlobPattern":
+           self.handle_includeGlobPattern(section, arg) 
         else:
             assert 0, "unexpected directive for " + `"%" + rest`
 
@@ -153,17 +159,50 @@ class ZConfigParser:
         newurl = ZConfig.url.urljoin(self.url, rest)
         self.context.includeConfiguration(section, newurl, self.defines)
 
-    def handle_define(self, section, rest):
+    def handle_define(self, section, rest, prevent_override=True):
         parts = rest.split(None, 1)
         defname = self._normalize_case(parts[0])
         defvalue = ''
         if len(parts) == 2:
             defvalue = parts[1]
-        if self.defines.has_key(defname):
+        if prevent_override and self.defines.has_key(defname):
             self.error("cannot redefine " + `defname`)
         if not isname(defname):
             self.error("not a substitution legal name: " + `defname`)
         self.defines[defname] = self.replace(defvalue)
+
+    def handle_includeGlobPattern(self, section, rest):
+        '''import any file identified by the glob pattern *rest* (the directive argument).
+
+        If *rest* is not absolute, then it is resolved relative to
+        the current baseurl. Note, that this url must be a file Url in
+        this case.
+        '''
+        from os.path import isabs, join, sep, islink, exists
+        from urllib import url2pathname
+        from glob import glob
+        rest = self.replace (rest.strip()); url = self.url
+        if isabs(rest) or url is None: pattern = rest
+        elif not url.startswith('file:///'):
+            self.error('relative glob pattern requires a file url as base')
+        else:
+            path = sep.join(url2pathname(url[5:]).split(sep)[:-1])
+            pattern = join(path, rest)
+        for name in glob(pattern):
+            # Note: this "try: ... except: ..." is highly "iDesk" specific:
+            #  "iDesk" makes extensive use of symbolic links pointing
+            #  into the production environment. During the production
+            #  the link destination can be missing.
+            #  The "try: ... except: ..." prevents such broken links
+            #  from interference with the startup.
+            try:
+                self.context.includeConfiguration(section, name, self.defines)
+            except ZConfig.ConfigurationError:
+                # If we can't open the file it may be an invalid symbolic link
+                # In this case we just print a warning and continue
+                if not islink (name) or exists (name):
+                    raise
+                self.warn ("Invalid symbolic link: %s" % name)
 
     def replace(self, text):
         try:

@@ -2,6 +2,11 @@
 Change History for ZConfig
 ==========================
 
+ZConfig 2.7.0 (unreleased)
+--------------------------
+
+- Launchpad #373614: new ``includeGlobPattern`` directive
+
 ZConfig 2.6.1 (2008/12/05)
 --------------------------
 
