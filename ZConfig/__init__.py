@@ -160,9 +160,9 @@ class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
         ConfigurationSyntaxError.__init__(
             self, "no replacement for " + `name`, url, lineno)
 
+
 def configureLoggers(text):
-    """Configure one or more loggers from configuration text
-    """
+    """Configure one or more loggers from configuration text."""
     import StringIO
     schema = loadSchemaFile(StringIO.StringIO("""
     <schema>
