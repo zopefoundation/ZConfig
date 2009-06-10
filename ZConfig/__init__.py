@@ -159,3 +159,16 @@ class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
         self.name = name
         ConfigurationSyntaxError.__init__(
             self, "no replacement for " + `name`, url, lineno)
+
+def configureLoggers(text):
+    """Configure one or more loggers from configuration text
+    """
+    import StringIO
+    schema = loadSchemaFile(StringIO.StringIO("""
+    <schema>
+    <import package='ZConfig.components.logger'/>
+    <multisection type='logger' name='*' attribute='loggers'/>
+    </schema>
+    """))
+    for factory in loadConfigFile(schema, StringIO.StringIO(text))[0].loggers:
+        factory()

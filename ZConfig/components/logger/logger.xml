@@ -25,7 +25,7 @@
 
     <key name="name"
          datatype="dotted-name"
-         required="yes">
+         >
       <description>
         The dotted name of the logger.  This give it a location in the
         logging hierarchy.  Most applications provide a specific set

@@ -15,6 +15,7 @@
 """Tests for logging configuration via ZConfig."""
 
 import cStringIO as StringIO
+import doctest
 import logging
 import os
 import sys
@@ -578,9 +579,61 @@ class TestReopeningRotatingLogfiles(TestReopeningLogfilesBase):
                 logger.removeHandler(handler)
                 handler.close()
 
+def test_logger_convenience_function_and_ommiting_name_to_get_root_logger():
+    """
+
+The ZConfig.loggers function can be used to configure one or more loggers.
+We'll configure the rot logger and a non-root logger.
+
+    >>> old_level = logging.getLogger().getEffectiveLevel()
+    >>> old_handler_count = len(logging.getLogger().handlers)
+
+    >>> ZConfig.configureLoggers('''
+    ... <logger>
+    ...    level INFO
+    ...    <logfile>
+    ...       PATH STDOUT
+    ...       format root %(levelname)s %(name)s %(message)s
+    ...    </logfile>
+    ... </logger>
+    ...
+    ... <logger>
+    ...    name ZConfig.TEST
+    ...    level DEBUG
+    ...    <logfile>
+    ...       PATH STDOUT
+    ...       format test %(levelname)s %(name)s %(message)s
+    ...    </logfile>
+    ... </logger>
+    ... ''')
+
+    >>> logging.getLogger('ZConfig.TEST').debug('test message')
+    test DEBUG ZConfig.TEST test message
+    root DEBUG ZConfig.TEST test message
+
+    >>> logging.getLogger().getEffectiveLevel() == logging.INFO
+    True
+    >>> len(logging.getLogger().handlers) == old_handler_count + 1
+    True
+    >>> logging.getLogger('ZConfig.TEST').getEffectiveLevel() == logging.DEBUG
+    True
+    >>> len(logging.getLogger('ZConfig.TEST').handlers) == 1
+    True
+
+.. cleanup
+
+    >>> logging.getLogger('ZConfig.TEST').setLevel(logging.NOTSET)
+    >>> logging.getLogger('ZConfig.TEST').removeHandler(
+    ...     logging.getLogger('ZConfig.TEST').handlers[-1])
+    >>> logging.getLogger().setLevel(old_level)
+    >>> logging.getLogger().removeHandler(logging.getLogger().handlers[-1])
+
+
+    """
 
 def test_suite():
     suite = unittest.TestSuite()
+    suite.addTest(doctest.DocTestSuite())
     suite.addTest(unittest.makeSuite(TestConfig))
     if os.name != "nt":
         suite.addTest(unittest.makeSuite(TestReopeningLogfiles))

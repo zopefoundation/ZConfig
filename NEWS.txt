@@ -2,6 +2,16 @@
 Change History for ZConfig
 ==========================
 
+ZConfig 2.7.0 (2009/06/10)
+--------------------------
+
+- Relaxed the requirement for a logger name in logger sections,
+  allowing the logger section to be used for both root and non-root
+  loggers.
+
+- Added a convenience function, ``ZConfig.configureLoggers(text)`` for
+  configuring loggers.
+
 ZConfig 2.6.1 (2008/12/05)
 --------------------------
 
@@ -19,7 +29,7 @@ ZConfig 2.6.0 (2008/09/03)
 --------------------------
 
 - Added support for file rotation by time by specifying when and
-  interval, rather than max-size, for log files. 
+  interval, rather than max-size, for log files.
 
 - Removed dependency on setuptools from the setup.py.
 
