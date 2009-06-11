@@ -23,6 +23,36 @@ the file LICENSE.txt in the distribution for the full license text.
 
 Reference documentation is available in the doc/ directory.
 
+One common use of ZConfig is to configure the Python logging
+framework. This is extremely simple to do as the following example
+demonstrates:
+
+    >>> from ZConfig import configureLoggers
+    >>> configureLoggers('''
+    ... <logger>
+    ...    level INFO
+    ...    <logfile>
+    ...       PATH STDOUT
+    ...       format %(levelname)s %(name)s %(message)s
+    ...    </logfile>
+    ... </logger>
+    ... ''')
+
+The above configures the root logger to output messages logged at INFO
+or above to the console, as we can see in the following example:
+
+    >>> from logging import getLogger
+    >>> logger = getLogger()
+    >>> logger.info('An info message')
+    INFO root An info message
+    >>> logger.debug('A debug message')
+
+A more common configuration would see STDOUT replaced with a path to
+the file into which log entries would be written.
+
+For more information, see section 5.2 on the ZConfig documentation and
+the examples in ZConfig/components/logger/tests.
+
 Information on the latest released version of the ZConfig package is
 available at
 
