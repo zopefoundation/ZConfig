@@ -30,5 +30,6 @@ def tearDown(test):
 
 def test_suite():
     return unittest.TestSuite((
-        DocFileSuite('../../readme.txt', optionflags=options),
+        DocFileSuite('../../readme.txt', optionflags=options,
+                     setUp=setUp,tearDown=tearDown),
         ))
