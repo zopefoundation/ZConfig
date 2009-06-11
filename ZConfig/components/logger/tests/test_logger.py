@@ -636,6 +636,14 @@ def test_suite():
     suite.addTest(doctest.DocTestSuite())
     suite.addTest(unittest.makeSuite(TestConfig))
     if os.name != "nt":
+        # Though log files can be closed and re-opened on Windows, these
+        # tests expect to be able to move the underlying files out from
+        # underneath the logger while open.  That's not possible on
+        # Windows.
+        #
+        # Different tests are needed that only test that close/re-open
+        # operations are performed by the handler; those can be run on
+        # any platform.
         suite.addTest(unittest.makeSuite(TestReopeningLogfiles))
         suite.addTest(unittest.makeSuite(TestReopeningRotatingLogfiles))
     return suite
