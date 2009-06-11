@@ -637,7 +637,7 @@ def test_suite():
     suite.addTest(unittest.makeSuite(TestConfig))
     if os.name != "nt":
         suite.addTest(unittest.makeSuite(TestReopeningLogfiles))
-    suite.addTest(unittest.makeSuite(TestReopeningRotatingLogfiles))
+        suite.addTest(unittest.makeSuite(TestReopeningRotatingLogfiles))
     return suite
 
 if __name__ == '__main__':
