@@ -15,6 +15,7 @@
 
 import cStringIO
 import os.path
+import re
 import sys
 import urllib
 import urllib2
@@ -128,14 +129,21 @@ class BaseLoader:
                 url)
         return newurl
 
+    # from RFC 3986:
+    # schema = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+    _pathsep_rx = re.compile(r"[a-zA-Z][-+.a-zA-Z0-9]*:")
+
     def isPath(self, s):
         """Return True iff 's' should be handled as a filesystem path."""
         if ":" in s:
             # XXX This assumes that one-character scheme identifiers
             # are always Windows drive letters; I don't know of any
             # one-character scheme identifiers.
-            scheme, rest = urllib.splittype(s)
-            return len(scheme) == 1
+            m = self._pathsep_rx.match(s)
+            if m is None:
+                return True
+            # Does it look like a drive letter?
+            return len(m.group(0)) == 2
         else:
             return True
 
