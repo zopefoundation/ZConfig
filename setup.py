@@ -21,8 +21,9 @@ def alltests():
 options = dict(
     name="ZConfig",
     version="0",
-    author="Zope Foundation and Contributors",
+    author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
+    maintainer="Zope Foundation and Contributors",
     description="Structured Configuration Library",
     long_description=README + "\n\n" + NEWS,
     license="ZPL 2.1",
