@@ -8,6 +8,8 @@ ZConfig (unreleased)
 - Fix relative path recognition.
   https://bugs.launchpad.net/zconfig/+bug/405687
 
+- Added SMTP authentication support for email logger on Python 2.6.
+
 ZConfig 2.7.1 (2009/06/13)
 --------------------------
 

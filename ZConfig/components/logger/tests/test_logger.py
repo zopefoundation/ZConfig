@@ -346,6 +346,32 @@ class TestConfig(LoggingTestBase):
         self.assertEqual(handler.fromaddr, "zlog-user@example.com")
         self.assertEqual(handler.level, logging.FATAL)
 
+    def test_with_email_notifier_with_credentials(self):
+        try:
+            logger = self.check_simple_logger("<eventlog>\n"
+                                              "  <email-notifier>\n"
+                                              "    to sysadmin@example.com\n"
+                                              "    from zlog-user@example.com\n"
+                                              "    level fatal\n"
+                                              "    smtp-auth-username john\n"
+                                              "    smtp-auth-password johnpw\n"
+                                              "  </email-notifier>\n"
+                                              "</eventlog>")
+        except ValueError:
+            if sys.version_info >= (2, 6):
+                # For python 2.6 no ValueError must be raised.
+                raise
+        else:
+            # This path must only be reached with python >=2.6
+            self.assert_(sys.version_info >= (2, 6))
+            handler = logger.handlers[0]
+            self.assertEqual(handler.toaddrs, ["sysadmin@example.com"])
+            self.assertEqual(handler.fromaddr, "zlog-user@example.com")
+            self.assertEqual(handler.fromaddr, "zlog-user@example.com")
+            self.assertEqual(handler.level, logging.FATAL)
+            self.assertEqual(handler.username, 'john')
+            self.assertEqual(handler.password, 'johnpw')
+
     def check_simple_logger(self, text, level=logging.INFO):
         conf = self.get_config(text)
         self.assert_(conf.eventlog is not None)
