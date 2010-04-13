@@ -353,8 +353,8 @@ class TestConfig(LoggingTestBase):
                                               "    to sysadmin@example.com\n"
                                               "    from zlog-user@example.com\n"
                                               "    level fatal\n"
-                                              "    smtp-auth-username john\n"
-                                              "    smtp-auth-password johnpw\n"
+                                              "    smtp-username john\n"
+                                              "    smtp-password johnpw\n"
                                               "  </email-notifier>\n"
                                               "</eventlog>")
         except ValueError:
@@ -371,6 +371,28 @@ class TestConfig(LoggingTestBase):
             self.assertEqual(handler.level, logging.FATAL)
             self.assertEqual(handler.username, 'john')
             self.assertEqual(handler.password, 'johnpw')
+
+    def test_with_email_notifier_with_invalid_credentials(self):
+        self.assertRaises(ValueError,
+                          self.check_simple_logger,
+                          "<eventlog>\n"
+                          "  <email-notifier>\n"
+                          "    to sysadmin@example.com\n"
+                          "    from zlog-user@example.com\n"
+                          "    level fatal\n"
+                          "    smtp-username john\n"
+                          "  </email-notifier>\n"
+                          "</eventlog>")
+        self.assertRaises(ValueError,
+                          self.check_simple_logger,
+                          "<eventlog>\n"
+                          "  <email-notifier>\n"
+                          "    to sysadmin@example.com\n"
+                          "    from zlog-user@example.com\n"
+                          "    level fatal\n"
+                          "    smtp-password john\n"
+                          "  </email-notifier>\n"
+                          "</eventlog>")
 
     def check_simple_logger(self, text, level=logging.INFO):
         conf = self.get_config(text)

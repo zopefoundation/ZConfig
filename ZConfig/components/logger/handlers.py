@@ -213,13 +213,17 @@ class SMTPHandlerFactory(HandlerFactory):
         else:
             mailhost = host, port
         kwargs = {}
-        if self.section.smtp_auth_username or self.section.smtp_auth_password:
+        if self.section.smtp_username and self.section.smtp_password:
             # Since credentials were only added in py2.6 we use a kwarg to not
             # break compatibility with older py
             if sys.version_info < (2, 6):
                 raise ValueError('SMTP auth requires at least Python 2.6.')
-            kwargs['credentials'] = (self.section.smtp_auth_username,
-                                     self.section.smtp_auth_password)
+            kwargs['credentials'] = (self.section.smtp_username,
+                                     self.section.smtp_password)
+        elif (self.section.smtp_username or self.section.smtp_password):
+            raise ValueError(
+                'Either both smtp-username and smtp-password or none must be '
+                'given')
         return loghandler.SMTPHandler(mailhost,
                                       self.section.fromaddr,
                                       self.section.toaddrs,
