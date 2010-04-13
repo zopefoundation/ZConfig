@@ -2,7 +2,8 @@
 Change History for ZConfig
 ==========================
 
-ZConfig 2.8.0 (2010/04/13)
+
+ZConfig 2.8.0 (2010-04-13)
 --------------------------
 
 - Fix relative path recognition.
@@ -10,14 +11,16 @@ ZConfig 2.8.0 (2010/04/13)
 
 - Added SMTP authentication support for email logger on Python 2.6.
 
-ZConfig 2.7.1 (2009/06/13)
+
+ZConfig 2.7.1 (2009-06-13)
 --------------------------
 
 - Improved documentation
 
 - Fixed tests failures on windows.
 
-ZConfig 2.7.0 (2009/06/11)
+
+ZConfig 2.7.0 (2009-06-11)
 --------------------------
 
 - Added a convenience function, ``ZConfig.configureLoggers(text)`` for
@@ -27,7 +30,8 @@ ZConfig 2.7.0 (2009/06/11)
   allowing the logger section to be used for both root and non-root
   loggers.
 
-ZConfig 2.6.1 (2008/12/05)
+
+ZConfig 2.6.1 (2008-12-05)
 --------------------------
 
 - Fixed support for schema descriptions that override descriptions from a base
@@ -40,7 +44,7 @@ ZConfig 2.6.1 (2008/12/05)
 - No longer trigger deprecation warnings under Python 2.6.
 
 
-ZConfig 2.6.0 (2008/09/03)
+ZConfig 2.6.0 (2008-09-03)
 --------------------------
 
 - Added support for file rotation by time by specifying when and
@@ -49,7 +53,7 @@ ZConfig 2.6.0 (2008/09/03)
 - Removed dependency on setuptools from the setup.py.
 
 
-ZConfig 2.5.1 (2007/12/24)
+ZConfig 2.5.1 (2007-12-24)
 --------------------------
 
 - Made it possible to run unit tests via 'python setup.py test' (requires
@@ -57,16 +61,17 @@ ZConfig 2.5.1 (2007/12/24)
 
 - Added better error messages to test failure assertions.
 
-ZConfig 2.5 (31 Aug 2007)
--------------------------
 
-  *A note on the version number:*
+ZConfig 2.5 (2007-08-31)
+------------------------
 
-  Information discovered in the revision control system suggests that
-  some past revision has been called "2.4", though it is not clear that
-  any actual release was made with that version number.  We're going to
-  skip revision 2.4 entirely to avoid potential issues with anyone using
-  something claiming to be ZConfig 2.4, and go straight to version 2.5.
+*A note on the version number:*
+
+Information discovered in the revision control system suggests that some
+past revision has been called "2.4", though it is not clear that any
+actual release was made with that version number.  We're going to skip
+revision 2.4 entirely to avoid potential issues with anyone using
+something claiming to be ZConfig 2.4, and go straight to version 2.5.
 
 - Add support for importing schema components from ZIP archives (including
   eggs).
@@ -94,15 +99,15 @@ ZConfig 2.5 (31 Aug 2007)
 - Added more tests.
 
 
-ZConfig 2.3.1 (21 Aug 2005)
----------------------------
+ZConfig 2.3.1 (2005-08-21)
+--------------------------
 
 - Isolated some of the case-normalization code so it will at least be
   easier to override.  This remains non-trivial.
 
 
-ZConfig 2.3 (18 May 2005)
--------------------------
+ZConfig 2.3 (2005-05-18)
+------------------------
 
 - Added "inet-binding-address" and "inet-connection-address" to the
   set of standard datatypes.  These are similar to the "inet-address"
@@ -116,8 +121,8 @@ ZConfig 2.3 (18 May 2005)
   assume name="*", since this is what is used most often.
 
 
-ZConfig 2.2 (21 Apr 2004)
--------------------------
+ZConfig 2.2 (2004-04-21)
+------------------------
 
 - More documentation has been written.
 
@@ -144,8 +149,8 @@ ZConfig 2.2 (21 Apr 2004)
   except that it returns a datetime.timedelta object instead.
 
 
-ZConfig 2.1 (12 Apr 2004)
--------------------------
+ZConfig 2.1 (2004-04-12)
+------------------------
 
 - Removed compatibility with Python 2.1 and 2.2.
 
@@ -180,8 +185,8 @@ ZConfig 2.1 (12 Apr 2004)
   ZConfig.components.logger.
 
 
-ZConfig 2.0 (27 Oct 2003)
--------------------------
+ZConfig 2.0 (2003-10-27)
+------------------------
 
 - Configurations can import additional schema components using a new
   "%import" directive; this can be used to integrate 3rd-party
@@ -197,7 +202,7 @@ ZConfig 2.0 (27 Oct 2003)
   is valid, if that's all that's needed.
 
 
-ZConfig 1.0 (25 Mar 2003)
--------------------------
+ZConfig 1.0 (2003-03-25)
+------------------------
 
 - Initial release.
