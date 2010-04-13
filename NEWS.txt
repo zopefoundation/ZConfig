@@ -2,8 +2,8 @@
 Change History for ZConfig
 ==========================
 
-ZConfig (unreleased)
---------------------
+ZConfig 2.8.0 (2010/04/13)
+--------------------------
 
 - Fix relative path recognition.
   https://bugs.launchpad.net/zconfig/+bug/405687
