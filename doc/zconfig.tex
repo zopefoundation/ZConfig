@@ -1249,6 +1249,25 @@ log handlers).  The date format strings (the \code{dateformat} key in
 the log handlers) are the same as those accepted by the
 \function{time.strftime()} function.
 
+\subsubsection{Configuring the email logger}
+
+ZConfig has support for Python's STMTPHandler via the <email-notifier>
+handler.
+
+\begin{verbatim}
+<eventlog>
+  <email-notifier>
+    to sysadmin@example.com
+    to john@example.com
+    from zlog-user@example.com
+    level fatal
+    smtp-username john
+    smtp-password johnpw
+  </email-notifier>
+</eventlog>
+\end{verbatim}
+  
+For details about the SMTPHandler see the Python \module{logging} module.
 
 \begin{seealso}
   \seepep{282}{A Logging System}
