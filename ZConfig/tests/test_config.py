@@ -133,7 +133,9 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define abc-def\n")
         self.assertRaises(ZConfig.ConfigurationSyntaxError,
-                          self.loadtext, "%define a value\n%define a value\n")
+                          self.loadtext, "%define a value\n%define a other\n")
+        # doesn't raise if value is equal
+        self.loadtext("%define a value\n%define a value\n")
 
     def test_fragment_ident_disallowed(self):
         self.assertRaises(ZConfig.ConfigurationError,

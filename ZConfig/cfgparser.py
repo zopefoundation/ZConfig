@@ -160,7 +160,8 @@ class ZConfigParser:
         if len(parts) == 2:
             defvalue = parts[1]
         if self.defines.has_key(defname):
-            self.error("cannot redefine " + `defname`)
+            if self.defines[defname] != defvalue:
+                self.error("cannot redefine " + `defname`)
         if not isname(defname):
             self.error("not a substitution legal name: " + `defname`)
         self.defines[defname] = self.replace(defvalue)
