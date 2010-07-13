@@ -3,7 +3,7 @@ Change History for ZConfig
 ==========================
 
 
-After ZConfig 2.8.0 )unreleased)
+After ZConfig 2.8.0 (unreleased)
 --------------------------------
 
 - Allow identical redefinition of ``%define`` names.
