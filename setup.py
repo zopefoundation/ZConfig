@@ -4,19 +4,17 @@ NEWS = open("NEWS.txt").read()
 def alltests():
     import os
     import sys
-    from unittest import TestSuite
-    # use the zope.testing testrunner machinery to find all the
+    import unittest
+    # use the zope.testrunner machinery to find all the
     # test suites we've put under ourselves
-    from zope.testing.testrunner import get_options
-    from zope.testing.testrunner import find_suites
-    from zope.testing.testrunner import configure_logging
-    configure_logging()
+    import zope.testrunner.find
+    import zope.testrunner.options
     here = os.path.abspath(os.path.dirname(sys.argv[0]))
     args = sys.argv[:]
     defaults = ["--test-path", here]
-    options = get_options(args, defaults)
-    suites = list(find_suites(options))
-    return TestSuite(suites)
+    options = zope.testrunner.options.get_options(args, defaults)
+    suites = list(zope.testrunner.find.find_suites(options))
+    return unittest.TestSuite(suites)
 
 options = dict(
     name="ZConfig",
@@ -58,7 +56,7 @@ options = dict(
     # Support for 'setup.py test' when setuptools is available:
     test_suite="__main__.alltests",
     tests_require=[
-        "zope.testing",
+        "zope.testrunner",
         ],
     )
 

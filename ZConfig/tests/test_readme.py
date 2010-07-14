@@ -11,16 +11,17 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-import logging,os,unittest
-from zope.testing.doctest import DocFileSuite, REPORT_NDIFF,ELLIPSIS
+import doctest
+import logging
 
-options = REPORT_NDIFF|ELLIPSIS
+
+options = doctest.REPORT_NDIFF | doctest.ELLIPSIS
 
 old = {}
 def setUp(test):
     global old
-    logger=logging.getLogger()
-    old['level']=logger.level
+    logger = logging.getLogger()
+    old['level'] = logger.level
     old['handlers'] = logger.handlers[:]
 
 def tearDown(test):
@@ -29,7 +30,8 @@ def tearDown(test):
     logger.handlers = old['handlers']
 
 def test_suite():
-    return unittest.TestSuite((
-        DocFileSuite('../../README.txt', optionflags=options,
-                     setUp=setUp,tearDown=tearDown),
-        ))
+    return doctest.DocFileSuite(
+        '../../README.txt',
+        optionflags=options,
+        setUp=setUp, tearDown=tearDown,
+        )
