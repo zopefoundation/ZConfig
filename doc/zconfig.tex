@@ -905,7 +905,9 @@ The following data types are provided by the default type registry.
   will be returned for \var{hostname}.  The default host is
   \code{localhost} on Windows and the empty string on all other
   platforms.  If the port is omitted, \code{None} will be returned for
-  \var{port}.
+  \var{port}. IPv6 addresses can be specified in colon-separated notation;
+  if both host and port need to be specified, the bracketed form
+  (\code{[addr]:port}) must be used.
 
 \term{\datatype{inet-binding-address}}
   An Internet address expressed as a \code{(\var{hostname},
@@ -931,7 +933,8 @@ The following data types are provided by the default type registry.
   Validates a valid IP address or hostname.  If the first 
   character is a digit, the value is assumed to be an IP 
   address.  If the first character is not a digit, the value 
-  is assumed to be a hostname.  Hostnames are converted to lower
+  is assumed to be a hostname.  Strings containing colons are
+  considered IPv6 address.  Hostnames are converted to lower
   case.
 
 \term{\datatype{locale}}

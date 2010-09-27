@@ -185,7 +185,9 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert("Host.Example.Com:80"), ("host.example.com", 80))
         eq(convert(":80"),                 (defhost, 80))
         eq(convert("80"),                  (defhost, 80))
+        eq(convert("[::1]:80"),            ("::1", 80))
         eq(convert("host.EXAMPLE.com"),    ("host.example.com", None))
+        eq(convert("2001::ABCD"),             ("2001::abcd", None))
         self.assertRaises(ValueError, convert, "40 # foo")
 
     def test_datatype_inet_binding_address(self):
@@ -258,6 +260,7 @@ class DatatypeTestCase(unittest.TestCase):
         convert = self.types.get("socket-address")
         eq = self.assertEqual
         AF_INET = socket.AF_INET
+        AF_INET6 = socket.AF_INET6
         defhost = ZConfig.datatypes.DEFAULT_HOST
 
         def check(value, family, address, self=self, convert=convert):
@@ -269,6 +272,8 @@ class DatatypeTestCase(unittest.TestCase):
         check(":80",                 AF_INET, (defhost, 80))
         check("80",                  AF_INET, (defhost, 80))
         check("host.EXAMPLE.com",    AF_INET, ("host.example.com",None))
+        check("::1",                 AF_INET6,("::1", None))
+        check("[::]:80",             AF_INET6,("::", 80))
         a1 = convert("/tmp/var/@345.4")
         a2 = convert("/tmp/var/@345.4:80")
         self.assertEqual(a1.address, "/tmp/var/@345.4")
@@ -291,11 +296,16 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert('HOSTNAME.COM'),      'hostname.com')
         eq(convert('WWW.HOSTNAME.COM'),  'www.hostname.com')
         eq(convert('127.0.0.1'),         '127.0.0.1')
+        eq(convert('::1'),               '::1')
+        eq(convert('2001:DB8:1234:4567:89AB:cdef:0:1'), '2001:db8:1234:4567:89ab:cdef:0:1')
+        eq(convert('2001:DB8:1234:4567::10.11.12.13'), '2001:db8:1234:4567::10.11.12.13')
         raises(ValueError, convert,  '1hostnamewithleadingnumeric')
         raises(ValueError, convert,  '255.255')
         raises(ValueError, convert,  '12345678')
         raises(ValueError, convert,  '999.999.999.999')
         raises(ValueError, convert,  'a!badhostname')
+        raises(ValueError, convert,  '2001:DB8:0123:4567:89AB:cdef:0:1:2')
+        raises(ValueError, convert,  '2001:DB8:0123:4567::10.11.12.13.14')
 
     def test_existing_directory(self):
         convert = self.types.get('existing-directory')

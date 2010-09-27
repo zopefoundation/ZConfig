@@ -177,9 +177,17 @@ class InetAddress:
         host = ''
         port = None
         if ":" in s:
-            host, s = s.split(":", 1)
-            if s:
-                port = port_number(s)
+            host, p = s.rsplit(":", 1)
+            if host.startswith('[') and host.endswith(']'):
+                # [IPv6]:port
+                host = host[1:-1]
+            elif ':' in host:
+                # Unbracketed IPv6 address; 
+                # last part is not the port number
+                host = s
+                p = None
+            if p: # else leave port at None
+                port = port_number(p)
             host = host.lower()
         else:
             try:
@@ -203,6 +211,14 @@ inet_connection_address = InetAddress("127.0.0.1")
 inet_binding_address = InetAddress("")
 
 class SocketAddress:
+    # Parsing results in family and address
+    # Family can be AF_UNIX (for addresses that are path names)
+    # or AF_INET6 (for inet addresses with colons in them)
+    # or AF_INET (for all other inet addresses); 
+    # An inet address is a (host, port) pair
+    # Notice that no DNS lookup is performed, so if the host
+    # is a DNS name, DNS lookup may end up with either IPv4 or
+    # IPv6 addresses, or both
     def __init__(self, s):
         import socket
         if "/" in s or s.find(os.sep) >= 0:
@@ -211,6 +227,8 @@ class SocketAddress:
         else:
             self.family = socket.AF_INET
             self.address = self._parse_address(s)
+            if ':' in self.address[0]:
+                self.family = socket.AF_INET6
 
     def _parse_address(self, s):
         return inet_address(s)
@@ -237,15 +255,28 @@ class IpaddrOrHostname(RegularExpressionConversion):
         # IP address regex from the Perl Cookbook, Recipe 6.23 (revised ed.)
         # We allow underscores in hostnames although this is considered
         # illegal according to RFC1034.
+        # Addition: IPv6 addresses are now also accepted
         expr = (r"(^(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr
                 r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr cont'd
                 r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr cont'd
                 r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])$)" #ipaddr cont'd
-                r"|([A-Za-z_][-A-Za-z0-9_.]*[-A-Za-z0-9_])") # or hostname
+                r"|([A-Za-z_][-A-Za-z0-9_.]*[-A-Za-z0-9_])" # or hostname
+                r"|([0-9A-Fa-f:.]+:[0-9A-Fa-f:.]*)" # or superset of IPv6 addresses
+                                     # (requiring at least one colon)
+                ) 
         RegularExpressionConversion.__init__(self, expr)
 
     def __call__(self, value):
-        return RegularExpressionConversion.__call__(self, value).lower()
+        result = RegularExpressionConversion.__call__(self, value).lower()
+        # Use C library to validate IPv6 addresses, in particular wrt.
+        # number of colons and number of digits per group
+        if ':' in result:
+            import socket
+            try:
+                socket.inet_pton(socket.AF_INET6, result)
+            except socket.error:
+                raise ValueError('%r is not a valid IPv6 address' % value)
+        return result
 
 def existing_directory(v):
     nv = os.path.expanduser(v)
