@@ -3,8 +3,8 @@ Change History for ZConfig
 ==========================
 
 
-After ZConfig 2.8.0 (unreleased)
---------------------------------
+ZConfig 2.9.0 (2011-03-22)
+--------------------------
 
 - Allow identical redefinition of ``%define`` names.
 - Added support for IPv6 addresses.

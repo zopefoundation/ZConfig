@@ -18,7 +18,7 @@ def alltests():
 
 options = dict(
     name="ZConfig",
-    version="0",
+    version="2.9.0",
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     maintainer="Zope Foundation and Contributors",
@@ -51,7 +51,7 @@ options = dict(
         "Programming Language :: Python :: 2.4",
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
-        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Programming Language :: Python :: 2.7",
         ],
     # Support for 'setup.py test' when setuptools is available:
     test_suite="__main__.alltests",
