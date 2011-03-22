@@ -17,10 +17,7 @@ Test driver for ZConfig.schemaless.
 """
 __docformat__ = "reStructuredText"
 
-try:
-    from zope.testing import doctest
-except ImportError:
-    import doctest
+import doctest
 
 
 def test_suite():
