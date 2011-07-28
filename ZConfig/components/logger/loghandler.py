@@ -84,8 +84,7 @@ class FileHandler(StreamHandler):
         _remove_from_reopenable(self._wr)
 
     def reopen(self):
-        # Do not close old stream to allow other process to finish logging
-        # to them. The Python GC will take care of the closing.
+        self.stream.close()
         self.stream = open(self.baseFilename, self.mode)
 
 
