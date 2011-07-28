@@ -458,6 +458,28 @@ class TestReopeningLogfilesBase(LoggingTestBase):
         self.assert_("message 4" in text2)
         self.assert_("message 5" in text3)
 
+    def test_filehandler_reopen_thread_safety(self):
+        # The reopen method needs to do locking to avoid a race condition
+        # with emit calls. For simplicity we replace the "acquire" and
+        # "release" calls with dummy method that counts its calls.
+        class FakeMethod(object):
+            def __init__(self):
+                self.call_count = 0
+
+            def __call__(self):
+                self.call_count += 1
+
+        fn = self.mktemp()
+        h = self.handler_factory(fn)
+        h.acquire = FakeMethod()
+        h.release = FakeMethod()
+
+        h.reopen()
+        h.close()
+
+        self.assertEqual(2, h.acquire.call_count)
+        self.assertEqual(2, h.release.call_count)
+
 class TestReopeningLogfiles(TestReopeningLogfilesBase):
 
     handler_factory = loghandler.FileHandler
