@@ -6,6 +6,8 @@ Change History for ZConfig
 ZConfig 2.9.1 (unreleased)
 --------------------------
 
+- Make FileHandler.reopen thread safe.
+
 
 ZConfig 2.9.0 (2011-03-22)
 --------------------------
