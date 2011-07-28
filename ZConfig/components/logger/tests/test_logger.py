@@ -556,8 +556,8 @@ class TestReopeningLogfiles(TestReopeningLogfilesBase):
         h.reopen()
         h.close()
 
-        self.assertEqual(2, h.acquire.call_count)
-        self.assertEqual(2, h.release.call_count)
+        self.assertEqual(1, h.acquire.call_count)
+        self.assertEqual(1, h.release.call_count)
 
 
 class TestReopeningRotatingLogfiles(TestReopeningLogfilesBase):
