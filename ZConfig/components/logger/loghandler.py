@@ -84,8 +84,12 @@ class FileHandler(StreamHandler):
         _remove_from_reopenable(self._wr)
 
     def reopen(self):
-        self.stream.close()
-        self.stream = open(self.baseFilename, self.mode)
+        self.acquire()
+        try:
+            self.stream.close()
+            self.stream = open(self.baseFilename, self.mode)
+        finally:
+            self.release()
 
 
 class Win32FileHandler(FileHandler):

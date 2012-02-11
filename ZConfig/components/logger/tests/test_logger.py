@@ -537,6 +537,23 @@ class TestReopeningLogfiles(TestReopeningLogfilesBase):
                 logger.removeHandler(handler)
                 handler.close()
 
+    def test_filehandler_reopen_thread_safety(self):
+        # The reopen method needs to do locking to avoid a race condition
+        # with emit calls. For simplicity we replace the "acquire" and
+        # "release" methods with dummies that record calls to them.
+
+        fn = self.mktemp()
+        h = self.handler_factory(fn)
+
+        calls = []
+        h.acquire = lambda: calls.append("acquire")
+        h.release = lambda: calls.append("release")
+
+        h.reopen()
+        h.close()
+
+        self.assertEqual(calls, ["acquire", "release"])
+
 
 class TestReopeningRotatingLogfiles(TestReopeningLogfilesBase):
 
