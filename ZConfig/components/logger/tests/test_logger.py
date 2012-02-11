@@ -407,15 +407,51 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         return logger
 
 
-class TestReopeningLogfilesHelper(LoggingTestHelper):
+class TestReopeningRotatingLogfiles(LoggingTestHelper, unittest.TestCase):
 
     # These tests should not be run on Windows.
+
+    handler_factory = loghandler.RotatingFileHandler
 
     _schematext = """
       <schema>
         <import package='ZConfig.components.logger'/>
         <multisection type='logger' name='*' attribute='loggers'/>
       </schema>
+    """
+
+    _sampleconfig_template = """
+      <logger>
+        name  foo.bar
+        <logfile>
+          path  %(path0)s
+          level debug
+          max-size 1mb
+          old-files 10
+        </logfile>
+        <logfile>
+          path  %(path1)s
+          level info
+          max-size 1mb
+          old-files 3
+        </logfile>
+        <logfile>
+          path  %(path1)s
+          level info
+          when D
+          old-files 3
+        </logfile>
+      </logger>
+
+      <logger>
+        name  bar.foo
+        <logfile>
+          path  %(path2)s
+          level info
+          max-size 10mb
+          old-files 10
+        </logfile>
+      </logger>
     """
 
     def test_filehandler_reopen(self):
@@ -461,8 +497,59 @@ class TestReopeningLogfilesHelper(LoggingTestHelper):
         self.assert_("message 4" in text2)
         self.assert_("message 5" in text3)
 
+    def test_logfile_reopening(self):
+        #
+        # This test only applies to the simple logfile reopening; it
+        # doesn't work the same way as the rotating logfile handler.
+        #
+        paths = self.mktemp(), self.mktemp(), self.mktemp()
+        d = {
+            "path0": paths[0],
+            "path1": paths[1],
+            "path2": paths[2],
+            }
+        text = self._sampleconfig_template % d
+        conf = self.get_config(text)
+        self.assertEqual(len(conf.loggers), 2)
+        # Build the loggers from the configuration, and write to them:
+        conf.loggers[0]().info("message 1")
+        conf.loggers[1]().info("message 2")
+        #
+        # We expect this to re-open the original filenames, so we'll
+        # have six files instead of three.
+        #
+        loghandler.reopenFiles()
+        #
+        # Write to them again:
+        conf.loggers[0]().info("message 3")
+        conf.loggers[1]().info("message 4")
+        #
+        # We expect this to re-open the original filenames, so we'll
+        # have nine files instead of six.
+        #
+        loghandler.reopenFiles()
+        #
+        # Write to them again:
+        conf.loggers[0]().info("message 5")
+        conf.loggers[1]().info("message 6")
+        #
+        # We should now have all nine files:
+        for fn in paths:
+            fn1 = fn + ".1"
+            fn2 = fn + ".2"
+            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+            self.assert_(os.path.isfile(fn1), "%r must exist" % fn1)
+            self.assert_(os.path.isfile(fn2), "%r must exist" % fn2)
+        #
+        # Clean up:
+        for logger in conf.loggers:
+            logger = logger()
+            for handler in logger.handlers[:]:
+                logger.removeHandler(handler)
+                handler.close()
 
-class TestReopeningLogfiles(TestReopeningLogfilesHelper, unittest.TestCase):
+
+class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
 
     handler_factory = loghandler.FileHandler
 
@@ -558,96 +645,6 @@ class TestReopeningLogfiles(TestReopeningLogfilesHelper, unittest.TestCase):
 
         self.assertEqual(calls, ["acquire", "release"])
 
-
-class TestReopeningRotatingLogfiles(
-    TestReopeningLogfilesHelper, unittest.TestCase):
-
-    _sampleconfig_template = """
-      <logger>
-        name  foo.bar
-        <logfile>
-          path  %(path0)s
-          level debug
-          max-size 1mb
-          old-files 10
-        </logfile>
-        <logfile>
-          path  %(path1)s
-          level info
-          max-size 1mb
-          old-files 3
-        </logfile>
-        <logfile>
-          path  %(path1)s
-          level info
-          when D
-          old-files 3
-        </logfile>
-      </logger>
-
-      <logger>
-        name  bar.foo
-        <logfile>
-          path  %(path2)s
-          level info
-          max-size 10mb
-          old-files 10
-        </logfile>
-      </logger>
-    """
-
-    handler_factory = loghandler.RotatingFileHandler
-
-    def test_logfile_reopening(self):
-        #
-        # This test only applies to the simple logfile reopening; it
-        # doesn't work the same way as the rotating logfile handler.
-        #
-        paths = self.mktemp(), self.mktemp(), self.mktemp()
-        d = {
-            "path0": paths[0],
-            "path1": paths[1],
-            "path2": paths[2],
-            }
-        text = self._sampleconfig_template % d
-        conf = self.get_config(text)
-        self.assertEqual(len(conf.loggers), 2)
-        # Build the loggers from the configuration, and write to them:
-        conf.loggers[0]().info("message 1")
-        conf.loggers[1]().info("message 2")
-        #
-        # We expect this to re-open the original filenames, so we'll
-        # have six files instead of three.
-        #
-        loghandler.reopenFiles()
-        #
-        # Write to them again:
-        conf.loggers[0]().info("message 3")
-        conf.loggers[1]().info("message 4")
-        #
-        # We expect this to re-open the original filenames, so we'll
-        # have nine files instead of six.
-        #
-        loghandler.reopenFiles()
-        #
-        # Write to them again:
-        conf.loggers[0]().info("message 5")
-        conf.loggers[1]().info("message 6")
-        #
-        # We should now have all nine files:
-        for fn in paths:
-            fn1 = fn + ".1"
-            fn2 = fn + ".2"
-            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
-            self.assert_(os.path.isfile(fn1), "%r must exist" % fn1)
-            self.assert_(os.path.isfile(fn2), "%r must exist" % fn2)
-        #
-        # Clean up:
-        for logger in conf.loggers:
-            logger = logger()
-            for handler in logger.handlers[:]:
-                logger.removeHandler(handler)
-                handler.close()
 
 def test_logger_convenience_function_and_ommiting_name_to_get_root_logger():
     """
