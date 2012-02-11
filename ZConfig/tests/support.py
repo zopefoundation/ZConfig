@@ -16,7 +16,6 @@
 
 import os
 import StringIO
-import unittest
 import urllib
 
 import ZConfig
@@ -35,8 +34,11 @@ d = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
 CONFIG_BASE = "file://%s/" % urllib.pathname2url(d)
 
 
-class TestBase(unittest.TestCase):
+class TestHelper:
     """Utility methods which can be used with the schema support."""
+
+    # Not derived from unittest.TestCase; some test runners seem to
+    # think that means this class contains tests.
 
     def load_both(self, schema_url, conf_url):
         schema = self.load_schema(schema_url)

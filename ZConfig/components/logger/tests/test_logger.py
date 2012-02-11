@@ -41,7 +41,10 @@ class CustomFormatter(logging.Formatter):
         return sio.getvalue() + "... Don't panic!"
 
 
-class LoggingTestBase(unittest.TestCase):
+class LoggingTestHelper:
+
+    # Not derived from unittest.TestCase; some test runners seem to
+    # think that means this class contains tests.
 
     # XXX This tries to save and restore the state of logging around
     # the test.  Somewhat surgical; there may be a better way.
@@ -100,7 +103,7 @@ class LoggingTestBase(unittest.TestCase):
         return conf
 
 
-class TestConfig(LoggingTestBase):
+class TestConfig(LoggingTestHelper, unittest.TestCase):
 
     _schematext = """
       <schema>
@@ -404,7 +407,7 @@ class TestConfig(LoggingTestBase):
         return logger
 
 
-class TestReopeningLogfilesBase(LoggingTestBase):
+class TestReopeningLogfilesHelper(LoggingTestHelper):
 
     # These tests should not be run on Windows.
 
@@ -458,7 +461,8 @@ class TestReopeningLogfilesBase(LoggingTestBase):
         self.assert_("message 4" in text2)
         self.assert_("message 5" in text3)
 
-class TestReopeningLogfiles(TestReopeningLogfilesBase):
+
+class TestReopeningLogfiles(TestReopeningLogfilesHelper, unittest.TestCase):
 
     handler_factory = loghandler.FileHandler
 
@@ -555,7 +559,8 @@ class TestReopeningLogfiles(TestReopeningLogfilesBase):
         self.assertEqual(calls, ["acquire", "release"])
 
 
-class TestReopeningRotatingLogfiles(TestReopeningLogfilesBase):
+class TestReopeningRotatingLogfiles(
+    TestReopeningLogfilesHelper, unittest.TestCase):
 
     _sampleconfig_template = """
       <logger>

@@ -20,9 +20,8 @@ The ZConfig Cookbook is available online at:
 
 """
 
+import ZConfig.tests.support
 import unittest
-
-from ZConfig.tests.support import TestBase
 
 
 def basic_key_mapping_password_to_passwd(key):
@@ -37,7 +36,7 @@ def user_info_conversion(section):
     return section
 
 
-class CookbookTestCase(TestBase):
+class CookbookTestCase(ZConfig.tests.support.TestHelper, unittest.TestCase):
 
     def test_rewriting_key_names(self):
         schema = self.load_schema_text("""

@@ -15,9 +15,8 @@
 """Tests of the 'basic' section types provided as part of
 ZConfig.components.basic."""
 
+import ZConfig.tests.support
 import unittest
-
-from ZConfig.tests import support
 
 
 SIMPLE_SCHEMA = '''\
@@ -43,7 +42,9 @@ SIMPLE_SCHEMA = '''\
 '''
 
 
-class BasicSectionTypeTestCase(support.TestBase):
+class BasicSectionTypeTestCase(
+    ZConfig.tests.support.TestHelper, unittest.TestCase):
+
     schema = None
 
     def setUp(self):

@@ -17,12 +17,12 @@
 import unittest
 
 import ZConfig
+import ZConfig.tests.support
 
 from ZConfig.cmdline import ExtendedConfigLoader
-from ZConfig.tests.support import TestBase
 
 
-class CommandLineTest(TestBase):
+class CommandLineTest(ZConfig.tests.support.TestHelper, unittest.TestCase):
 
     def create_config_loader(self, schema):
         loader = ExtendedConfigLoader(schema)

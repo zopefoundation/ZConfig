@@ -25,7 +25,7 @@ import ZConfig
 import ZConfig.loader
 import ZConfig.url
 
-from ZConfig.tests.support import CONFIG_BASE, TestBase
+from ZConfig.tests.support import CONFIG_BASE, TestHelper
 
 
 try:
@@ -37,7 +37,7 @@ myfile = os.path.abspath(myfile)
 LIBRARY_DIR = os.path.join(os.path.dirname(myfile), "library")
 
 
-class LoaderTestCase(TestBase):
+class LoaderTestCase(TestHelper, unittest.TestCase):
 
     def test_schema_caching(self):
         loader = ZConfig.loader.SchemaLoader()

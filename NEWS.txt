@@ -3,6 +3,13 @@ Change History for ZConfig
 ==========================
 
 
+ZConfig 2.9.2 (unreleased)
+--------------------------
+
+- Adjust test classes to avoid base classes being considered separate
+  test cases by (at least) the "nose" test runner.
+
+
 ZConfig 2.9.1 (2012-02-11)
 --------------------------
 

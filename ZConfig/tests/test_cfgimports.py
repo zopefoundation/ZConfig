@@ -24,7 +24,8 @@ import ZConfig
 import ZConfig.tests.support
 
 
-class TestImportFromConfiguration(ZConfig.tests.support.TestBase):
+class TestImportFromConfiguration(
+    ZConfig.tests.support.TestHelper, unittest.TestCase):
 
     def test_simple_import(self):
         schema = self.load_schema_text("<schema/>")

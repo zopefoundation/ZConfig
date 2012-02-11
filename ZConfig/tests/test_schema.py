@@ -17,7 +17,7 @@ import unittest
 
 import ZConfig
 
-from ZConfig.tests.support import TestBase, CONFIG_BASE
+from ZConfig.tests.support import TestHelper, CONFIG_BASE
 
 
 def uppercase(value):
@@ -40,7 +40,7 @@ def get_section_attributes(section):
     return L
 
 
-class SchemaTestCase(TestBase):
+class SchemaTestCase(TestHelper, unittest.TestCase):
     """Tests of the basic schema support itself."""
 
     def test_minimal_schema(self):
