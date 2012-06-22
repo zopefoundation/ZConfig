@@ -3,6 +3,12 @@ Change History for ZConfig
 ==========================
 
 
+ZConfig 2.9.3 (2012-06-22)
+--------------------------
+
+- Fixed: port values of 0 weren't allowed.  Port 0 is used to request
+  an ephemeral port.
+
 ZConfig 2.9.2 (2012-02-11)
 --------------------------
 

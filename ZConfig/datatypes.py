@@ -164,7 +164,7 @@ def string_list(s):
     return s.split()
 
 
-port_number = RangeCheckedConversion(integer, min=1, max=0xffff).__call__
+port_number = RangeCheckedConversion(integer, min=0, max=0xffff).__call__
 
 
 class InetAddress:

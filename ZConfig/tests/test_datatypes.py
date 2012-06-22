@@ -183,6 +183,7 @@ class DatatypeTestCase(unittest.TestCase):
         eq = self.assertEqual
         defhost = ZConfig.datatypes.DEFAULT_HOST
         eq(convert("Host.Example.Com:80"), ("host.example.com", 80))
+        eq(convert("Host.Example.Com:0"), ("host.example.com", 0))
         eq(convert(":80"),                 (defhost, 80))
         eq(convert("80"),                  (defhost, 80))
         eq(convert("[::1]:80"),            ("::1", 80))
@@ -247,7 +248,7 @@ class DatatypeTestCase(unittest.TestCase):
         raises = self.assertRaises
 
         raises(ValueError, convert, '-1')
-        raises(ValueError, convert, '0')
+        eq(convert('0'), 0)
         eq(convert('1'), 1)
         eq(convert('80'), 80)
         eq(convert('1023'), 1023)
