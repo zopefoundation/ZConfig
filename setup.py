@@ -1,5 +1,5 @@
 README = open("README.txt").read()
-NEWS = open("NEWS.txt").read()
+CHANGES = open("CHANGES.txt").read()
 
 def alltests():
     import os
@@ -23,7 +23,7 @@ options = dict(
     author_email="fred@zope.com",
     maintainer="Zope Foundation and Contributors",
     description="Structured Configuration Library",
-    long_description=README + "\n\n" + NEWS,
+    long_description=README + "\n\n" + CHANGES,
     license="ZPL 2.1",
     url="http://www.zope.org/Members/fdrake/zconfig/",
     # List packages explicitly so we don't have to assume setuptools:
