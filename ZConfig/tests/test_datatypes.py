@@ -225,11 +225,6 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert('65535'), 65535)
         eq(convert('65536'), 65536)
 
-        big = sys.maxint + 1L  # Python 2.1 needs the L suffix here
-        s = str(big)           # s won't have the suffix
-        eq(convert(s), big)
-        eq(convert("-" + s), -big)
-
         raises(ValueError, convert, 'abc')
         raises(ValueError, convert, '-0xabc')
         raises(ValueError, convert, '')
@@ -349,12 +344,12 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert('128'), 128)
         eq(convert('128KB'), 128*1024)
         eq(convert('128MB'), 128*1024*1024)
-        eq(convert('128GB'), 128*1024*1024*1024L)
+        eq(convert('128GB'), 128*1024*1024*1024)
         raises(ValueError, convert, '128TB')
         eq(convert('128'), 128)
         eq(convert('128kb'), 128*1024)
         eq(convert('128mb'), 128*1024*1024)
-        eq(convert('128gb'), 128*1024*1024*1024L)
+        eq(convert('128gb'), 128*1024*1024*1024)
         raises(ValueError, convert, '128tb')
 
     def test_time_interval(self):

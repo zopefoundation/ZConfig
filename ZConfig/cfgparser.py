@@ -88,8 +88,8 @@ class ZConfigParser:
             name = self._normalize_case(name)
         try:
             newsect = self.context.startSection(section, type, name)
-        except ZConfig.ConfigurationError, e:
-            self.error(e[0])
+        except ZConfig.ConfigurationError as e:
+            self.error(e.message)
 
         if isempty:
             self.context.endSection(section, type, name, newsect)
@@ -108,12 +108,15 @@ class ZConfigParser:
         try:
             self.context.endSection(
                 prevsection, type, name, section)
-        except ZConfig.ConfigurationError, e:
-            self.error(e[0])
+        except ZConfig.ConfigurationError as e:
+            self.error(e.args[0])
         return prevsection
 
     def handle_key_value(self, section, rest):
-        m = _keyvalue_rx.match(rest)
+        try:
+            m = _keyvalue_rx.match(rest)
+        except:
+            import pdb; pdb.set_trace()
         if not m:
             self.error("malformed configuration data")
         key, value = m.group('key', 'value')
@@ -123,8 +126,8 @@ class ZConfigParser:
             value = self.replace(value)
         try:
             section.addValue(key, value, (self.lineno, None, self.url))
-        except ZConfig.ConfigurationError, e:
-            self.error(e[0])
+        except ZConfig.ConfigurationError as e:
+            self.error(e.args[0])
 
     def handle_directive(self, section, rest):
         m = _keyvalue_rx.match(rest)
@@ -132,7 +135,7 @@ class ZConfigParser:
             self.error("missing or unrecognized directive")
         name, arg = m.group('key', 'value')
         if name not in ("define", "import", "include"):
-            self.error("unknown directive: " + `name`)
+            self.error("unknown directive: " + repr(name))
         if not arg:
             self.error("missing argument to %%%s directive" % name)
         if name == "include":
@@ -142,7 +145,7 @@ class ZConfigParser:
         elif name == "import":
             self.handle_import(section, arg)
         else:
-            assert 0, "unexpected directive for " + `"%" + rest`
+            assert 0, "unexpected directive for " + repr("%" + rest)
 
     def handle_import(self, section, rest):
         pkgname = self.replace(rest.strip())
@@ -159,17 +162,17 @@ class ZConfigParser:
         defvalue = ''
         if len(parts) == 2:
             defvalue = parts[1]
-        if self.defines.has_key(defname):
+        if defname in self.defines:
             if self.defines[defname] != defvalue:
-                self.error("cannot redefine " + `defname`)
+                self.error("cannot redefine " + repr(defname))
         if not isname(defname):
-            self.error("not a substitution legal name: " + `defname`)
+            self.error("not a substitution legal name: " + repr(defname))
         self.defines[defname] = self.replace(defvalue)
 
     def replace(self, text):
         try:
             return substitute(text, self.defines)
-        except ZConfig.SubstitutionReplacementError, e:
+        except ZConfig.SubstitutionReplacementError as e:
             e.lineno = self.lineno
             e.url = self.url
             raise

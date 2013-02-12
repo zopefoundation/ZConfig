@@ -15,14 +15,23 @@
 """Support code shared among the tests."""
 
 import os
-import StringIO
-import urllib
 
 import ZConfig
 
 from ZConfig.loader import ConfigLoader
 from ZConfig.url import urljoin
 
+try:
+    import StringIO
+except ImportError:
+    # Python 3 support.
+    import io as StringIO
+
+try:
+    from urllib import pathname2url
+except ImportError:
+    # Python 3 support.
+    from urllib.request import pathname2url
 
 try:
     __file__
@@ -31,7 +40,7 @@ except NameError:
     __file__ = sys.argv[0]
 
 d = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
-CONFIG_BASE = "file://%s/" % urllib.pathname2url(d)
+CONFIG_BASE = "file://%s/" % pathname2url(d)
 
 
 class TestHelper:

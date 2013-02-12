@@ -35,16 +35,22 @@ $Id: __init__.py,v 1.18 2004/04/15 20:33:32 fdrake Exp $
 """
 __docformat__ = "reStructuredText"
 
-version_info = (2, 3)
+version_info = (3, 0)
 __version__ = ".".join([str(n) for n in version_info])
 
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
 
+try:
+    import cStringIO as StringIO
+except ImportError:
+    # Python 3 support.
+    import io as StringIO
+
 
 class ConfigurationError(Exception):
     """Base class for ZConfig exceptions."""
- 
+
     # The 'message' attribute was deprecated for BaseException with
     # Python 2.6; here we create descriptor properties to continue using it
     def __set_message(self, v):
@@ -158,12 +164,11 @@ class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
         self.source = source
         self.name = name
         ConfigurationSyntaxError.__init__(
-            self, "no replacement for " + `name`, url, lineno)
+            self, "no replacement for " + repr(name), url, lineno)
 
 
 def configureLoggers(text):
     """Configure one or more loggers from configuration text."""
-    import StringIO
     schema = loadSchemaFile(StringIO.StringIO("""
     <schema>
     <import package='ZConfig.components.logger'/>

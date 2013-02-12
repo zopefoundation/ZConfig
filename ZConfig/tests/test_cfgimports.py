@@ -12,16 +12,17 @@
 #
 ##############################################################################
 """Tests of the %import mechanism.
-
-$Id: test_cfgimports.py,v 1.1 2003/10/03 20:01:57 fdrake Exp $
 """
-
 import unittest
-
-from StringIO import StringIO
 
 import ZConfig
 import ZConfig.tests.support
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    # Python 3 support.
+    from io import StringIO
 
 
 class TestImportFromConfiguration(

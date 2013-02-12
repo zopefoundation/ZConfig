@@ -17,25 +17,13 @@ ZConfig and urllib2 expect file: URLs to consistently use the '//'
 hostpart seperator; the functions here enforce this constraint.
 """
 
-import urlparse as _urlparse
-
 try:
-    from urlparse import urlsplit
+    import urlparse as _urlparse
 except ImportError:
-    def urlsplit(url):
-        # Check for the fragment here, since Python 2.1.3 didn't get
-        # it right for things like "http://www.python.org#frag".
-        if '#' in url:
-            url, fragment = url.split('#', 1)
-        else:
-            fragment = ''
-        parts = list(_urlparse.urlparse(url))
-        parts[-1] = fragment
-        param = parts.pop(3)
-        if param:
-            parts[2] += ";" + param
-        return tuple(parts)
+    # Python 3 support
+    import urllib.parse as _urlparse
 
+urlsplit = _urlparse.urlsplit
 
 def urlnormalize(url):
     lc = url.lower()

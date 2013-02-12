@@ -12,9 +12,7 @@
 #
 ##############################################################################
 """Tests of the configuration data structures and loader."""
-
 import os
-import StringIO
 import tempfile
 import unittest
 
@@ -22,6 +20,11 @@ import ZConfig
 
 from ZConfig.tests.support import CONFIG_BASE
 
+try:
+    import cStringIO as StringIO
+except ImportError:
+    # Python 3 support.
+    import io as StringIO
 
 class ConfigurationTestCase(unittest.TestCase):
 

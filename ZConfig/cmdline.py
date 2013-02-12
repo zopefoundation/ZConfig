@@ -89,15 +89,15 @@ class OptionBag:
                 "could not convert basic-key value", *pos)
 
     def add_value(self, name, val, pos):
-        if self.keypairs.has_key(name):
+        if name in self.keypairs:
             L = self.keypairs[name]
         else:
             L = []
             self.keypairs[name] = L
         L.append((val, pos))
 
-    def has_key(self, name):
-        return self.keypairs.has_key(name)
+    def __contains__(self, name):
+        return name in self.keypairs
 
     def get_key(self, name):
         """Return a list of (value, pos) items for the key 'name'.
@@ -149,9 +149,9 @@ class MatcherMixin:
     def addValue(self, key, value, position):
         try:
             realkey = self.type.keytype(key)
-        except ValueError, e:
+        except ValueError as e:
             raise ZConfig.DataConversionError(e, key, position)
-        if self.optionbag.has_key(realkey):
+        if realkey in self.optionbag:
             return
         ZConfig.matcher.BaseMatcher.addValue(self, key, value, position)
 
@@ -165,7 +165,7 @@ class MatcherMixin:
         return sm
 
     def finish_optionbag(self):
-        for key in self.optionbag.keys():
+        for key in list(self.optionbag.keys()):
             for val, pos in self.optionbag.get_key(key):
                 ZConfig.matcher.BaseMatcher.addValue(self, key, val, pos)
         self.optionbag.finish()

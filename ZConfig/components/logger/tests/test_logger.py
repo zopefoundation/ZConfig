@@ -14,7 +14,6 @@
 
 """Tests for logging configuration via ZConfig."""
 
-import cStringIO as StringIO
 import doctest
 import logging
 import os
@@ -28,6 +27,11 @@ from ZConfig.components.logger import datatypes
 from ZConfig.components.logger import handlers
 from ZConfig.components.logger import loghandler
 
+try:
+    import cStringIO as StringIO
+except ImportError:
+    # Python 3 support.
+    import io as StringIO
 
 class CustomFormatter(logging.Formatter):
     def formatException(self, ei):
@@ -122,6 +126,8 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                      "critical"]:
             self.assertEqual(convert(name), convert(name.upper()))
         self.assertRaises(ValueError, convert, "hopefully-not-a-valid-value")
+        self.assertEqual(convert('10'), 10)
+        self.assertRaises(ValueError, convert, '100')
 
     def test_http_method(self):
         convert = handlers.get_or_post

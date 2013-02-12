@@ -46,7 +46,10 @@ open for reading.  Let's take a look at this, and what it returns::
   ...
   ... '''
 
-  >>> import StringIO
+  >>> try:
+  ...     import StringIO
+  ... except ImportError:
+  ...     import io as StringIO
 
   >>> config = schemaless.loadConfigFile(StringIO.StringIO(config_text))
 
@@ -104,7 +107,7 @@ record the type and name of the section as ZConfig understands them::
   >>> section.type
   'section'
 
-  >>> print section.name
+  >>> print(section.name)
   None
 
 Let's look at the named section from our example, so we can see the
@@ -130,7 +133,7 @@ New sections can also be added::
 
 The configuration can be re-serialized using ``str()``::
 
-  >>> print str(config)
+  >>> print(str(config))
   another-key whee!
   new-key new-value-1
   new-key new-value-2
@@ -199,7 +202,7 @@ other elements of a configuration are::
 
   >>> config = schemaless.loadConfigFile(StringIO.StringIO(config_text))
 
-  >>> print config
+  >>> print(config)
   %import some.package
   %import another.package
   <BLANKLINE>
@@ -230,7 +233,7 @@ Multiple imports of the same name are removed::
 
   >>> config = schemaless.loadConfigFile(StringIO.StringIO(config_text))
 
-  >>> print config
+  >>> print(config)
   %import some.package
   %import another.package
   <BLANKLINE>

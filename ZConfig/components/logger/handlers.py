@@ -17,6 +17,11 @@ import sys
 
 from ZConfig.components.logger.factory import Factory
 
+try:
+    import urlparse
+except ImportError:
+    # Python 3 support.
+    import urllib.parse as urlparse
 
 _log_format_variables = {
     'name': '',
@@ -153,9 +158,8 @@ _syslog_facilities = {
 
 def syslog_facility(value):
     value = value.lower()
-    if not _syslog_facilities.has_key(value):
-        L = _syslog_facilities.keys()
-        L.sort()
+    if value not in _syslog_facilities:
+        L = sorted(_syslog_facilities.keys())
         raise ValueError("Syslog facility must be one of " + ", ".join(L))
     return value
 
@@ -171,7 +175,6 @@ class Win32EventLogFactory(HandlerFactory):
         return loghandler.Win32EventLogHandler(self.section.appname)
 
 def http_handler_url(value):
-    import urlparse
     scheme, netloc, path, param, query, fragment = urlparse.urlparse(value)
     if scheme != 'http':
         raise ValueError('url must be an http url')

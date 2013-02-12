@@ -39,15 +39,15 @@ class BaseMatcher:
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        extra = "type " + `self.type.name`
+        extra = "type " + repr(self.type.name)
         return "<%s for %s>" % (clsname, extra)
 
     def addSection(self, type, name, sectvalue):
         if name:
-            if self._sectionnames.has_key(name):
+            if name in self._sectionnames:
                 raise ZConfig.ConfigurationError(
                     "section names must not be re-used within the"
-                    " same container:" + `name`)
+                    " same container:" + repr(name))
             self._sectionnames[name] = name
         ci = self.type.getsectioninfo(type, name)
         attr = ci.attribute
@@ -58,12 +58,12 @@ class BaseMatcher:
             self._values[attr] = sectvalue
         else:
             raise ZConfig.ConfigurationError(
-                "too many instances of %s section" % `ci.sectiontype.name`)
+                "too many instances of %s section" % repr(ci.sectiontype.name))
 
     def addValue(self, key, value, position):
         try:
             realkey = self.type.keytype(key)
-        except ValueError, e:
+        except ValueError as e:
             raise ZConfig.DataConversionError(e, key, position)
         arbkey_info = None
         for i in range(len(self.type)):
@@ -75,15 +75,15 @@ class BaseMatcher:
         else:
             if arbkey_info is None:
                 raise ZConfig.ConfigurationError(
-                    `key` + " is not a known key name")
+                    repr(key) + " is not a known key name")
             k, ci = arbkey_info
         if ci.issection():
             if ci.name:
-                extra = " in %s sections" % `self.type.name`
+                extra = " in %s sections" % repr(self.type.name)
             else:
                 extra = ""
             raise ZConfig.ConfigurationError(
-                "%s is not a valid key name%s" % (`key`, extra))
+                "%s is not a valid key name%s" % (repr(key), extra))
 
         ismulti = ci.ismulti()
         attr = ci.attribute
@@ -98,22 +98,22 @@ class BaseMatcher:
         elif not ismulti:
             if k != '+':
                 raise ZConfig.ConfigurationError(
-                    `key` + " does not support multiple values")
+                    repr(key) + " does not support multiple values")
         elif len(v) == ci.maxOccurs:
             raise ZConfig.ConfigurationError(
-                "too many values for " + `name`)
+                "too many values for " + repr(name))
 
         value = ValueInfo(value, position)
         if k == '+':
             if ismulti:
-                if v.has_key(realkey):
+                if realkey in v:
                     v[realkey].append(value)
                 else:
                     v[realkey] = [value]
             else:
-                if v.has_key(realkey):
+                if realkey in v:
                     raise ZConfig.ConfigurationError(
-                        "too many values for " + `key`)
+                        "too many values for " + repr(key))
                 v[realkey] = value
         elif ismulti:
             v.append(value)
@@ -126,7 +126,7 @@ class BaseMatcher:
         if not ci.isAllowedName(name):
             raise ZConfig.ConfigurationError(
                 "%s is not an allowed name for %s sections"
-                % (`name`, `ci.sectiontype.name`))
+                % (repr(name), repr(ci.sectiontype.name)))
         return SectionMatcher(ci, type, name, self.handlers)
 
     def finish(self):
@@ -137,7 +137,7 @@ class BaseMatcher:
             if key:
                 key = repr(key)
             else:
-                key = "section type " + `ci.sectiontype.name`
+                key = "section type " + repr(ci.sectiontype.name)
             assert ci.attribute is not None
             attr = ci.attribute
             v = values[attr]
@@ -186,7 +186,7 @@ class BaseMatcher:
                             st = s.getSectionDefinition()
                             try:
                                 s = st.datatype(s)
-                            except ValueError, e:
+                            except ValueError as e:
                                 raise ZConfig.DataConversionError(
                                     e, s, (-1, -1, None))
                         v.append(s)
@@ -201,7 +201,7 @@ class BaseMatcher:
                     st = values[attr].getSectionDefinition()
                     try:
                         v = st.datatype(values[attr])
-                    except ValueError, e:
+                    except ValueError as e:
                         raise ZConfig.DataConversionError(
                             e, values[attr], (-1, -1, None))
                 else:
@@ -233,7 +233,7 @@ class SectionMatcher(BaseMatcher):
             self.name = name
         else:
             raise ZConfig.ConfigurationError(
-                `type.name` + " sections may not be unnamed")
+                repr(type.name) + " sections may not be unnamed")
         BaseMatcher.__init__(self, info, type, handlers)
 
     def createValue(self):
@@ -270,7 +270,7 @@ class SectionValue:
     def __repr__(self):
         if self._name:
             # probably unique for a given config file; more readable than id()
-            name = `self._name`
+            name = repr(self._name)
         else:
             # identify uniquely
             name = "at %#x" % id(self)
@@ -279,8 +279,7 @@ class SectionValue:
 
     def __str__(self):
         l = []
-        attrnames = [s for s in self.__dict__.keys() if s[0] != "_"]
-        attrnames.sort()
+        attrnames = sorted([s for s in self.__dict__.keys() if s[0] != "_"])
         for k in attrnames:
             v = getattr(self, k)
             l.append('%-40s: %s' % (k, v))

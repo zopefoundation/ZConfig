@@ -2,12 +2,20 @@
 Change History for ZConfig
 ==========================
 
+ZConfig 3.0.0b1 (unreleased)
+----------------------------
+
+- Add Python 3.3 support.
+
+- Drop Python 2.4, 2.5 and 2.6 support.
+
 
 ZConfig 2.9.3 (2012-06-25)
 --------------------------
 
 - Fixed: port values of 0 weren't allowed.  Port 0 is used to request
   an ephemeral port.
+
 
 ZConfig 2.9.2 (2012-02-11)
 --------------------------

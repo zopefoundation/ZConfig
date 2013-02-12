@@ -36,9 +36,9 @@ def parseComponent(resource, loader, schema):
 def _srepr(ob):
     if isinstance(ob, type(u'')):
         # drop the leading "u" from a unicode repr
-        return `ob`[1:]
+        return repr(ob)[1:]
     else:
-        return `ob`
+        return repr(ob)
 
 
 class BaseParser(xml.sax.ContentHandler):
@@ -85,7 +85,7 @@ class BaseParser(xml.sax.ContentHandler):
         attrs = dict(attrs)
         if self._elem_stack:
             parent = self._elem_stack[-1]
-            if not self._allowed_parents.has_key(name):
+            if name not in self._allowed_parents:
                 self.error("Unknown tag " + name)
             if parent not in self._allowed_parents[name]:
                 self.error("%s elements may not be nested in %s elements"
@@ -117,7 +117,7 @@ class BaseParser(xml.sax.ContentHandler):
             self._cdata.append(data)
         elif data.strip():
             self.error("unexpected non-blank character data: "
-                       + `data.strip()`)
+                       + repr(data.strip()))
 
     def endElement(self, name):
         del self._elem_stack[-1]
@@ -158,7 +158,7 @@ class BaseParser(xml.sax.ContentHandler):
                 convert = self._registry.get("dotted-name")
             try:
                 name = convert(name)
-            except ValueError, err:
+            except ValueError as err:
                 self.error("not a valid prefix: %s (%s)"
                            % (_srepr(name), str(err)))
             if name[0] == ".":
@@ -182,7 +182,7 @@ class BaseParser(xml.sax.ContentHandler):
             return name
 
     def get_datatype(self, attrs, attrkey, default, base=None):
-        if attrs.has_key(attrkey):
+        if attrkey in attrs:
             dtname = self.get_classname(attrs[attrkey])
         else:
             convert = getattr(base, attrkey, None)
@@ -192,8 +192,8 @@ class BaseParser(xml.sax.ContentHandler):
 
         try:
             return self._registry.get(dtname)
-        except ValueError, e:
-            self.error(e[0])
+        except ValueError as e:
+            self.error(e.args[0])
 
     def get_sect_typeinfo(self, attrs, base=None):
         keytype = self.get_datatype(attrs, "keytype", "basic-key", base)
@@ -202,7 +202,7 @@ class BaseParser(xml.sax.ContentHandler):
         return keytype, valuetype, datatype
 
     def get_required(self, attrs):
-        if attrs.has_key("required"):
+        if "required" in attrs:
             v = attrs["required"]
             if v == "yes":
                 return True
@@ -255,7 +255,7 @@ class BaseParser(xml.sax.ContentHandler):
             # run the keytype converter to make sure this is a valid key
             try:
                 name = self._stack[-1].keytype(name)
-            except ValueError, e:
+            except ValueError as e:
                 self.error("could not convert key name to keytype: " + str(e))
             if not aname:
                 aname = self.basic_key(name)
@@ -325,7 +325,7 @@ class BaseParser(xml.sax.ContentHandler):
             self.error("sectiontype name must not be omitted or empty")
         name = self.basic_key(name)
         self.push_prefix(attrs)
-        if attrs.has_key("extends"):
+        if "extends" in attrs:
             basename = self.basic_key(attrs["extends"])
             base = self._schema.gettype(basename)
             if base.isabstract():
@@ -337,7 +337,7 @@ class BaseParser(xml.sax.ContentHandler):
             keytype, valuetype, datatype = self.get_sect_typeinfo(attrs)
             sectinfo = self._schema.createSectionType(
                 name, keytype, valuetype, datatype)
-        if attrs.has_key("implements"):
+        if "implements" in attrs:
             ifname = self.basic_key(attrs["implements"])
             interface = self._schema.gettype(ifname)
             if not interface.isabstract():
@@ -397,7 +397,7 @@ class BaseParser(xml.sax.ContentHandler):
         name, datatype, handler, attribute = self.get_key_info(attrs, "key")
         min = self.get_required(attrs) and 1 or 0
         key = info.KeyInfo(name, datatype, min, handler, attribute)
-        if attrs.has_key("default"):
+        if "default" in attrs:
             if min:
                 self.error("required key cannot have a default value")
             key.adddefault(str(attrs["default"]).strip(),
@@ -414,7 +414,7 @@ class BaseParser(xml.sax.ContentHandler):
             key.finish()
 
     def start_multikey(self, attrs):
-        if attrs.has_key("default"):
+        if "default" in attrs:
             self.error("default values for multikey must be given using"
                        " 'default' elements")
         name, datatype, handler, attribute = self.get_key_info(attrs,
@@ -435,13 +435,13 @@ class BaseParser(xml.sax.ContentHandler):
     def basic_key(self, s):
         try:
             return self._basic_key(s)
-        except ValueError, e:
+        except ValueError as e:
             self.error(e[0])
 
     def identifier(self, s):
         try:
             return self._identifier(s)
-        except ValueError, e:
+        except ValueError as e:
             self.error(e[0])
 
     # exception setup helpers
@@ -485,7 +485,7 @@ class SchemaParser(BaseParser):
 
         self._stack = [self._schema]
 
-        if attrs.has_key("extends"):
+        if "extends" in attrs:
             sources = attrs["extends"].split()
             sources.reverse()
 
@@ -498,7 +498,7 @@ class SchemaParser(BaseParser):
                 self.extendSchema(src)
 
             # Inherit keytype from bases, if unspecified and not conflicting
-            if self._base_keytypes and not attrs.has_key("keytype"):
+            if self._base_keytypes and "keytype" not in attrs:
                 keytype = self._base_keytypes[0]
                 for kt in self._base_keytypes[1:]:
                     if kt is not keytype:
@@ -507,7 +507,7 @@ class SchemaParser(BaseParser):
                                    " extending schema")
 
             # Inherit datatype from bases, if unspecified and not conflicting
-            if self._base_datatypes and not attrs.has_key("datatype"):
+            if self._base_datatypes and "datatype" not in attrs:
                 datatype = self._base_datatypes[0]
                 for dt in self._base_datatypes[1:]:
                     if dt is not datatype:

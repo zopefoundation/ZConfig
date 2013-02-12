@@ -36,8 +36,7 @@ class MySection:
 
 def get_section_attributes(section):
     L = list(section.getSectionAttributes())
-    L.sort()
-    return L
+    return sorted(L)
 
 
 class SchemaTestCase(TestHelper, unittest.TestCase):
@@ -568,14 +567,12 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
               <section type='used' name='a'/>
             </schema>
             """)
-        L = schema.getrequiredtypes()
-        L.sort()
+        L = sorted(schema.getrequiredtypes())
         self.assertEqual(L, ["used"])
 
     def test_getunusedtypes(self):
         schema = self.load_schema("library.xml")
-        L = schema.getunusedtypes()
-        L.sort()
+        L = sorted(schema.getunusedtypes())
         self.assertEqual(L, ["type-a", "type-b"])
 
         schema = self.load_schema_text("""\
@@ -735,7 +732,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
     def get_data_conversion_error(self, schema, src, url):
         try:
             self.load_config_text(schema, src, url=url)
-        except ZConfig.DataConversionError, e:
+        except ZConfig.DataConversionError as e:
             return e
         else:
             self.fail("expected ZConfig.DataConversionError")
@@ -844,11 +841,9 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
               EXAMPLE.COM foo
             </derived>
             """)
-        L = conf.base.map.items()
-        L.sort()
+        L = sorted(conf.base.map.items())
         self.assertEqual(L, [("Ident2", "bar"), ("ident1", "foo")])
-        L = conf.derived.map.items()
-        L.sort()
+        L = sorted(conf.derived.map.items())
         self.assertEqual(L, [("example.com", "foo")])
         self.assertEqual(get_section_attributes(conf), ["base", "derived"])
 
@@ -865,8 +860,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             </schema>
             """)
         conf = self.load_config_text(schema, "<sect/>")
-        items = conf.sect.mapping.items()
-        items.sort()
+        items = sorted(conf.sect.mapping.items())
         self.assertEqual(items, [("bar", "24"), ("foo", "42")])
 
     def test_duplicate_default_key_checked_in_schema(self):
@@ -928,11 +922,9 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             <base/>
             <sect/>
             """)
-        base = conf.base.mapping.items()
-        base.sort()
+        base = sorted(conf.base.mapping.items())
         self.assertEqual(base, [("Foo", ["42"]), ("foo", ["42"])])
-        sect = conf.sect.mapping.items()
-        sect.sort()
+        sect = sorted(conf.sect.mapping.items())
         self.assertEqual(sect, [("foo", ["42", "42"])])
 
     def test_sectiontype_inherited_datatype(self):
@@ -963,8 +955,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                                      "www.example.org 127.0.0.2\n")
         table = conf.table
         self.assertEqual(len(table), 2)
-        L = table.items()
-        L.sort()
+        L = sorted(table.items())
         self.assertEqual(L, [("host.example.com", "127.0.0.1"),
                              ("www.example.org", "127.0.0.2")])
 

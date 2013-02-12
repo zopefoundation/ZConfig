@@ -1,0 +1,10 @@
+include *.rst
+include *.txt
+include tox.ini
+include bootstrap.py
+include buildout.cfg
+
+recursive-include ZConfig *
+recursive-include doc *
+
+global-exclude *.pyc

@@ -17,15 +17,24 @@ import os.path
 import sys
 import tempfile
 import unittest
-import urllib2
-
-from StringIO import StringIO
 
 import ZConfig
 import ZConfig.loader
 import ZConfig.url
 
 from ZConfig.tests.support import CONFIG_BASE, TestHelper
+
+try:
+    import urllib2
+except ImportError:
+    # Python 3 support.
+    import urllib.request as urllib2
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    # Python 3 support.
+    from io import StringIO
 
 
 try:
@@ -86,7 +95,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "</schema>")
         try:
             ZConfig.loadSchemaFile(sio)
-        except ZConfig.SchemaResourceError, e:
+        except ZConfig.SchemaResourceError as e:
             self.assertEqual(e.filename, "component.xml")
             self.assertEqual(e.package, "ZConfig.tests.test_loader")
             self.assert_(e.path is None)
@@ -129,7 +138,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "</schema>")
         try:
             loader.loadFile(sio)
-        except ZConfig.SchemaResourceError, e:
+        except ZConfig.SchemaResourceError as e:
             self.assertEqual(e.filename, "notthere.xml")
             self.assertEqual(e.package, "ZConfig.tests.library.widget")
             self.assert_(e.path)
@@ -301,7 +310,7 @@ class TestResourcesInZip(unittest.TestCase):
         sys.path[:] = self.old_path
 
     def test_zip_import_component_from_schema(self):
-        sio = StringIO('''
+        sio = StringIO(u'''
             <schema>
               <abstracttype name="something"/>
               <import package="foo.sample"/>

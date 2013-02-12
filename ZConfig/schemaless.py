@@ -65,8 +65,7 @@ class Section(dict):
             result.append(start)
             pre += '  '
 
-        lst = list(self.items())
-        lst.sort()
+        lst = sorted(self.items())
         for name, values in lst:
             for value in values:
                 result.append('%s%s %s' % (pre, name, value))

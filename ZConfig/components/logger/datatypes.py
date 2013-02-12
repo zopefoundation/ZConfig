@@ -30,10 +30,10 @@ _logging_levels = {
 
 def logging_level(value):
     s = str(value).lower()
-    if _logging_levels.has_key(s):
+    if s in _logging_levels:
         return _logging_levels[s]
     else:
         v = int(s)
         if v < 0 or v > 50:
-            raise ValueError("log level not in range: " + `v`)
+            raise ValueError("log level not in range: " + repr(v))
         return v

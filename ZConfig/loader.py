@@ -13,12 +13,10 @@
 ##############################################################################
 """Schema loader utility."""
 
-import cStringIO
 import os.path
 import re
 import sys
 import urllib
-import urllib2
 
 import ZConfig
 import ZConfig.cfgparser
@@ -27,6 +25,24 @@ import ZConfig.info
 import ZConfig.matcher
 import ZConfig.schema
 import ZConfig.url
+
+try:
+    import cStringIO as StringIO
+except ImportError:
+    # Python 3 support.
+    import io as StringIO
+
+try:
+    import urllib2
+except ImportError:
+    # Python 3 support
+    import urllib.request as urllib2
+
+try:
+    from urllib import pathname2url
+except ImportError:
+    # Python 3 support
+    from urllib.request import pathname2url
 
 
 def loadSchema(url):
@@ -98,20 +114,23 @@ class BaseLoader:
         else:
             try:
                 file = urllib2.urlopen(url)
-            except urllib2.URLError, e:
+            except urllib2.URLError as e:
                 # urllib2.URLError has a particularly hostile str(), so we
                 # generally don't want to pass it along to the user.
                 self._raise_open_error(url, e.reason)
-            except (IOError, OSError), e:
+            except (IOError, OSError) as e:
                 # Python 2.1 raises a different error from Python 2.2+,
                 # so we catch both to make sure we detect the situation.
                 self._raise_open_error(url, str(e))
+            # Python 3 support: file.read() returns bytes, so we convert it to an
+            # StringIO.
+            file = StringIO.StringIO(file.read().decode())
         return self.createResource(file, url)
 
     def _raise_open_error(self, url, message):
         if url[:7].lower() == "file://":
             what = "file"
-            ident = urllib.url2pathname(url[7:])
+            ident = urllib2.url2pathname(url[7:])
         else:
             what = "URL"
             ident = url
@@ -121,7 +140,7 @@ class BaseLoader:
 
     def normalizeURL(self, url):
         if self.isPath(url):
-            url = "file://" + urllib.pathname2url(os.path.abspath(url))
+            url = "file://" + pathname2url(os.path.abspath(url))
         newurl, fragment = ZConfig.url.urldefrag(url)
         if fragment:
             raise ZConfig.ConfigurationError(
@@ -164,18 +183,27 @@ def openPackageResource(package, path):
                                               filename=path,
                                               package=package,
                                               path=pkg.__path__)
-        url = "file:" + urllib.pathname2url(filename)
+        url = "file:" + pathname2url(filename)
         url = ZConfig.url.urlnormalize(url)
         return urllib2.urlopen(url)
     else:
-        loadpath = os.path.join(os.path.dirname(pkg.__file__), path)
-        return cStringIO.StringIO(loader.get_data(loadpath))
+        for dir in pkg.__path__:
+            loadpath = os.path.join(dir, path)
+            try:
+                return StringIO.StringIO(
+                    loader.get_data(loadpath).decode('utf-8'))
+            except Exception:
+                pass
+        raise ZConfig.SchemaResourceError("schema component not found",
+                                          filename=path,
+                                          package=package,
+                                          path=pkg.__path__)
 
 
 def _url_from_file(file):
     name = getattr(file, "name", None)
     if name and name[0] != "<" and name[-1] != ">":
-        return "file://" + urllib.pathname2url(os.path.abspath(name))
+        return "file://" + pathname2url(os.path.abspath(name))
     else:
         return None
 
@@ -189,7 +217,7 @@ class SchemaLoader(BaseLoader):
         self._cache = {}
 
     def loadResource(self, resource):
-        if resource.url and self._cache.has_key(resource.url):
+        if resource.url and resource.url in self._cache:
             schema = self._cache[resource.url]
         else:
             schema = ZConfig.schema.parseResource(resource, self)
@@ -202,15 +230,15 @@ class SchemaLoader(BaseLoader):
         parts = package.split(".")
         if not parts:
             raise ZConfig.SchemaError(
-                "illegal schema component name: " + `package`)
+                "illegal schema component name: " + repr(package))
         if "" in parts:
             # '' somewhere in the package spec; still illegal
             raise ZConfig.SchemaError(
-                "illegal schema component name: " + `package`)
+                "illegal schema component name: " + repr(package))
         file = file or "component.xml"
         try:
             __import__(package)
-        except ImportError, e:
+        except ImportError as e:
             raise ZConfig.SchemaResourceError(
                 "could not load package %s: %s" % (package, str(e)),
                 filename=file,
@@ -248,7 +276,7 @@ class ConfigLoader(BaseLoader):
         if t.isabstract():
             raise ZConfig.ConfigurationError(
                 "concrete sections cannot match abstract section types;"
-                " found abstract type " + `type`)
+                " found abstract type " + repr(type))
         return parent.createChildMatcher(t, name)
 
     def endSection(self, parent, type, name, matcher):
@@ -298,14 +326,14 @@ class CompositeHandler:
         d = {}
         for name, callback in handlermap.items():
             n = self._convert(name)
-            if d.has_key(n):
+            if n in d:
                 raise ZConfig.ConfigurationError(
                     "handler name not unique when converted to a basic-key: "
-                    + `name`)
+                    + repr(name))
             d[n] = callback
         L = []
         for handler, value in self._handlers:
-            if not d.has_key(handler):
+            if handler not in d:
                 L.append(handler)
         if L:
             raise ZConfig.ConfigurationError(

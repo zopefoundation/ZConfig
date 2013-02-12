@@ -54,10 +54,10 @@ class RangeCheckedConversion:
         v = self._conversion(value)
         if self._min is not None and v < self._min:
             raise ValueError("%s is below lower bound (%s)"
-                             % (`v`, `self._min`))
+                             % (repr(v), repr(self._min)))
         if self._max is not None and v > self._max:
             raise ValueError("%s is above upper bound (%s)"
-                             % (`v`, `self._max`))
+                             % (repr(v), repr(self._max)))
         return v
 
 
@@ -136,12 +136,7 @@ class DottedNameSuffixConversion(ASCIIConversion):
 
 
 def integer(value):
-    try:
-        return int(value)
-    except ValueError:
-        return long(value)
-    except OverflowError:
-        return long(value)
+    return int(value)
 
 
 def null_conversion(value):
@@ -245,9 +240,14 @@ class SocketConnectionAddress(SocketAddress):
 
 
 def float_conversion(v):
-    if isinstance(v, basestring):
+    try:
+        is_str = isinstance(v, basestring)
+    except NameError:
+        # Python 3 support.
+        is_str = isinstance(v, str)
+    if is_str:
         if v.lower() in ["inf", "-inf", "nan"]:
-            raise ValueError(`v` + " is not a portable float representation")
+            raise ValueError(repr(v) + " is not a portable float representation")
     return float(v)
 
 class IpaddrOrHostname(RegularExpressionConversion):
@@ -394,7 +394,7 @@ stock_datatypes = {
     "existing-dirpath":  existing_dirpath,
     "byte-size":         SuffixMultiplier({'kb': 1024,
                                            'mb': 1024*1024,
-                                           'gb': 1024*1024*1024L,
+                                           'gb': 1024*1024*1024,
                                            }),
     "time-interval":     SuffixMultiplier({'s': 1,
                                            'm': 60,
@@ -430,16 +430,16 @@ class Registry:
         return t
 
     def register(self, name, conversion):
-        if self._stock.has_key(name):
+        if name in self._stock:
             raise ValueError("datatype name conflicts with built-in type: "
-                             + `name`)
-        if self._other.has_key(name):
-            raise ValueError("datatype name already registered: " + `name`)
+                             + repr(name))
+        if name in self._other:
+            raise ValueError("datatype name already registered: " + repr(name))
         self._other[name] = conversion
 
     def search(self, name):
         if not "." in name:
-            raise ValueError("unloadable datatype name: " + `name`)
+            raise ValueError("unloadable datatype name: " + repr(name))
         components = name.split('.')
         start = components[0]
         g = {}

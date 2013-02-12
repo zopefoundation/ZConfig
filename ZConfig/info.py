@@ -14,7 +14,6 @@
 """Objects that can describe a ZConfig schema."""
 
 import copy
-
 import ZConfig
 
 
@@ -58,7 +57,7 @@ class ValueInfo:
     def convert(self, datatype):
         try:
             return datatype(self.value)
-        except ValueError, e:
+        except ValueError as e:
             raise ZConfig.DataConversionError(e, self.value, self.position)
 
 
@@ -87,7 +86,7 @@ class BaseInfo:
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        return "<%s for %s>" % (clsname, `self.name`)
+        return "<%s for %s>" % (clsname, repr(self.name))
 
     def isabstract(self):
         return False
@@ -161,11 +160,11 @@ class KeyInfo(BaseKeyInfo):
 
     def add_valueinfo(self, vi, key):
         if self.name == "+":
-            if self._default.has_key(key):
+            if key in self._default:
                 # not ideal: we're presenting the unconverted
                 # version of the key
                 raise ZConfig.SchemaError(
-                    "duplicate default value for key %s" % `key`)
+                    "duplicate default value for key %s" % repr(key))
             self._default[key] = vi
         elif self._default is not None:
             raise ZConfig.SchemaError(
@@ -175,7 +174,7 @@ class KeyInfo(BaseKeyInfo):
 
     def computedefault(self, keytype):
         self.prepare_raw_defaults()
-        for k, vi in self._rawdefaults.iteritems():
+        for k, vi in self._rawdefaults.items():
             key = ValueInfo(k, vi.position).convert(keytype)
             self.add_valueinfo(vi, key)
 
@@ -209,7 +208,7 @@ class MultiKeyInfo(BaseKeyInfo):
 
     def computedefault(self, keytype):
         self.prepare_raw_defaults()
-        for k, vlist in self._rawdefaults.iteritems():
+        for k, vlist in self._rawdefaults.items():
             key = ValueInfo(k, vlist[0].position).convert(keytype)
             for vi in vlist:
                 self.add_valueinfo(vi, key)
@@ -249,7 +248,7 @@ class SectionInfo(BaseInfo):
     def __repr__(self):
         clsname = self.__class__.__name__
         return "<%s for %s (%s)>" % (
-            clsname, self.sectiontype.name, `self.name`)
+            clsname, self.sectiontype.name, repr(self.name))
 
     def issection(self):
         return True
@@ -292,7 +291,7 @@ class AbstractType:
             return self._subtypes[name]
         except KeyError:
             raise ZConfig.SchemaError("no sectiontype %s in abstracttype %s"
-                                      % (`name`, `self.name`))
+                                      % (repr(name), repr(self.name)))
 
     def hassubtype(self, name):
         """Return true iff this type has 'name' as a concrete manifestation."""
@@ -300,9 +299,7 @@ class AbstractType:
 
     def getsubtypenames(self):
         """Return the names of all concrete types as a sorted list."""
-        L = self._subtypes.keys()
-        L.sort()
-        return L
+        return sorted(self._subtypes.keys())
 
     def isabstract(self):
         return True
@@ -331,10 +328,10 @@ class SectionType:
         try:
             return self._types[n]
         except KeyError:
-            raise ZConfig.SchemaError("unknown type name: " + `name`)
+            raise ZConfig.SchemaError("unknown type name: " + repr(name))
 
     def gettypenames(self):
-        return self._types.keys()
+        return list(self._types.keys())
 
     def __len__(self):
         return len(self._children)
@@ -345,10 +342,10 @@ class SectionType:
     def _add_child(self, key, info):
         # check naming constraints
         assert key or info.attribute
-        if key and self._keymap.has_key(key):
+        if key and key in self._keymap:
             raise ZConfig.SchemaError(
                 "child name %s already used" % key)
-        if info.attribute and self._attrmap.has_key(info.attribute):
+        if info.attribute and info.attribute in self._attrmap:
             raise ZConfig.SchemaError(
                 "child attribute name %s already used" % info.attribute)
         # a-ok, add the item to the appropriate maps
@@ -372,7 +369,7 @@ class SectionType:
         try:
             return self._keymap[key]
         except KeyError:
-            raise ZConfig.ConfigurationError("no key matching " + `key`)
+            raise ZConfig.ConfigurationError("no key matching " + repr(key))
 
     def getrequiredtypes(self):
         d = {}
@@ -384,10 +381,10 @@ class SectionType:
             for key, ci in info._children:
                 if ci.issection():
                     t = ci.sectiontype
-                    if not d.has_key(t.name):
+                    if t.name not in d:
                         d[t.name] = 1
                         stack.append(t)
-        return d.keys()
+        return list(d.keys())
 
     def getsectioninfo(self, type, name):
         for key, info in self._children:
@@ -403,17 +400,17 @@ class SectionType:
                         except ZConfig.ConfigurationError:
                             raise ZConfig.ConfigurationError(
                                 "section type %s not allowed for name %s"
-                                % (`type`, `key`))
+                                % (repr(type), repr(key)))
                     if not st.name == type:
                         raise ZConfig.ConfigurationError(
                             "name %s must be used for a %s section"
-                            % (`name`, `st.name`))
+                            % (repr(name), repr(st.name)))
                     return info
             # else must be a sectiontype or an abstracttype:
             elif info.sectiontype.name == type:
                 if not (name or info.allowUnnamed()):
                     raise ZConfig.ConfigurationError(
-                        `type` + " sections must be named")
+                        repr(type) + " sections must be named")
                 return info
             elif info.sectiontype.isabstract():
                 st = info.sectiontype
@@ -446,9 +443,9 @@ class SchemaType(SectionType):
 
     def addtype(self, typeinfo):
         n = typeinfo.name
-        if self._types.has_key(n):
+        if n in self._types:
             raise ZConfig.SchemaError("type name cannot be redefined: "
-                                      + `typeinfo.name`)
+                                      + repr(typeinfo.name))
         self._types[n] = typeinfo
 
     def allowUnnamed(self):
@@ -494,12 +491,12 @@ class SchemaType(SectionType):
         return t
 
     def addComponent(self, name):
-        if self._components.has_key(name):
+        if name in self._components:
             raise ZConfig.SchemaError("already have component %s" % name)
         self._components[name] = name
 
     def hasComponent(self, name):
-        return self._components.has_key(name)
+        return name in self._components
 
 
 def createDerivedSchema(base):

@@ -68,8 +68,7 @@ class BasicSectionTypeTestCase(
            key-two value-two
            </dict>
            """)
-        L = conf.simple_dict.items()
-        L.sort()
+        L = sorted(conf.simple_dict.items())
         self.assertEqual(L, [("key-one", "value-one"),
                              ("key-two", "value-two")])
 
@@ -81,8 +80,7 @@ class BasicSectionTypeTestCase(
             42 question?
             </intkeys>
             """)
-        L = conf.int_dict.items()
-        L.sort()
+        L = sorted(conf.int_dict.items())
         self.assertEqual(L, [(1, "foo"), (2, "bar"), (42, "question?")])
 
 
