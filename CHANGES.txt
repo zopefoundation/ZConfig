@@ -2,10 +2,12 @@
 Change History for ZConfig
 ==========================
 
-3.0.1 (unreleased)
+3.0.1 (2013-02-13)
 ------------------
 
-- Nothing changed yet.
+- Removed an accidentally left `pdb` statement from the code.
+
+- Fix a bug in Python 3 with the custom string `repr()` function.
 
 
 3.0.0 (2013-02-13)

@@ -113,10 +113,7 @@ class ZConfigParser:
         return prevsection
 
     def handle_key_value(self, section, rest):
-        try:
-            m = _keyvalue_rx.match(rest)
-        except:
-            import pdb; pdb.set_trace()
+        m = _keyvalue_rx.match(rest)
         if not m:
             self.error("malformed configuration data")
         key, value = m.group('key', 'value')

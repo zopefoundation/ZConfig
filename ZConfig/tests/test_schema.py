@@ -42,6 +42,7 @@ def get_section_attributes(section):
 class SchemaTestCase(TestHelper, unittest.TestCase):
     """Tests of the basic schema support itself."""
 
+
     def test_minimal_schema(self):
         schema = self.load_schema_text("<schema/>")
         self.assertEqual(len(schema), 0)
@@ -1073,6 +1074,11 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
               <description>  bar  </description>
             </schema>
             """)
+
+    def test_srepr(self):
+        from ZConfig.schema import _srepr
+        self.assertEqual(_srepr('foo'), "'foo'")
+        self.assertEqual(_srepr(u'foo'), "'foo'")
 
 
 def test_suite():

@@ -14,6 +14,7 @@
 """Parser for ZConfig schemas."""
 
 import os
+import sys
 import xml.sax
 
 import ZConfig
@@ -34,7 +35,7 @@ def parseComponent(resource, loader, schema):
 
 
 def _srepr(ob):
-    if isinstance(ob, type(u'')):
+    if isinstance(ob, type(u'')) and sys.version_info[0] < 3:
         # drop the leading "u" from a unicode repr
         return repr(ob)[1:]
     else:
