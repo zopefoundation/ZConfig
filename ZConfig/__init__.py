@@ -42,7 +42,7 @@ from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
 
 try:
-    import cStringIO as StringIO
+    import StringIO as StringIO
 except ImportError:
     # Python 3 support.
     import io as StringIO

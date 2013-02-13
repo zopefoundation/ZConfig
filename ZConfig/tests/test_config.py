@@ -21,7 +21,7 @@ import ZConfig
 from ZConfig.tests.support import CONFIG_BASE
 
 try:
-    import cStringIO as StringIO
+    import StringIO as StringIO
 except ImportError:
     # Python 3 support.
     import io as StringIO

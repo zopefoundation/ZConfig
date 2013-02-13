@@ -28,7 +28,7 @@ from ZConfig.components.logger import handlers
 from ZConfig.components.logger import loghandler
 
 try:
-    import cStringIO as StringIO
+    import StringIO as StringIO
 except ImportError:
     # Python 3 support.
     import io as StringIO
