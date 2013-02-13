@@ -2,43 +2,43 @@
 Change History for ZConfig
 ==========================
 
-ZConfig 3.0.0b1 (unreleased)
-----------------------------
+3.0.0 (unreleased)
+------------------
 
-- Add Python 3.3 support.
+- Added Python 3.3 support.
 
-- Drop Python 2.4 and 2.5 support.
+- Droped Python 2.4 and 2.5 support.
 
 
-ZConfig 2.9.3 (2012-06-25)
---------------------------
+2.9.3 (2012-06-25)
+------------------
 
 - Fixed: port values of 0 weren't allowed.  Port 0 is used to request
   an ephemeral port.
 
 
-ZConfig 2.9.2 (2012-02-11)
---------------------------
+2.9.2 (2012-02-11)
+------------------
 
 - Adjust test classes to avoid base classes being considered separate
   test cases by (at least) the "nose" test runner.
 
 
-ZConfig 2.9.1 (2012-02-11)
---------------------------
+2.9.1 (2012-02-11)
+------------------
 
 - Make FileHandler.reopen thread safe.
 
 
-ZConfig 2.9.0 (2011-03-22)
---------------------------
+2.9.0 (2011-03-22)
+------------------
 
 - Allow identical redefinition of ``%define`` names.
 - Added support for IPv6 addresses.
 
 
-ZConfig 2.8.0 (2010-04-13)
---------------------------
+2.8.0 (2010-04-13)
+------------------
 
 - Fix relative path recognition.
   https://bugs.launchpad.net/zconfig/+bug/405687
@@ -46,16 +46,16 @@ ZConfig 2.8.0 (2010-04-13)
 - Added SMTP authentication support for email logger on Python 2.6.
 
 
-ZConfig 2.7.1 (2009-06-13)
---------------------------
+2.7.1 (2009-06-13)
+------------------
 
 - Improved documentation
 
 - Fixed tests failures on windows.
 
 
-ZConfig 2.7.0 (2009-06-11)
---------------------------
+2.7.0 (2009-06-11)
+------------------
 
 - Added a convenience function, ``ZConfig.configureLoggers(text)`` for
   configuring loggers.
@@ -65,8 +65,8 @@ ZConfig 2.7.0 (2009-06-11)
   loggers.
 
 
-ZConfig 2.6.1 (2008-12-05)
---------------------------
+2.6.1 (2008-12-05)
+------------------
 
 - Fixed support for schema descriptions that override descriptions from a base
   schema.  If multiple base schema provide descriptions but the derived schema
@@ -78,8 +78,8 @@ ZConfig 2.6.1 (2008-12-05)
 - No longer trigger deprecation warnings under Python 2.6.
 
 
-ZConfig 2.6.0 (2008-09-03)
---------------------------
+2.6.0 (2008-09-03)
+------------------
 
 - Added support for file rotation by time by specifying when and
   interval, rather than max-size, for log files.
@@ -87,8 +87,8 @@ ZConfig 2.6.0 (2008-09-03)
 - Removed dependency on setuptools from the setup.py.
 
 
-ZConfig 2.5.1 (2007-12-24)
---------------------------
+2.5.1 (2007-12-24)
+------------------
 
 - Made it possible to run unit tests via 'python setup.py test' (requires
   setuptools on sys.path).
@@ -96,7 +96,7 @@ ZConfig 2.5.1 (2007-12-24)
 - Added better error messages to test failure assertions.
 
 
-ZConfig 2.5 (2007-08-31)
+2.5 (2007-08-31)
 ------------------------
 
 *A note on the version number:*
@@ -133,15 +133,15 @@ something claiming to be ZConfig 2.4, and go straight to version 2.5.
 - Added more tests.
 
 
-ZConfig 2.3.1 (2005-08-21)
---------------------------
+2.3.1 (2005-08-21)
+------------------
 
 - Isolated some of the case-normalization code so it will at least be
   easier to override.  This remains non-trivial.
 
 
-ZConfig 2.3 (2005-05-18)
-------------------------
+2.3 (2005-05-18)
+----------------
 
 - Added "inet-binding-address" and "inet-connection-address" to the
   set of standard datatypes.  These are similar to the "inet-address"
@@ -155,8 +155,8 @@ ZConfig 2.3 (2005-05-18)
   assume name="*", since this is what is used most often.
 
 
-ZConfig 2.2 (2004-04-21)
-------------------------
+2.2 (2004-04-21)
+----------------
 
 - More documentation has been written.
 
@@ -183,8 +183,8 @@ ZConfig 2.2 (2004-04-21)
   except that it returns a datetime.timedelta object instead.
 
 
-ZConfig 2.1 (2004-04-12)
-------------------------
+2.1 (2004-04-12)
+----------------
 
 - Removed compatibility with Python 2.1 and 2.2.
 
@@ -219,8 +219,8 @@ ZConfig 2.1 (2004-04-12)
   ZConfig.components.logger.
 
 
-ZConfig 2.0 (2003-10-27)
-------------------------
+2.0 (2003-10-27)
+----------------
 
 - Configurations can import additional schema components using a new
   "%import" directive; this can be used to integrate 3rd-party
@@ -236,7 +236,7 @@ ZConfig 2.0 (2003-10-27)
   is valid, if that's all that's needed.
 
 
-ZConfig 1.0 (2003-03-25)
-------------------------
+1.0 (2003-03-25)
+----------------
 
 - Initial release.

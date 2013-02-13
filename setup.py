@@ -18,7 +18,7 @@ def alltests():
 
 options = dict(
     name="ZConfig",
-    version="3.0.0b1dev",
+    version='3.0.0',
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     maintainer="Zope Foundation and Contributors",
@@ -44,10 +44,10 @@ options = dict(
     zip_safe=False,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-        "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: Zope Public License",
-        "Operating System :: OS Independent",
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: Zope Public License',
+        'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
@@ -59,9 +59,9 @@ options = dict(
         'Topic :: Software Development',
         ],
     # Support for 'setup.py test' when setuptools is available:
-    test_suite="__main__.alltests",
+    test_suite='__main__.alltests',
     tests_require=[
-        "zope.testrunner",
+        'zope.testrunner',
         ],
     )
 
