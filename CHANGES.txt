@@ -2,10 +2,10 @@
 Change History for ZConfig
 ==========================
 
-3.0.2 (unreleased)
+3.0.2 (2013-02-14)
 ------------------
 
-- Nothing changed yet.
+- Fixed ResourceWarning in BaseLoader.openResource().
 
 
 3.0.1 (2013-02-13)
