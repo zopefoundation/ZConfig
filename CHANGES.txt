@@ -2,6 +2,12 @@
 Change History for ZConfig
 ==========================
 
+3.0.3 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
 3.0.2 (2013-02-14)
 ------------------
 
