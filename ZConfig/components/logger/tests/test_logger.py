@@ -45,6 +45,11 @@ class CustomFormatter(logging.Formatter):
         return sio.getvalue() + "... Don't panic!"
 
 
+def read_file(filename):
+    with open(filename) as f:
+        return f.read()
+
+
 class LoggingTestHelper:
 
     # Not derived from unittest.TestCase; some test runners seem to
@@ -494,9 +499,9 @@ class TestReopeningRotatingLogfiles(LoggingTestHelper, unittest.TestCase):
         h.close()
 
         # Check that the messages are in the right files::
-        text1 = open(nfn1).read()
-        text2 = open(nfn2).read()
-        text3 = open(fn).read()
+        text1 = read_file(nfn1)
+        text2 = read_file(nfn2)
+        text3 = read_file(fn)
         self.assert_("message 1" in text1)
         self.assert_("message 2" in text1)
         self.assert_("message 3" in text2)
