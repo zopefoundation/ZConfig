@@ -274,7 +274,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
             logger = conf.eventlog()
         finally:
             setattr(sys, name, old_stream)
-        logger.warn("woohoo!")
+        logger.warning("woohoo!")
         self.assertTrue(sio.getvalue().find("woohoo!") >= 0)
 
     def test_custom_formatter(self):
