@@ -122,9 +122,15 @@ class BaseLoader:
                 # Python 2.1 raises a different error from Python 2.2+,
                 # so we catch both to make sure we detect the situation.
                 self._raise_open_error(url, str(e))
-            # Python 3 support: file.read() returns bytes, so we convert it to an
-            # StringIO.
-            file = StringIO.StringIO(file.read().decode())
+            if sys.version_info[0] >= 3:
+                # Python 3 support: file.read() returns bytes, so we convert it
+                # to an StringIO.  (Can't use io.TextIOWrapper because of
+                # http://bugs.python.org/issue16723 and probably other bugs)
+                try:
+                    data = file.read().decode()
+                finally:
+                    file.close()
+                file = StringIO.StringIO(data)
         return self.createResource(file, url)
 
     def _raise_open_error(self, url, message):
