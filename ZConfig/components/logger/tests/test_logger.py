@@ -311,6 +311,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         syslog = logger.handlers[0]
         self.assertEqual(syslog.level, logging.ERROR)
         self.assertTrue(isinstance(syslog, loghandler.SysLogHandler))
+        syslog.close() # avoid ResourceWarning
 
     def test_with_http_logger_localhost(self):
         logger = self.check_simple_logger("<eventlog>\n"
