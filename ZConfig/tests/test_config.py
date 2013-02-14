@@ -41,9 +41,9 @@ class ConfigurationTestCase(unittest.TestCase):
         self.conf, self.handlers = ZConfig.loadConfig(self.get_schema(), url)
         conf = self.conf
         #self.assertEqual(conf.url, url)
-        self.assert_(conf.getSectionName() is None)
-        self.assert_(conf.getSectionType() is None)
-        #self.assert_(conf.delegate is None)
+        self.assertTrue(conf.getSectionName() is None)
+        self.assertTrue(conf.getSectionType() is None)
+        #self.assertTrue(conf.delegate is None)
         return conf
 
     def loadtext(self, text):
@@ -61,12 +61,12 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertEqual(conf.neg_int, -2)
         self.assertEqual(conf.float_var, 12.02)
         self.assertEqual(conf.var1, 'abc')
-        self.assert_(conf.true_var_1)
-        self.assert_(conf.true_var_2)
-        self.assert_(conf.true_var_3)
-        self.assert_(not conf.false_var_1)
-        self.assert_(not conf.false_var_2)
-        self.assert_(not conf.false_var_3)
+        self.assertTrue(conf.true_var_1)
+        self.assertTrue(conf.true_var_2)
+        self.assertTrue(conf.true_var_3)
+        self.assertTrue(not conf.false_var_1)
+        self.assertTrue(not conf.false_var_2)
+        self.assertTrue(not conf.false_var_3)
         self.assertEqual(conf.list_1, [])
         self.assertEqual(conf.list_2, ['abc'])
         self.assertEqual(conf.list_3, ['abc', 'def', 'ghi'])
@@ -97,12 +97,12 @@ class ConfigurationTestCase(unittest.TestCase):
                 if sect.getSectionName() == "name"][0]
         self.assertEqual(sect.var, "bar")
         self.assertEqual(sect.var_one, "splat")
-        self.assert_(sect.var_three is None)
+        self.assertTrue(sect.var_three is None)
         sect = [sect for sect in conf.sections
                 if sect.getSectionName() == "delegate"][0]
         self.assertEqual(sect.var, "spam")
         self.assertEqual(sect.var_two, "stuff")
-        self.assert_(sect.var_three is None)
+        self.assertTrue(sect.var_three is None)
 
     def test_include(self):
         conf = self.load("include.conf")

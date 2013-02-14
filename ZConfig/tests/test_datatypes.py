@@ -58,7 +58,7 @@ class DatatypeTestCase(unittest.TestCase):
 
     def test_datatype_boolean(self):
         convert = self.types.get("boolean")
-        check = self.assert_
+        check = self.assertTrue
         raises = self.assertRaises
 
         check(convert("on"))
@@ -78,7 +78,7 @@ class DatatypeTestCase(unittest.TestCase):
         raises = self.assertRaises
 
         eq(convert("1"), 1.0)
-        self.assert_(type(convert(1)) is type(1.0))
+        self.assertTrue(type(convert(1)) is type(1.0))
         eq(convert("1.1"), 1.1)
         eq(convert("50.50"), 50.50)
         eq(convert("-50.50"), -50.50)
@@ -122,12 +122,12 @@ class DatatypeTestCase(unittest.TestCase):
     def assert_ascii_equal(self, convert, value):
         v = convert(value)
         self.assertEqual(v, value)
-        self.assert_(isinstance(v, str))
+        self.assertTrue(isinstance(v, str))
         if have_unicode:
             unicode_value = unicode(value)
             v = convert(unicode_value)
             self.assertEqual(v, value)
-            self.assert_(isinstance(v, str))
+            self.assertTrue(isinstance(v, str))
 
     def check_never_namelike(self, convert):
         raises = self.assertRaises
@@ -278,8 +278,8 @@ class DatatypeTestCase(unittest.TestCase):
             self.assertEqual(a1.family, socket.AF_UNIX)
             self.assertEqual(a2.family, socket.AF_UNIX)
         else:
-            self.assert_(a1.family is None)
-            self.assert_(a2.family is None)
+            self.assertTrue(a1.family is None)
+            self.assertTrue(a2.family is None)
 
     def test_ipaddr_or_hostname(self):
         convert = self.types.get('ipaddr-or-hostname')

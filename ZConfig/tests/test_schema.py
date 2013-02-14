@@ -62,7 +62,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         eq(conf.float_var, 12.02)
         eq(conf.neg_int, -2)
 
-        check = self.assert_
+        check = self.assertTrue
         check(conf.true_var_1)
         check(conf.true_var_2)
         check(conf.true_var_3)
@@ -115,9 +115,9 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                                        sample 42
                                      </foo>
                                      """)
-        self.assert_(isinstance(conf, MySection))
+        self.assertTrue(isinstance(conf, MySection))
         o1 = conf.conf.sect
-        self.assert_(isinstance(o1, MySection))
+        self.assertTrue(isinstance(o1, MySection))
         self.assertEqual(o1.conf.sample, 42)
 
     def test_empty_sections(self):
@@ -133,8 +133,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                                      </section>
                                      <section s2/>
                                      """)
-        self.assert_(conf.s1 is not None)
-        self.assert_(conf.s2 is not None)
+        self.assertTrue(conf.s1 is not None)
+        self.assertTrue(conf.s2 is not None)
         self.assertEqual(get_section_attributes(conf),
                          ["s1", "s2"])
 
@@ -355,15 +355,15 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             """)
         # check the types that get defined
         t = schema.gettype("group")
-        self.assert_(t.isabstract())
+        self.assertTrue(t.isabstract())
         t1 = schema.gettype("t1")
-        self.assert_(not t1.isabstract())
-        self.assert_(t.getsubtype("t1") is t1)
+        self.assertTrue(not t1.isabstract())
+        self.assertTrue(t.getsubtype("t1") is t1)
         t2 = schema.gettype("t2")
-        self.assert_(not t2.isabstract())
-        self.assert_(t.getsubtype("t2") is t2)
+        self.assertTrue(not t2.isabstract())
+        self.assertTrue(t.getsubtype("t2") is t2)
         self.assertRaises(ZConfig.ConfigurationError, t.getsubtype, "group")
-        self.assert_(t1 is not t2)
+        self.assertTrue(t1 is not t2)
         # try loading a config that relies on this schema
         conf = self.load_config_text(schema, """\
                                      <t1/>
@@ -384,10 +384,10 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         eq(conf.g[3].k2, "value2")
 
         # white box:
-        self.assert_(conf.g[0].getSectionDefinition() is t1)
-        self.assert_(conf.g[1].getSectionDefinition() is t1)
-        self.assert_(conf.g[2].getSectionDefinition() is t2)
-        self.assert_(conf.g[3].getSectionDefinition() is t2)
+        self.assertTrue(conf.g[0].getSectionDefinition() is t1)
+        self.assertTrue(conf.g[1].getSectionDefinition() is t1)
+        self.assertTrue(conf.g[2].getSectionDefinition() is t2)
+        self.assertTrue(conf.g[3].getSectionDefinition() is t2)
 
     def test_abstracttype_extension(self):
         schema = self.load_schema_text("""\
@@ -398,7 +398,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             </schema>
             """)
         abstype = schema.gettype("group")
-        self.assert_(schema.gettype("extra") is abstype.getsubtype("extra"))
+        self.assertTrue(schema.gettype("extra") is abstype.getsubtype("extra"))
 
         # make sure we can use the extension in a config:
         conf = self.load_config_text(schema, "<extra thing/>")
@@ -590,7 +590,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         orig = conf.empty
         new = []
         conf.empty = new
-        self.assert_(conf.empty is new)
+        self.assertTrue(conf.empty is new)
 
     def test_simple_anonymous_section(self):
         schema = self.load_schema_text("""\

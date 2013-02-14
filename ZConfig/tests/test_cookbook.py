@@ -60,7 +60,7 @@ class CookbookTestCase(ZConfig.tests.support.TestHelper, unittest.TestCase):
         self.assertEqual(config.userinfo.userid, 42)
         self.assertEqual(config.userinfo.username, "foouser")
         self.assertEqual(config.userinfo.passwd, "yeah-right")
-        self.assert_(not hasattr(config.userinfo, "password"))
+        self.assertTrue(not hasattr(config.userinfo, "password"))
 
 
 def test_suite():

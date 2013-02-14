@@ -35,7 +35,7 @@ class TestImportFromConfiguration(
             StringIO("%import ZConfig.tests.library.widget\n"))
         # make sure we now have a "private" schema object; the only
         # way to get it is from the loader itself
-        self.assert_(schema is not loader.schema)
+        self.assertTrue(schema is not loader.schema)
         # make sure component types are only found on the private schema:
         loader.schema.gettype("widget-b")
         self.assertRaises(ZConfig.SchemaError, schema.gettype, "widget-b")

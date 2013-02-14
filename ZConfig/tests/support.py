@@ -57,7 +57,7 @@ class TestHelper:
     def load_schema(self, relurl):
         self.url = urljoin(CONFIG_BASE, relurl)
         self.schema = ZConfig.loadSchema(self.url)
-        self.assert_(self.schema.issection())
+        self.assertTrue(self.schema.issection())
         return self.schema
 
     def load_schema_text(self, text, url=None):

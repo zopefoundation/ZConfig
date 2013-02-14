@@ -44,8 +44,8 @@ class CommandLineTest(ZConfig.tests.support.TestHelper, unittest.TestCase):
                        ("section/innerkey=spoogey", None)]
         bag = self.create_config_loader(schema).cook()
         # Test a variety of queries on the OptionBag:
-        self.assert_("mykey" in bag)
-        self.assert_("another" not in bag)
+        self.assertTrue("mykey" in bag)
+        self.assertTrue("another" not in bag)
         self.assertEqual(bag.get_section_info("st", None), None)
         self.assertEqual(bag.get_section_info("st", "missing-sect"), None)
         # Consume everything in the OptionBag:
@@ -54,8 +54,8 @@ class CommandLineTest(ZConfig.tests.support.TestHelper, unittest.TestCase):
         self.assertEqual(len(L), 1)
         self.assertEqual(s, "splat!")
         bag2 = bag.get_section_info("st", "section")
-        self.assert_("innerkey" in bag2)
-        self.assert_("another" not in bag2)
+        self.assertTrue("innerkey" in bag2)
+        self.assertTrue("another" not in bag2)
         L = bag2.get_key("innerkey")
         s, pos = L[0]
         self.assertEqual(len(L), 1)

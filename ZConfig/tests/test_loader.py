@@ -53,7 +53,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         url = ZConfig.url.urljoin(CONFIG_BASE, "simple.xml")
         schema1 = loader.loadURL(url)
         schema2 = loader.loadURL(url)
-        self.assert_(schema1 is schema2)
+        self.assertTrue(schema1 is schema2)
 
     def test_simple_import_with_cache(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -65,7 +65,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "</schema>")
         url2 = ZConfig.url.urljoin(CONFIG_BASE, "stringio")
         schema2 = loader.loadFile(sio, url2)
-        self.assert_(schema1.gettype("type-a") is schema2.gettype("type-a"))
+        self.assertTrue(schema1.gettype("type-a") is schema2.gettype("type-a"))
 
     def test_simple_import_using_prefix(self):
         self.load_schema_text("""\
@@ -98,7 +98,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         except ZConfig.SchemaResourceError as e:
             self.assertEqual(e.filename, "component.xml")
             self.assertEqual(e.package, "ZConfig.tests.test_loader")
-            self.assert_(e.path is None)
+            self.assertTrue(e.path is None)
             # make sure the str() doesn't raise an unexpected exception
             str(e)
         else:
@@ -110,7 +110,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "  <import package='ZConfig.tests.library.widget'/>"
                        "</schema>")
         schema = loader.loadFile(sio)
-        self.assert_(schema.gettype("widget-a") is not None)
+        self.assertTrue(schema.gettype("widget-a") is not None)
 
     def test_import_from_package_with_file(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -119,7 +119,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "          file='extra.xml' />"
                        "</schema>")
         schema = loader.loadFile(sio)
-        self.assert_(schema.gettype("extra-type") is not None)
+        self.assertTrue(schema.gettype("extra-type") is not None)
 
     def test_import_from_package_extra_directory(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -128,7 +128,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "          file='extras.xml' />"
                        "</schema>")
         schema = loader.loadFile(sio)
-        self.assert_(schema.gettype("extra-thing") is not None)
+        self.assertTrue(schema.gettype("extra-thing") is not None)
 
     def test_import_from_package_with_missing_file(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -141,7 +141,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         except ZConfig.SchemaResourceError as e:
             self.assertEqual(e.filename, "notthere.xml")
             self.assertEqual(e.package, "ZConfig.tests.library.widget")
-            self.assert_(e.path)
+            self.assertTrue(e.path)
             # make sure the str() doesn't raise an unexpected exception
             str(e)
         else:
@@ -230,24 +230,24 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             ("file:///abc/def", "frag"))
 
     def test_isPath(self):
-        assert_ = self.assert_
+        assertTrue = self.assertTrue
         isPath = ZConfig.loader.BaseLoader().isPath
-        assert_(isPath("abc"))
-        assert_(isPath("abc/def"))
-        assert_(isPath("/abc"))
-        assert_(isPath("/abc/def"))
-        assert_(isPath(r"\abc"))
-        assert_(isPath(r"\abc\def"))
-        assert_(isPath(r"c:\abc\def"))
-        assert_(isPath("/ab:cd"))
-        assert_(isPath(r"\ab:cd"))
-        assert_(isPath("long name with spaces"))
-        assert_(isPath("long name:with spaces"))
-        assert_(not isPath("ab:cd"))
-        assert_(not isPath("http://www.example.com/"))
-        assert_(not isPath("http://www.example.com/sample.conf"))
-        assert_(not isPath("file:///etc/zope/zope.conf"))
-        assert_(not isPath("file:///c|/foo/bar.conf"))
+        assertTrue(isPath("abc"))
+        assertTrue(isPath("abc/def"))
+        assertTrue(isPath("/abc"))
+        assertTrue(isPath("/abc/def"))
+        assertTrue(isPath(r"\abc"))
+        assertTrue(isPath(r"\abc\def"))
+        assertTrue(isPath(r"c:\abc\def"))
+        assertTrue(isPath("/ab:cd"))
+        assertTrue(isPath(r"\ab:cd"))
+        assertTrue(isPath("long name with spaces"))
+        assertTrue(isPath("long name:with spaces"))
+        assertTrue(not isPath("ab:cd"))
+        assertTrue(not isPath("http://www.example.com/"))
+        assertTrue(not isPath("http://www.example.com/sample.conf"))
+        assertTrue(not isPath("file:///etc/zope/zope.conf"))
+        assertTrue(not isPath("file:///c|/foo/bar.conf"))
 
 
 class TestNonExistentResources(unittest.TestCase):
@@ -322,7 +322,7 @@ class TestResourcesInZip(unittest.TestCase):
             ''')
         schema = ZConfig.loadSchemaFile(sio)
         t = schema.gettype("sample")
-        self.failIf(t.isabstract())
+        self.assertFalse(t.isabstract())
 
     def test_zip_import_component_from_config(self):
         sio = StringIO('''

@@ -108,7 +108,7 @@ class LoggingTestHelper:
     def get_config(self, text):
         conf, handler = ZConfig.loadConfigFile(self.get_schema(),
                                                StringIO.StringIO(text))
-        self.assert_(not handler)
+        self.assertTrue(not handler)
         return conf
 
 
@@ -155,15 +155,14 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
 
     def test_config_without_logger(self):
         conf = self.get_config("")
-        self.assert_(conf.eventlog is None)
+        self.assertTrue(conf.eventlog is None)
 
     def test_config_without_handlers(self):
         logger = self.check_simple_logger("<eventlog/>")
         # Make sure there's a NullHandler, since a warning gets
         # printed if there are no handlers:
         self.assertEqual(len(logger.handlers), 1)
-        self.assert_(isinstance(logger.handlers[0],
-                                loghandler.NullHandler))
+        self.assertTrue(isinstance(logger.handlers[0], loghandler.NullHandler))
 
     def test_with_logfile(self):
         fn = self.mktemp()
@@ -175,7 +174,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                                           "</eventlog>" % fn)
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
-        self.assert_(isinstance(logfile, loghandler.FileHandler))
+        self.assertTrue(isinstance(logfile, loghandler.FileHandler))
         logger.removeHandler(logfile)
         logfile.close()
 
@@ -199,7 +198,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assertEqual(logfile.backupCount, 10)
         self.assertEqual(logfile.maxBytes, 5*1024*1024)
-        self.assert_(isinstance(logfile, loghandler.RotatingFileHandler))
+        self.assertTrue(isinstance(logfile, loghandler.RotatingFileHandler))
         logger.removeHandler(logfile)
         logfile.close()
 
@@ -217,7 +216,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assertEqual(logfile.backupCount, 11)
         self.assertEqual(logfile.interval, 86400)
-        self.assert_(isinstance(logfile, loghandler.TimedRotatingFileHandler))
+        self.assertTrue(isinstance(logfile, loghandler.TimedRotatingFileHandler))
         logger.removeHandler(logfile)
         logfile.close()
 
@@ -236,7 +235,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assertEqual(logfile.backupCount, 11)
         self.assertEqual(logfile.interval, 86400*3)
-        self.assert_(isinstance(logfile, loghandler.TimedRotatingFileHandler))
+        self.assertTrue(isinstance(logfile, loghandler.TimedRotatingFileHandler))
         logger.removeHandler(logfile)
         logfile.close()
 
@@ -265,7 +264,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
               </logfile>
             </eventlog>
             """ % name.upper())
-        self.assert_(conf.eventlog is not None)
+        self.assertTrue(conf.eventlog is not None)
         # The factory has already been created; make sure it picks up
         # the stderr we set here when we create the logger and
         # handlers:
@@ -276,7 +275,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         finally:
             setattr(sys, name, old_stream)
         logger.warn("woohoo!")
-        self.assert_(sio.getvalue().find("woohoo!") >= 0)
+        self.assertTrue(sio.getvalue().find("woohoo!") >= 0)
 
     def test_custom_formatter(self):
         old_stream = sys.stdout
@@ -299,8 +298,8 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
             raise KeyError
         except KeyError:
             logger.exception("testing a KeyError")
-        self.assert_(sio.getvalue().find("KeyError") >= 0)
-        self.assert_(sio.getvalue().find("Don't panic") >= 0)
+        self.assertTrue(sio.getvalue().find("KeyError") >= 0)
+        self.assertTrue(sio.getvalue().find("Don't panic") >= 0)
 
     def test_with_syslog(self):
         logger = self.check_simple_logger("<eventlog>\n"
@@ -311,7 +310,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                                           "</eventlog>")
         syslog = logger.handlers[0]
         self.assertEqual(syslog.level, logging.ERROR)
-        self.assert_(isinstance(syslog, loghandler.SysLogHandler))
+        self.assertTrue(isinstance(syslog, loghandler.SysLogHandler))
 
     def test_with_http_logger_localhost(self):
         logger = self.check_simple_logger("<eventlog>\n"
@@ -327,7 +326,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(handler.url, "/")
         self.assertEqual(handler.level, logging.ERROR)
         self.assertEqual(handler.method, "POST")
-        self.assert_(isinstance(handler, loghandler.HTTPHandler))
+        self.assertTrue(isinstance(handler, loghandler.HTTPHandler))
 
     def test_with_http_logger_remote_host(self):
         logger = self.check_simple_logger("<eventlog>\n"
@@ -343,7 +342,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(handler.url, "/log/")
         self.assertEqual(handler.level, logging.NOTSET)
         self.assertEqual(handler.method, "GET")
-        self.assert_(isinstance(handler, loghandler.HTTPHandler))
+        self.assertTrue(isinstance(handler, loghandler.HTTPHandler))
 
     def test_with_email_notifier(self):
         logger = self.check_simple_logger("<eventlog>\n"
@@ -377,7 +376,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                 raise
         else:
             # This path must only be reached with python >=2.6
-            self.assert_(sys.version_info >= (2, 6))
+            self.assertTrue(sys.version_info >= (2, 6))
             handler = logger.handlers[0]
             self.assertEqual(handler.toaddrs, ["sysadmin@example.com"])
             self.assertEqual(handler.fromaddr, "zlog-user@example.com")
@@ -410,10 +409,10 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
 
     def check_simple_logger(self, text, level=logging.INFO):
         conf = self.get_config(text)
-        self.assert_(conf.eventlog is not None)
+        self.assertTrue(conf.eventlog is not None)
         self.assertEqual(conf.eventlog.level, level)
         logger = conf.eventlog()
-        self.assert_(isinstance(logger, logging.Logger))
+        self.assertTrue(isinstance(logger, logging.Logger))
         self.assertEqual(len(logger.handlers), 1)
         return logger
 
@@ -502,11 +501,11 @@ class TestReopeningRotatingLogfiles(LoggingTestHelper, unittest.TestCase):
         text1 = read_file(nfn1)
         text2 = read_file(nfn2)
         text3 = read_file(fn)
-        self.assert_("message 1" in text1)
-        self.assert_("message 2" in text1)
-        self.assert_("message 3" in text2)
-        self.assert_("message 4" in text2)
-        self.assert_("message 5" in text3)
+        self.assertTrue("message 1" in text1)
+        self.assertTrue("message 2" in text1)
+        self.assertTrue("message 3" in text2)
+        self.assertTrue("message 4" in text2)
+        self.assertTrue("message 5" in text3)
 
     def test_logfile_reopening(self):
         #
@@ -548,9 +547,9 @@ class TestReopeningRotatingLogfiles(LoggingTestHelper, unittest.TestCase):
         for fn in paths:
             fn1 = fn + ".1"
             fn2 = fn + ".2"
-            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
-            self.assert_(os.path.isfile(fn1), "%r must exist" % fn1)
-            self.assert_(os.path.isfile(fn2), "%r must exist" % fn2)
+            self.assertTrue(os.path.isfile(fn), "%r must exist" % fn)
+            self.assertTrue(os.path.isfile(fn1), "%r must exist" % fn1)
+            self.assertTrue(os.path.isfile(fn2), "%r must exist" % fn2)
         #
         # Clean up:
         for logger in conf.loggers:
@@ -626,11 +625,11 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
         #
         # We should now have all nine files:
         for fn in paths:
-            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+            self.assertTrue(os.path.isfile(fn), "%r must exist" % fn)
         for fn in npaths1:
-            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+            self.assertTrue(os.path.isfile(fn), "%r must exist" % fn)
         for fn in npaths2:
-            self.assert_(os.path.isfile(fn), "%r must exist" % fn)
+            self.assertTrue(os.path.isfile(fn), "%r must exist" % fn)
         #
         # Clean up:
         for logger in conf.loggers:

@@ -80,14 +80,14 @@ class SubstitutionTestCase(unittest.TestCase):
         self.assertEqual(substitute("$name", d), "$value")
 
     def test_isname(self):
-        self.assert_(isname("abc"))
-        self.assert_(isname("abc_def"))
-        self.assert_(isname("_abc"))
-        self.assert_(isname("abc_"))
-        self.assert_(not isname("abc-def"))
-        self.assert_(not isname("-def"))
-        self.assert_(not isname("abc-"))
-        self.assert_(not isname(""))
+        self.assertTrue(isname("abc"))
+        self.assertTrue(isname("abc_def"))
+        self.assertTrue(isname("_abc"))
+        self.assertTrue(isname("abc_"))
+        self.assertTrue(not isname("abc-def"))
+        self.assertTrue(not isname("-def"))
+        self.assertTrue(not isname("abc-"))
+        self.assertTrue(not isname(""))
 
 
 def test_suite():
