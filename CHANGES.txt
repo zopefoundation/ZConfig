@@ -2,7 +2,8 @@
 Change History for ZConfig
 ==========================
 
-3.0.3 (unreleased)
+
+3.0.3 (2013-03-02)
 ------------------
 
 - Added Python 3.2 support.
