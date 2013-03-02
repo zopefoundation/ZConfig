@@ -1077,8 +1077,12 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
 
     def test_srepr(self):
         from ZConfig.schema import _srepr
+        try:
+            FOO = unicode('foo')
+        except NameError:
+            FOO = 'foo'
         self.assertEqual(_srepr('foo'), "'foo'")
-        self.assertEqual(_srepr(u'foo'), "'foo'")
+        self.assertEqual(_srepr(FOO), "'foo'")
 
 
 def test_suite():

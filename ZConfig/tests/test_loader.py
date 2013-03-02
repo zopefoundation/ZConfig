@@ -310,7 +310,7 @@ class TestResourcesInZip(unittest.TestCase):
         sys.path[:] = self.old_path
 
     def test_zip_import_component_from_schema(self):
-        sio = StringIO(u'''
+        sio = StringIO('''
             <schema>
               <abstracttype name="something"/>
               <import package="foo.sample"/>

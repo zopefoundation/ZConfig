@@ -22,6 +22,10 @@ import ZConfig
 from ZConfig import info
 from ZConfig import url
 
+try:
+    BLANK = unicode('')
+except NameError:
+    BLANK = ''
 
 def parseResource(resource, loader):
     parser = SchemaParser(loader, resource.url)
@@ -35,7 +39,7 @@ def parseComponent(resource, loader, schema):
 
 
 def _srepr(ob):
-    if isinstance(ob, type(u'')) and sys.version_info[0] < 3:
+    if isinstance(ob, type(BLANK)) and sys.version_info[0] < 3:
         # drop the leading "u" from a unicode repr
         return repr(ob)[1:]
     else:
