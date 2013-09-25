@@ -33,7 +33,7 @@ Change History for ZConfig
 
 - Added Python 3.3 support.
 
-- Droped Python 2.4 and 2.5 support.
+- Dropped Python 2.4 and 2.5 support.
 
 
 2.9.3 (2012-06-25)
