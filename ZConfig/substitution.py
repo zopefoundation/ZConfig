@@ -13,6 +13,7 @@
 ##############################################################################
 """Substitution support for ZConfig values."""
 
+import os
 import ZConfig
 
 
@@ -22,10 +23,15 @@ def substitute(s, mapping):
         result = ''
         rest = s
         while rest:
-            p, name, namecase, rest = _split(rest)
+            p, name, namecase, rest, vtype = _split(rest)
             result += p
             if name:
-                v = mapping.get(name)
+                v = None
+                if vtype == 'define':
+                    v = mapping.get(name)
+                if vtype == 'env':
+                    v = os.getenv(namecase)
+
                 if v is None:
                     raise ZConfig.SubstitutionReplacementError(s, namecase)
                 result += v
@@ -57,8 +63,9 @@ def _split(s):
             raise ZConfig.SubstitutionSyntaxError(
                 "illegal lone '$' at end of source")
         if c == "$":
-            return s[:i+1], None, None, s[i+2:]
+            return s[:i+1], None, None, s[i+2:], None
         prefix = s[:i]
+        vtype = 'define'
         if c == "{":
             m = _name_match(s, i + 2)
             if not m:
@@ -69,6 +76,17 @@ def _split(s):
             if not s.startswith("}", i - 1):
                 raise ZConfig.SubstitutionSyntaxError(
                     "'${%s' not followed by '}'" % name)
+        elif c == "(":
+            m = _name_match(s, i + 2)
+            if not m:
+                raise ZConfig.SubstitutionSyntaxError(
+                    "'$(' not followed by name")
+            name = m.group(0)
+            i = m.end() + 1
+            if not s.startswith(")", i - 1):
+                raise ZConfig.SubstitutionSyntaxError(
+                    "'$(%s' not followed by ')'" % name)
+            vtype = 'env'
         else:
             m = _name_match(s, i+1)
             if not m:
@@ -76,9 +94,9 @@ def _split(s):
                     "'$' not followed by '$' or name")
             name = m.group(0)
             i = m.end()
-        return prefix, name.lower(), name, s[i:]
+        return prefix, name.lower(), name, s[i:], vtype
     else:
-        return s, None, None, None
+        return s, None, None, None, None
 
 
 import re
