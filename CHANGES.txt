@@ -2,6 +2,12 @@
 Change History for ZConfig
 ==========================
 
+3.0.4+enfold2 (unreleased)
+--------------------------
+
+- Nothing changed yet.
+
+
 3.0.4+enfold1 (2015-04-09)
 --------------------------
 
