@@ -2,10 +2,17 @@
 Change History for ZConfig
 ==========================
 
-3.0.5 (unreleased)
-------------------
+3.0.4+enfold2 (unreleased)
+--------------------------
 
-- TBD
+- Nothing changed yet.
+
+
+3.0.4+enfold1 (2015-04-09)
+--------------------------
+
+- Add ability to do variable substitution from environment variables using
+  $() syntax.
 
 3.0.4 (2014-03-20)
 ------------------

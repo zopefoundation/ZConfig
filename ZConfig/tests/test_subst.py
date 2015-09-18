@@ -15,6 +15,7 @@
 
 # This is needed to support Python 2.1.
 from __future__ import nested_scopes
+import os
 
 import unittest
 
@@ -46,6 +47,9 @@ class SubstitutionTestCase(unittest.TestCase):
         check("$$", "$")
         check("$$$name$$", "$value$")
 
+        # Check for an ENV var
+        self.assertEqual(substitute("$(PATH)", d), os.getenv("PATH"))
+
     def test_undefined_names(self):
         d = {"name": "value"}
         self.assertRaises(SubstitutionReplacementError,
@@ -54,6 +58,10 @@ class SubstitutionTestCase(unittest.TestCase):
                           substitute, "$splat1", d)
         self.assertRaises(SubstitutionReplacementError,
                           substitute, "$splat_", d)
+
+        # An undefined ENV should also rise
+        self.assertRaises(SubstitutionReplacementError,
+                          substitute, "$(MY_SUPER_PATH)", d)
 
     def test_syntax_errors(self):
         d = {"name": "${next"}
@@ -64,6 +72,10 @@ class SubstitutionTestCase(unittest.TestCase):
         check("${name")
         check("${1name}")
         check("${ name}")
+        check("$(")
+        check("$(name")
+        check("$(1name)")
+        check("$( name)")
 
     def test_edge_cases(self):
         # It's debatable what should happen for these cases, so we'll
