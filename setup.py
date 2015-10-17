@@ -18,7 +18,7 @@ def alltests():
 
 options = dict(
     name="ZConfig",
-    version='3.0.4+enfold2.dev0',
+    version='3.1.0',
     author="Fred L. Drake, Jr.",
     author_email="fred@zope.com",
     maintainer="Zope Foundation and Contributors",
