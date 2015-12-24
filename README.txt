@@ -56,7 +56,7 @@ the examples in ZConfig/components/logger/tests.
 Information on the latest released version of the ZConfig package is
 available at
 
-  http://www.zope.org/Members/fdrake/zconfig/
+  https://pypi.python.org/pypi/ZConfig/
 
 You may either create an RPM and install this, or install directly from
 the source distribution.
@@ -90,5 +90,5 @@ If you need to force the python interpreter to (for example) python2::
   python2 setup.py install
 
 
-For more information on installing packages, please refer to
-`Installing Python Modules <http://docs.python.org/inst/inst.html>`__.
+For more information on installing packages, please refer to the
+`Python Packaging User Guide <https://packaging.python.org/>`__.

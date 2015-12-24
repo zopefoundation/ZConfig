@@ -20,12 +20,12 @@ options = dict(
     name="ZConfig",
     version='3.1.1.dev0',
     author="Fred L. Drake, Jr.",
-    author_email="fred@zope.com",
+    author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
     description="Structured Configuration Library",
     long_description=README + "\n\n" + CHANGES,
     license="ZPL 2.1",
-    url="http://www.zope.org/Members/fdrake/zconfig/",
+    url="https://github.com/zopefoundation/ZConfig/",
     # List packages explicitly so we don't have to assume setuptools:
     packages=[
         "ZConfig",
