@@ -1,6 +1,7 @@
 *.pyc
 *.egg-info
 __pycache__
+.cache/
 .tox/
 .installed.cfg
 bin/
