@@ -18,7 +18,7 @@ def alltests():
 
 options = dict(
     name="ZConfig",
-    version='3.1.1.dev0',
+    version='3.2.0.dev0',
     author="Fred L. Drake, Jr.",
     author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
@@ -50,10 +50,8 @@ options = dict(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: Implementation :: CPython',
