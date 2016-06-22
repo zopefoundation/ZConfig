@@ -1116,28 +1116,6 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             """)
         self.assertEqual(schema.gettype('abc').getinfo('def').example, 'This is an example')
 
-    def test_section_example(self):
-        schema = self.load_schema_text("""\
-            <schema>
-                <sectiontype name="abc"/>
-                <section type="abc" name="def">
-                    <example>  This is an example  </example>
-                </section>
-            </schema>
-            """)
-        self.assertEqual(schema[0][1].example, 'This is an example')
-
-    def test_multisection_example(self):
-        schema = self.load_schema_text("""\
-            <schema>
-                <sectiontype name="abc"/>
-                <multisection type="abc" name="*" attribute="things">
-                    <example>  This is an example  </example>
-                </multisection>
-            </schema>
-            """)
-        self.assertEqual(schema[0][1].example, 'This is an example')
-
     def test_sectiontype_example(self):
         schema = self.load_schema_text("""\
             <schema>
@@ -1154,6 +1132,26 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             <schema>
                 <example>  This is an example  </example>
                 <example>  This is an example  </example>
+            </schema>
+            """)
+
+    def test_section_example_is_error(self):
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
+            <schema>
+                <sectiontype name="abc"/>
+                <section type="abc" name="def">
+                    <example>  This is an example  </example>
+                </section>
+            </schema>
+            """)
+
+    def test_multisection_example_is_error(self):
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
+            <schema>
+                <sectiontype name="abc"/>
+                <multisection type="abc" name="*" attribute="things">
+                    <example>  This is an example  </example>
+                </multisection>
             </schema>
             """)
 
