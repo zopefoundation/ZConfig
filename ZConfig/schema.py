@@ -56,7 +56,7 @@ class BaseParser(xml.sax.ContentHandler):
         "description": ["key", "section", "multikey", "multisection",
                         "sectiontype", "abstracttype",
                         "schema", "component"],
-        "example": ["key", "section", "multikey", "multisection"],
+        "example": ["schema", "sectiontype", "key", "multikey"],
         "metadefault": ["key", "section", "multikey", "multisection"],
         "default": ["key", "multikey"],
         "import": ["schema", "component"],
@@ -280,6 +280,9 @@ class BaseParser(xml.sax.ContentHandler):
         self._stack[-1].description = data
 
     def characters_example(self, data):
+        if self._stack[-1].example is not None:
+            self.error(
+                "at most one <example> may be used for each element")
         self._stack[-1].example = data
 
     def characters_metadefault(self, data):

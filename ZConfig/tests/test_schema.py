@@ -1084,6 +1084,77 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         self.assertEqual(_srepr('foo'), "'foo'")
         self.assertEqual(_srepr(FOO), "'foo'")
 
+    def test_schema_example(self):
+        schema = self.load_schema_text("""\
+            <schema>
+                <example>  This is an example  </example>
+            </schema>
+            """)
+        self.assertEqual(schema.example, 'This is an example')
+
+    def test_key_example(self):
+        schema = self.load_schema_text("""\
+            <schema>
+                <sectiontype name="abc">
+                    <key name="def">
+                        <example>  This is an example  </example>
+                    </key>
+                </sectiontype>
+            </schema>
+            """)
+        self.assertEqual(schema.gettype('abc').getinfo('def').example, 'This is an example')
+
+    def test_multikey_example(self):
+        schema = self.load_schema_text("""\
+            <schema>
+                <sectiontype name="abc">
+                    <multikey name="def">
+                        <example>  This is an example  </example>
+                    </multikey>
+                </sectiontype>
+            </schema>
+            """)
+        self.assertEqual(schema.gettype('abc').getinfo('def').example, 'This is an example')
+
+    def test_sectiontype_example(self):
+        schema = self.load_schema_text("""\
+            <schema>
+                <sectiontype name="abc">
+                    <example>  This is an example  </example>
+                </sectiontype>
+                <section type="abc" name="def"/>
+            </schema>
+            """)
+        self.assertEqual(schema.gettype('abc').example, 'This is an example')
+
+    def test_multiple_examples_is_error(self):
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
+            <schema>
+                <example>  This is an example  </example>
+                <example>  This is an example  </example>
+            </schema>
+            """)
+
+    def test_section_example_is_error(self):
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
+            <schema>
+                <sectiontype name="abc"/>
+                <section type="abc" name="def">
+                    <example>  This is an example  </example>
+                </section>
+            </schema>
+            """)
+
+    def test_multisection_example_is_error(self):
+        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
+            <schema>
+                <sectiontype name="abc"/>
+                <multisection type="abc" name="*" attribute="things">
+                    <example>  This is an example  </example>
+                </multisection>
+            </schema>
+            """)
+
 
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)

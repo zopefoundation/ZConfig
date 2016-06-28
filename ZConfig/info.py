@@ -317,6 +317,7 @@ class SectionType:
         self.valuetype = valuetype
         self.handler = None
         self.description = None
+        self.example = None
         self.registry = registry
         self._children = []    # [(key, info), ...]
         self._attrmap = {}     # {attribute: info, ...}
@@ -504,6 +505,7 @@ def createDerivedSchema(base):
                      base.handler, base.url, base.registry)
     new._components.update(base._components)
     new.description = base.description
+    new.example = base.example
     new._children[:] = base._children
     new._attrmap.update(base._attrmap)
     new._keymap.update(base._keymap)
