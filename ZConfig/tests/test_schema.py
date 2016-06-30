@@ -1131,24 +1131,32 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             """)
 
     def test_section_example_is_error(self):
-        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
+        schema = self.load_schema_text("""\
             <schema>
-                <sectiontype name="abc"/>
+                <sectiontype name="abc">
+                    <example>  This is a sectiontype example  </example>
+                </sectiontype>
                 <section type="abc" name="def">
                     <example>  This is an example  </example>
                 </section>
             </schema>
             """)
+        self.assertEqual(schema.getinfo('def').sectiontype.example, 'This is a sectiontype example')
+        self.assertEqual(schema.getinfo('def').example, 'This is an example')
 
     def test_multisection_example_is_error(self):
-        self.assertRaises(ZConfig.SchemaError, self.load_schema_text, """\
+        schema = self.load_schema_text("""\
             <schema>
-                <sectiontype name="abc"/>
+                <sectiontype name="abc">
+                    <example>  This is a sectiontype example  </example>
+                </sectiontype>
                 <multisection type="abc" name="*" attribute="things">
                     <example>  This is an example  </example>
                 </multisection>
             </schema>
             """)
+        self.assertEqual(schema[0][1].sectiontype.example, 'This is a sectiontype example')
+        self.assertEqual(schema[0][1].example, 'This is an example')
 
     def checkErrorText(self, schema, error_text):
         self.assertRaisesRegexp(ZConfig.SchemaError, error_text,
