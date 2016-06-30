@@ -82,7 +82,7 @@
           handler    NMTOKEN  #IMPLIED
           required   (yes|no) "no">
 
-<!ELEMENT section (description?)>
+<!ELEMENT section (description?, example?)>
 <!ATTLIST section
           name       CDATA    "*"
           attribute  NMTOKEN  #IMPLIED
@@ -90,7 +90,7 @@
           handler    NMTOKEN  #IMPLIED
           required   (yes|no) "no">
 
-<!ELEMENT multisection (description?)>
+<!ELEMENT multisection (description?, example?)>
 <!ATTLIST multisection
           name       CDATA    "*"
           attribute  NMTOKEN  #IMPLIED
