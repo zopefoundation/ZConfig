@@ -291,13 +291,8 @@ language is helpful.
 
 The following elements are used to describe a schema:
 
-<schema>
-  description?, metadefault?, example?,
-  import*,
-  (sectiontype | abstracttype)*,
-  (section | key | multisection |
-  multikey)*
-</schema>
+<schema> description?, metadefault?, example?, import*, (sectiontype |
+abstracttype)*, (section | key | multisection | multikey)* </schema>
 
 Document element for a :mod:`ZConfig` schema.
 
@@ -346,9 +341,7 @@ Document element for a :mod:`ZConfig` schema.
     attribute.
 
 
-<description>
- PCDATA
-</description>
+<description> PCDATA </description>
 
 Descriptive text explaining the purpose the container of the
 ``description``  element.  Most other elements can contain
@@ -370,15 +363,11 @@ context.
     ``stx``        Classic Strucutred Text
     =========      ===============================================
 
-<example>
- PCDATA
-</example>
+<example> PCDATA </example>
 
 An example value.  This serves only as documentation.
 
-<metadefault>
- PCDATA
-</metadefault>
+<metadefault> PCDATA </metadefault>
 
 A description of the default value, for human readers.  This may
 include information about how a computed value is determined when
@@ -641,104 +630,106 @@ element will be passed to the datatype conversion for the
 
 
 
-\begin{elementdesc}{section}{description?}
-  A ``section``  element is used to describe a section which may
-  occur at most once in the section type or top-level schema in which
-  it is listed.
+<section>description?</section>
 
-  **attribute** (**identifier**)
+A ``section``  element is used to describe a section which may
+occur at most once in the section type or top-level schema in which
+it is listed.
+
+**attribute** (**identifier**)
     The name of the Python attribute which this section should be the
-    value of on a \class{SectionValue} instance.  This must be unique
+    value of on a :class:`SectionValue` instance.  This must be unique
     within the immediate contents of a section type or schema.  If
     this attribute is not specified, an attribute name will be
     computed by converting hyphens in the section name to underscores,
-    in which case the \attribute{name} attribute may not be \code{*}
-    or \code{+}.
+    in which case the ``name`` attribute may not be ``*``
+    or ``+``.
 
 
-  **handler** (**basic-key**)
+**handler** (**basic-key**)
 
 
-  **name** (**basic-key**)
+**name** (**basic-key**)
     The name of the section, as it must be given in a configuration
-    instance, \code{*}, or \code{+}.  If the value is \code{*} or this
+    instance, ``*``, or ``+``.  If the value is ``*`` or this
     attribute is omitted, any name not already specified as a key may
-    be used.  If the value is \code{*} or \code{+}, the
+    be used.  If the value is ``*`` or ``+``, the
     ``attribute``  attribute must be specified.  If the value
-    is \code{*}, any name is allowed, or the name may be omitted.  If
-    the value is \code{+}, any name is allowed, but some name must be
+    is ``*``, any name is allowed, or the name may be omitted.  If
+    the value is ``+``, any name is allowed, but some name must be
     provided.
 
 
-  **required** (**code{yes|no}}
+**required** (``yes|no``)
     Specifies whether the configuration instance is required to
-    provide the section.  If the value is \code{yes}, an error will be
+    provide the section.  If the value is ``yes``, an error will be
     reported if the configuration instance does not include the
-    section.  If the value is \code{no} (the default) and the
+    section.  If the value is ``no`` (the default) and the
     configuration instance does not include the section, the value
-    reported to the application will be \code{None}.
+    reported to the application will be ``None``.
 
 
-  **type** (**basic-key**)
+**type** (**basic-key**)
     The section type which matching sections must implement.  If the
     value names an abstract section type, matching sections in the
     configuration file must be of a type which specifies that it
     implements the named abstract type.  If the name identifies a
     concrete type, the section type must match exactly.
 
-\end{elementdesc}
 
 
-\begin{elementdesc}{multisection}{description?}
-  A ``multisection``  element is used to describe a section which
-  may occur any number of times in the section type or top-level
-  schema in which it is listed.
+<multisection>description?</multisection>
 
-  **attribute** (**identifier**)
+A ``multisection``  element is used to describe a section which
+may occur any number of times in the section type or top-level
+schema in which it is listed.
+
+**attribute** (**identifier**)
     The name of the Python attribute which matching sections should be
-    the value of on a \class{SectionValue} instance.  This is required
+    the value of on a :class:`SectionValue` instance.  This is required
     and must be unique within the immediate contents of a section type
-    or schema.  The \class{SectionValue} instance will contain a list
+    or schema.  The :class:`SectionValue` instance will contain a list
     of matching sections.
 
 
-  **handler** (**basic-key**)
+**handler** (**basic-key**)
 
 
-  **name** (**basic-key**)
+**name** (**basic-key**)
     For a ``multisection`` , any name not already specified as a
-    key may be used.  If the value is \code{*} or \code{+}, the
+    key may be used.  If the value is ``*`` or ``+``, the
     ``attribute``  attribute must be specified.  If the value
-    is \code{*} or this attribute is omitted, any name is allowed, or
-    the name may be omitted.  If the value is \code{+}, any name is
+    is ``*`` or this attribute is omitted, any name is allowed, or
+    the name may be omitted.  If the value is ``+``, any name is
     allowed, but some name must be provided.  No other value for the
     ``name``  attribute is allowed for a
     ``multisection`` .
 
 
-  **required** (**code{yes|no}}
+**required** (``yes|no``)
     Specifies whether the configuration instance is required to
     provide at least one matching section.  If the value is
-    \code{yes}, an error will be reported if the configuration
-    instance does not include the section.  If the value is \code{no}
+    ``yes``, an error will be reported if the configuration
+    instance does not include the section.  If the value is ``no``
     (the default) and the configuration instance does not include the
     section, the value reported to the application will be
-    \code{None}.
+    ``None``.
 
 
-  **type** (**basic-key**)
+**type** (**basic-key**)
     The section type which matching sections must implement.  If the
     value names an abstract section type, matching sections in the
     configuration file must be of types which specify that they
     implement the named abstract type.  If the name identifies a
     concrete type, the section type must match exactly.
 
-\end{elementdesc}
 
+.. _schema-components:
 
-\subsection{Schema Components \label{schema-components}}
+Schema Components
+-----------------
 
-XXX need more explanation
+.. XXX need more explanation
 
 :mod:`ZConfig` supports schema components that can be
 provided by disparate components, and allows them to be knit together
@@ -748,15 +739,15 @@ additional keys or sections in the application schema.
 A schema "component" is allowed to define new abstract and
 section types.
 Components are identified using a dotted-name, similar to a Python
-module name.  For example, one component may be \code{zodb.storage}.
+module name.  For example, one component may be ``zodb.storage``.
 
 Schema components are stored alongside application code since they
 directly reference datatype code.  Schema components are provided by
 Python packages.  The component definition is normally stored in the
-file \file{component.xml}; an alternate filename may be specified
+file 'component.xml'; an alternate filename may be specified
 using the ``file``  attribute of the ``import``  element.
 Components imported using the ``%import`` keyword from a
-configuration file must be named \file{component.xml}.
+configuration file must be named 'component.xml'.
 The component defines the types provided by that component; it must
 have a ``component``  element as the document element.
 
@@ -765,57 +756,60 @@ components.  Note that schema components do not allow keys and
 sections to be added to the top-level of a schema; they serve only to
 provide type definitions.
 
-\begin{elementdesc}{component}{description?, (abstracttype | sectiontype)*}
-  The top-level element for schema components.
+<component>description?, (abstracttype | sectiontype)*</component>
 
-  **prefix** (**dotted-name**)
+The top-level element for schema components.
+
+**prefix** (**dotted-name**)
     Prefix to be pre-pended in front of partial dotted-names that
     start with a period.  The value of this attribute is used in all
     contexts within the ``component``  element if it hasn't been
     overridden by an inner element with a ``prefix``
     attribute.
 
-\end{elementdesc}
 
-
-\subsection{Referring to Files in Packages}
+Referring to Files in Packages
+------------------------------
 
 The ``extends``  attribute of the ``schema``  element is
 used to refer to files containing base schema; sometimes it makes
 sense to refer to a base schema relative to the Python package that
 provides it.  For this purpose, ZConfig supports the special
-\code{package:} URL scheme.
+``package:`` URL scheme.
 
-The \code{package:} URL scheme is straightforward, and contains three
+The ``package:`` URL scheme is straightforward, and contains three
 parts: the scheme name, the package name, and a relative path.  The
 relative path is searched for using the named package's
-\code{__path__} if it's a conventional filesystem package, or using
+``__path__`` if it's a conventional filesystem package, or using
 the package's loader if that supports resource access (such as the
 loader for eggs and other ZIP-file based packages).
 
-The basic form of the \code{package:} URL is
+The basic form of the ``package:`` URL is::
 
-\begin{alltt}
-package:\var{package.name}:\var{relative-path}
-\end{alltt}
+
+  package:package.name:relative-path
+
 
 The package name must be fully specified; the current prefix, if any,
 is not used.  If the named package is contained in an egg or ZIP file,
 the resource identified by the relative path must reside in the same
 egg or ZIP file.
 
-The \code{package:} URL scheme is generally available everywhere
+The ``package:`` URL scheme is generally available everywhere
 ZConfig supports loading text from URLs directly, but applications
 using ZConfig do not automatically acquire general support for this.
 
 
-\section{Standard \module{ZConfig} Datatypes\label{standard-datatypes}}
+.. _standard-datatypes:
+
+Standard ZConfig Datatypes
+==========================
 
 There are a number of data types which can be identified using the
 ``datatype``  attribute on ``key`` ,
-\element{sectiontype}, and \element{schema} elements.
+``sectiontype``, and ``schema`` elements.
 Applications may extend the set of datatypes by calling the
-\method{register()} method of the data type registry being used or by
+:meth:`register` method of the data type registry being used or by
 using Python dotted-names to refer to conversion routines defined in
 code.
 
@@ -825,33 +819,33 @@ The following data types are provided by the default type registry.
 **basic-key**
   The default data type for a key in a ZConfig configuration file.
   The result of conversion is always lower-case, and matches the
-  regular expression \regexp{[a-z][-._a-z0-9]*}.
+  regular expression ``[a-z][-._a-z0-9]*``.
 
 **boolean**
   Convert a human-friendly string to a boolean value.  The names
-  \code{yes}, \code{on}, and \code{true} convert to \constant{True},
-  while \code{no}, \code{off}, and \code{false} convert to
-  \constant{False}.  Comparisons are case-insensitive.  All other
+  ``yes``, ``on``, and ``true`` convert to ``True``,
+  while ``no``, ``off``, and ``false`` convert to
+  ``False``.  Comparisons are case-insensitive.  All other
   input strings are disallowed.
 
 **byte-size**
   A specification of a size, with byte multiplier suffixes (for
-  example, \samp{128MB}).  Suffixes are case insensitive and may be
-  \samp{KB}, \samp{MB}, or \samp{GB}
+  example, ``128MB``).  Suffixes are case insensitive and may be
+  ``KB``, ``MB``, or ``GB``
 
 **dotted-name**
   A string consisting of one or more **identifier** values
-  separated by periods (\character{.}).
+  separated by periods (``.``).
 
 **dotted-suffix**
   A string consisting of one or more **identifier** values
-  separated by periods (\character{.}), possibly prefixed by a
+  separated by periods (``.``), possibly prefixed by a
   period.  This can be used to indicate a dotted name that may be
   specified relative to some base dotted name.
 
 **existing-dirpath**
   Validates that the directory portion of a pathname exists.  For
-  example, if the value provided is \file{/foo/bar}, \file{/foo} must
+  example, if the value provided is '/foo/bar', '/foo' must
   be an existing directory.  No conversion is performed.
 
 **existing-directory**
@@ -868,36 +862,36 @@ The following data types are provided by the default type registry.
   is performed.
 
 **float**
-  A Python float.  \code{Inf}, \code{-Inf}, and \code{NaN} are not
+  A Python float.  ``Inf``, ``-Inf``, and ``NaN`` are not
   allowed.
 
 **identifier**
   Any valid Python identifier.
 
 **inet-address**
-  An Internet address expressed as a \code{(\var{hostname},
-  \var{port})} pair.  If only the port is specified, the default host
-  will be returned for \var{hostname}.  The default host is
-  \code{localhost} on Windows and the empty string on all other
-  platforms.  If the port is omitted, \code{None} will be returned for
-  \var{port}. IPv6 addresses can be specified in colon-separated notation;
+  An Internet address expressed as a ``(hostname,
+  port)`` pair.  If only the port is specified, the default host
+  will be returned for *hostname*.  The default host is
+  ``localhost`` on Windows and the empty string on all other
+  platforms.  If the port is omitted, ``None`` will be returned for
+  *port*. IPv6 addresses can be specified in colon-separated notation;
   if both host and port need to be specified, the bracketed form
-  (\code{[addr]:port}) must be used.
+  (``[addr]:port``) must be used.
 
 **inet-binding-address**
-  An Internet address expressed as a \code{(\var{hostname},
-  \var{port})} pair.  The address is suitable for binding a socket.
+  An Internet address expressed as a ``(hostname,
+  port)`` pair.  The address is suitable for binding a socket.
   If only the port is specified, the default host will be returned for
-  \var{hostname}.  The default host is the empty string on all
-  platforms.  If the port is omitted, \code{None} will be returned for
-  \var{port}.
+  *hostname*.  The default host is the empty string on all
+  platforms.  If the port is omitted, *None* will be returned for
+  *port*.
 
 **inet-connection-address**
-  An Internet address expressed as a \code{(\var{hostname},
-  \var{port})} pair.  The address is suitable for connecting a socket
+  An Internet address expressed as a ``(hostname,
+  port)`` pair.  The address is suitable for connecting a socket
   to a server.  If only the port is specified, \code{'127.0.0.1'} will
-  be returned for \var{hostname}.  If the port is omitted, \code{None}
-  will be returned for \var{port}.
+  be returned for \var{hostname}.  If the port is omitted, ``None``
+  will be returned for *port*.
 
 **integer**
   Convert a value to an integer.  This will be a Python \class{int} if
@@ -915,7 +909,7 @@ The following data types are provided by the default type registry.
 **locale**
   Any valid locale specifier accepted by the available
   \function{locale.setlocale()} function.  Be aware that only the
-  \code{'C'} locale is supported on some platforms.
+  ``'C'`` locale is supported on some platforms.
 
 **null**
   No conversion is performed; the value passed in is the value
@@ -929,33 +923,33 @@ The following data types are provided by the default type registry.
 
 **socket-address**
   An address for a socket.  The converted value is an object providing
-  two attributes.  \member{family} specifies the address family
-  (\constant{AF_INET} or \constant{AF_UNIX}), with \code{None} instead
-  of \constant{AF_UNIX} on platforms that don't support it.  The
-  \member{address} attribute will be the address that should be passed
-  to the socket's \method{bind()} method.  If the family is
-  \constant{AF_UNIX}, the specific address will be a pathname; if the
-  family is \constant{AF_INET}, the second part will be the result of
+  two attributes.  ``family`` specifies the address family
+  (``AF_INET`` or ``AF_UNIX``), with ``None`` instead
+  of ``AF_UNIX`` on platforms that don't support it.  The
+  ``address`` attribute will be the address that should be passed
+  to the socket's :meth:`bind` method.  If the family is
+  ``AF_UNIX``, the specific address will be a pathname; if the
+  family is ``AF_INET``, the second part will be the result of
   the **inet-address** conversion.
 
 **string**
   Returns the input value as a string.  If the source is a Unicode
   string, this implies that it will be checked to be simple 7-bit
-  \ASCII.  This is the default data type for values in
+  ASCII.  This is the default data type for values in
   configuration files.
 
 **time-interval**
   A specification of a time interval in seconds, with multiplier
-  suffixes (for example, \code{12h}).  Suffixes are case insensitive
-  and may be \samp{s} (seconds), \samp{m} (minutes), \samp{h} (hours),
-  or \samp{d} (days).
+  suffixes (for example, ``12h``).  Suffixes are case insensitive
+  and may be ``s`` (seconds), ``m`` (minutes), ``h`` (hours),
+  or ``d`` (days).
 
 **timedelta**
-  Similar to the \datatype{time-interval}, this data type returns a Python
-  datetime.timedelta object instead of a float.  The set of suffixes
-  recognized by \datatype{timedelta} are: \samp{w} (weeks), \samp{d} (days),
-  \samp{h} (hours), \samp{m} (minutes), \samp{s} (seconds).  Values may be
-  floats, for example: \code{4w 2.5d 7h 12m 0.001s}.
+  Similar to the **time-interval**, this data type returns a Python
+  :class:`datetime.timedelta` object instead of a float.  The set of suffixes
+  recognized by **timedelta** are: ``w`` (weeks), ``d`` (days),
+  ``h`` (hours), ``m`` (minutes), ``s`` (seconds).  Values may be
+  floats, for example: ``4w 2.5d 7h 12m 0.001s``.
 
 
 .. _standard-components:
@@ -968,17 +962,18 @@ of the package.  These may be used directly or can server as examples
 for creating new components.
 
 
-\subsection{\module{ZConfig.components.basic}}
+ZConfig.components.basic
+------------------------
 
 The :mod:`ZConfig.components.basic` package provides small
 components that can be helpful in composing application-specific
 components and schema.  There is no large functionality represented by
 this package.  The default component provided by this package simply
-imports all of the smaller components.  This can be imported using
+imports all of the smaller components.  This can be imported using::
 
-\begin{verbatim}
-<import package="ZConfig.components.basic"/>
-\end{verbatim}
+
+  <import package="ZConfig.components.basic"/>
+
 
 Each of the smaller components is documented directly; importing these
 selectively can reduce the time it takes to load a schema slightly,
@@ -986,156 +981,148 @@ and allows replacing the other basic components with alternate
 components (by using different imports that define the same type
 names) if desired.
 
+.. _basic-mapping:
 
-\subsubsection{The Mapping Section Type \label{basic-mapping}}
+The Mapping Section Type
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 There is a basic section type that behaves like a simple Python
-mapping; this can be imported directly using
+mapping; this can be imported directly using::
 
-\begin{verbatim}
-<import package="ZConfig.components.basic" file="mapping.xml"/>
-\end{verbatim}
+  <import package="ZConfig.components.basic" file="mapping.xml"/>
 
-This defines a single section type, \datatype{ZConfig.basic.mapping}.
+
+This defines a single section type, **{ZConfig.basic.mapping**.
 When this is used, the section value is a Python dictionary mapping
 keys to string values.
 
 This type is intended to be used by extending it in simple ways.  The
 simplest is to create a new section type name that makes more sense
-for the application:
+for the application::
 
-\begin{verbatim}
-<import package="ZConfig.components.basic" file="mapping.xml"/>
 
-<sectiontype name="my-mapping"
-             extends="ZConfig.basic.mapping"
-             />
+  <import package="ZConfig.components.basic" file="mapping.xml"/>
 
-<section name="*"
-         type="my-mapping"
-         attribute="map"
-         />
-\end{verbatim}
+  <sectiontype name="my-mapping"
+               extends="ZConfig.basic.mapping"
+               />
+
+  <section name="*"
+           type="my-mapping"
+           attribute="map"
+           />
 
 This allows a configuration to contain a mapping from
-**basic-key** names to string values like this:
+**basic-key** names to string values like this::
 
-\begin{verbatim}
-<my-mapping>
-  This that
-  and the other
-</my-mapping>
-\end{verbatim}
 
-The value of the configuration object's \member{map} attribute would
-then be the dictionary
+  <my-mapping>
+    This that
+    and the other
+  </my-mapping>
 
-\begin{verbatim}
-{'this': 'that',
- 'and': 'the other',
- }
-\end{verbatim}
+The value of the configuration object's ``map`` attribute would
+then be the dictionary::
+
+
+  {'this': 'that',
+   'and': 'the other',
+   }
+
 
 (Recall that the **basic-key** data type converts everything to
 lower case.)
 
 Perhaps a more interesting application of
 **ZConfig.basic.mapping** is using the derived type to override
-the ``keytype`` .  If we have the conversion function:
-
-\begin{verbatim}
-def email_address(value):
-    userid, hostname = value.split("@", 1)
-    hostname = hostname.lower()  # normalize what we know we can
-    return "%s@%s" % (userid, hostname)
-\end{verbatim}
-
-then we can use this as the key type for a derived mapping type:
-
-\begin{verbatim}
-<import package="ZConfig.components.basic" file="mapping.xml"/>
-
-<sectiontype name="email-users"
-             extends="ZConfig.basic.mapping"
-             keytype="mypkg.datatypes.email_address"
-             />
-
-<section name="*"
-         type="email-users"
-         attribute="email_users"
-         />
-\end{verbatim}
+the ``keytype`` .  If we have the conversion function::
 
 
-\subsection{:mod:`ZConfig.components.logger}`
+  def email_address(value):
+      userid, hostname = value.split("@", 1)
+      hostname = hostname.lower()  # normalize what we know we can
+      return "%s@%s" % (userid, hostname)
+
+then we can use this as the key type for a derived mapping type::
+
+
+  <import package="ZConfig.components.basic" file="mapping.xml"/>
+
+  <sectiontype name="email-users"
+               extends="ZConfig.basic.mapping"
+               keytype="mypkg.datatypes.email_address"
+               />
+
+  <section name="*"
+           type="email-users"
+           attribute="email_users"
+           />
+
+
+ZConfig.components.logger
+-------------------------
 
 The :mod:`ZConfig.components.logger` package provides configuration
-support for the \ulink{:mod:`logging} package`
-{http://docs.python.org/library/logging.html} in
-Python's standard library.  This component can be imported using
+support for the :mod:`logging` package in Python's standard library.
+This component can be imported using::
 
-\begin{verbatim}
-<import package="ZConfig.components.logger"/>
-\end{verbatim}
+
+  <import package="ZConfig.components.logger"/>
+
 
 This component defines two abstract types and several concrete section
 types.  These can be imported as a unit, as above, or as four smaller
 components usable in creating alternate logging packages.
 
 The first of the four smaller components contains the abstract types,
-and can be imported using
+and can be imported using::
 
-\begin{verbatim}
-<import package="ZConfig.components.logger" file="abstract.xml"/>
-\end{verbatim}
+
+  <import package="ZConfig.components.logger" file="abstract.xml"/>
+
 
 The two abstract types imported by this are:
 
-\begin{definitions}
 
-\term{\datatype{ZConfig.logger.log}}
+**ZConfig.logger.log**
   Logger objects are represented by this abstract type.
 
-\term{\datatype{ZConfig.logger.handler}}
-  Each logger object can have one or more ``handlers'' associated with
+**ZConfig.logger.handler**
+  Each logger object can have one or more "handlers" associated with
   them.  These handlers are responsible for writing logging events to
   some form of output stream using appropriate formatting.  The output
   stream may be a file on a disk, a socket communicating with a server
-  on another system, or a series of \code{syslog} messages.  Section
+  on another system, or a series of ``syslog`` messages.  Section
   types which implement this type represent these handlers.
-
-\end{definitions}
 
 
 The second and third of the smaller components provides section types
-that act as factories for \class{logging.Logger} objects.  These can be
-imported using
+that act as factories for :class:`logging.Logger` objects.  These can be
+imported using::
 
-\begin{verbatim}
-<import package="ZConfig.components.logger" file="eventlog.xml"/>
-<import package="ZConfig.components.logger" file="logger.xml"/>
-\end{verbatim}
+
+  <import package="ZConfig.components.logger" file="eventlog.xml"/>
+  <import package="ZConfig.components.logger" file="logger.xml"/>
 
 The types defined in these components implement the
-**ZConfig.logger.log** abstract type.  The \file{eventlog.xml}
+**ZConfig.logger.log** abstract type.  The 'eventlog.xml'
 component defines an **eventlog** type which represents the
 root logger from the the :mod:`logging` package (the return value of
-\function{logging.getLogger()}), while the \file{logger.xml} component
+:func:`logging.getLogger`), while the 'logger.xml' component
 defines a **logger** section type which represents a named
-logger (as returned by \function{logging.getLogger(\var{name})}).
+logger.
 
 
 The third of the smaller components provides section types that are
-factories for \class{logging.Handler} objects.  This can be imported
-using
+factories for :class:`logging.Handler` objects.  This can be imported
+using::
 
-\begin{verbatim}
-<import package="ZConfig.components.logger" file="handlers.xml"/>
-\end{verbatim}
+
+  <import package="ZConfig.components.logger" file="handlers.xml"/>
+
 
 The types defined in this component implement the
 **ZConfig.logger.handler** abstract type.
-
 
 
 The configuration objects provided by both the logger and handler
@@ -1145,45 +1132,46 @@ log handler objects.  Calling the factories repeatedly will cause the
 same objects to be returned each time, so it's safe to simply call
 them to retrieve the objects.
 
-The factories for the logger objects, whether the \datatype{eventlog}
-or **logger** section type is used, provide a \method{reopen()}
+The factories for the logger objects, whether the **eventlog**
+or **logger** section type is used, provide a :meth:`reopen`
 method which may be called to close any log files and re-open them.
-This is useful when using a \UNIX{} signal to effect log file
+This is useful when using a UNIX signal to effect log file
 rotation: the signal handler can call this method, and not have to
 worry about what handlers have been registered for the logger.  There
 is also a function in the
 :mod:`ZConfig.components.logger.loghandler` module that re-opens all
 open log files created using ZConfig configuraiton:
 
-\begin{funcdesc}{reopenFiles}{}
+.. py:function:: ZConfig.components.logger.loghandler.reopenFiles()
+
   Closes and re-opens all the log files held open by handlers created
-  by the factories for \code{logfile} sections.  This is intended to
+  by the factories for ``logfile`` sections.  This is intended to
   help support log rotation for applications.
-\end{funcdesc}
+
 
 Building an application that uses the logging components is fairly
 straightforward.  The schema needs to import the relevant components
-and declare their use:
+and declare their use::
 
-\begin{verbatim}
-<schema>
-  <import package="ZConfig.components.logger" file="eventlog.xml"/>
-  <import package="ZConfig.components.logger" file="handlers.xml"/>
 
-  <section type="eventlog" name="*" attribute="eventlog"
-           required="yes"/>
-</schema>
-\end{verbatim}
+  <schema>
+    <import package="ZConfig.components.logger" file="eventlog.xml"/>
+    <import package="ZConfig.components.logger" file="handlers.xml"/>
+
+    <section type="eventlog" name="*" attribute="eventlog"
+             required="yes"/>
+  </schema>
+
 
 In the application, the schema and configuration file should be loaded
 normally.  Once the configuration object is available, the logger
-factory should be called to configure Python's :mod:`logging` package:
+factory should be called to configure Python's :mod:`logging` package::
 
-\begin{verbatim}
-import os
-import ZConfig
 
-def run(configfile):
+  import os
+  import ZConfig
+
+  def run(configfile):
     schemafile = os.path.join(os.path.dirname(__file__), "schema.xml")
     schema = ZConfig.loadSchema(schemafile)
     config, handlers = ZConfig.loadConfig(schema, configfile)
@@ -1192,75 +1180,62 @@ def run(configfile):
     config.eventlog()
 
     # now do interesting things
-\end{verbatim}
 
-An example configuration file for this application may look like this:
 
-\begin{verbatim}
-<eventlog>
-  level  info
+An example configuration file for this application may look like this::
 
-  <logfile>
-    path        /var/log/myapp
-    format      %(asctime)s %(levelname)s %(name)s %(message)s
-    # locale-specific date/time representation
-    dateformat  %c
-  </logfile>
 
-  <syslog>
-    level    error
-    address  syslog.example.net:514
-    format   %(levelname)s %(name)s %(message)s
-  </syslog>
-</eventlog>
-\end{verbatim}
+  <eventlog>
+    level  info
+
+    <logfile>
+      path        /var/log/myapp
+      format      %(asctime)s %(levelname)s %(name)s %(message)s
+      # locale-specific date/time representation
+      dateformat  %c
+    </logfile>
+
+    <syslog>
+      level    error
+      address  syslog.example.net:514
+      format   %(levelname)s %(name)s %(message)s
+    </syslog>
+  </eventlog>
+
 
 Refer to the :mod:`logging` package documentation for the names
-available in the message format strings (the \code{format} key in the
-log handlers).  The date format strings (the \code{dateformat} key in
+available in the message format strings (the ``format`` key in the
+log handlers).  The date format strings (the ``dateformat`` key in
 the log handlers) are the same as those accepted by the
 \function{time.strftime()} function.
 
-\subsubsection{Configuring the email logger}
+Configuring the email logger
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ZConfig has support for Python's STMTPHandler via the <email-notifier>
-handler.
+handler::
 
-\begin{verbatim}
-<eventlog>
-  <email-notifier>
-    to sysadmin@example.com
-    to john@example.com
-    from zlog-user@example.com
-    level fatal
-    smtp-username john
-    smtp-password johnpw
-  </email-notifier>
-</eventlog>
-\end{verbatim}
+
+  <eventlog>
+    <email-notifier>
+      to sysadmin@example.com
+      to john@example.com
+      from zlog-user@example.com
+      level fatal
+      smtp-username john
+      smtp-password johnpw
+    </email-notifier>
+  </eventlog>
+
 
 For details about the SMTPHandler see the Python :mod:`logging` module.
 
-\begin{seealso}
-  \seepep{282}{A Logging System}
-         {The proposal which described the logging feature for
-          inclusion in the Python standard library.}
-  \seelink{http://docs.python.org/library/logging.html}
-          {\module{logging} --- Logging facility for Python}
-          {Python's :mod:`logging` package documentation, from the
-           \citetitle[http://docs.python.org/library/]
-           {Python Library Reference}.}
-  \seelink{http://www.red-dove.com/python_logging.html}
-          {Original Python \module{logging} package}
-          {This is the original source for the :mod:`logging`
-           package.  This is mostly of historical interest.}
-\end{seealso}
 
+Using Components to Extend Schema
+=================================
 
-\section{Using Components to Extend Schema}
-
-% XXX This section needs a lot of work, but should get people started
-% who really want to add new pieces to ZConfig-configured applications.
+.. XXX This section needs a lot of work, but should get people started
+   who really want to add new pieces to ZConfig-configured applications.
 
 It is possible to use schema components and the ``%import``
 construct to extend the set of section types available for a specific
@@ -1284,32 +1259,33 @@ or described in some other bit of documentation.
 The following things need to be created to make the new component
 usable from the configuration file:
 
-\begin{enumerate}
-  \item An implementation of the required interface.
 
-  \item A schema component that defines a section type that contains
-        the information needed to construct the component.
+#. An implementation of the required interface.
 
-  \item A ``datatype'' function that converts configuration data to an
-        instance of the component.
-\end{enumerate}
+#. A schema component that defines a section type that contains
+   the information needed to construct the component.
+
+#. A ``datatype`` function that converts configuration data to an
+   instance of the component.
 
 For simplicity, let's assume that the implementation is defined by a
 Python class.
 
 The example component we build here will be in the :mod:`noise`
 package, but any package will do.  Components loadable using
-\keyword{\%import} must be contained in the \file{component.xml} file;
+\keyword{\%import} must be contained in the 'component.xml' file;
 alternate filenames may not be selected by the ``%import``
 construct.
+
+.. highlight:: xml
 
 Create a ZConfig component that provides a section type to support
 your component.  The new section type must declare that it implements
 the appropriate abstract type; it should probably look something like
-this:
+this::
 
-\begin{verbatim}
-<component prefix="noise.server">
+
+ <component prefix="noise.server">
   <import package="ZServer"/>
 
   <sectiontype name="noise-generator"
@@ -1335,35 +1311,35 @@ this:
     </key>
 
   </sectiontype>
-</component>
-\end{verbatim}
+ </component>
+
 
 This example uses one of the standard ZConfig datatypes,
-\datatype{port-number}, and requires two additional types to be
+**port-number**, and requires two additional types to be
 provided by the :mod:`noise.server` module:
-\class{NoiseServerFactory} and \function{noise_color()}.
+``NoiseServerFactory`` and ``{noise_color()``.
 
-The \function{noise_color()} function is a datatype conversion for a
-key, so it accepts a string and returns the value that should be used:
+The ``noise_color()`` function is a datatype conversion for a
+key, so it accepts a string and returns the value that should be used::
 
-\begin{verbatim}
-_noise_colors = {
-    # color -> r,g,b
-    'white': (255, 255, 255),
-    'pink':  (255, 182, 193),
-    }
 
-def noise_color(string):
-    if string in _noise_colors:
-        return _noise_colors[string]
-    else:
-        raise ValueError('unknown noise color: %r' % string)
-\end{verbatim}
+  _noise_colors = {
+      # color -> r,g,b
+      'white': (255, 255, 255),
+      'pink':  (255, 182, 193),
+      }
 
-\class{NoiseServerFactory} is a little different, as it's the datatype
+  def noise_color(string):
+      if string in _noise_colors:
+          return _noise_colors[string]
+      else:
+          raise ValueError('unknown noise color: %r' % string)
+
+
+``NoiseServerFactory`` is a little different, as it's the datatype
 function for a section rather than a key.  The parameter isn't a
-string, but a section value object with two attributes, \member{port}
-and \member{color}.
+string, but a section value object with two attributes, ``port``
+and ``color``.
 
 Since the **ZServer.server** abstract type requires that the
 component returned is a factory object, the datatype function can be
@@ -1372,13 +1348,13 @@ implemented at the constructor for the class of the factory object.
 classes based on the configuration values, it makes more sense to use
 a simple function that returns the appropriate implementation.)
 
-A class that implements this datatype might look like this:
+A class that implements this datatype might look like this::
 
-\begin{verbatim}
-from ZServer.datatypes import ServerFactory
-from noise.generator import WhiteNoiseGenerator, PinkNoiseGenerator
 
-class NoiseServerFactory(ServerFactory):
+  from ZServer.datatypes import ServerFactory
+  from noise.generator import WhiteNoiseGenerator, PinkNoiseGenerator
+
+  class NoiseServerFactory(ServerFactory):
 
     def __init__(self, section):
         # host and ip will be initialized by ServerFactory.prepare()
@@ -1393,218 +1369,226 @@ class NoiseServerFactory(ServerFactory):
         else:
             generator = PinkNoiseGenerator()
         return NoiseServer(self.ip, self.port, generator)
-\end{verbatim}
+
 
 You'll need to arrange for the package containing this component to be
-available on Python's \code{sys.path} before the configuration file is
+available on Python's ``sys.path`` before the configuration file is
 loaded; this is mostly easily done by manipulating the
-\envvar{PYTHONPATH} environment variable.
+``PYTHONPATH`` environment variable.
 
 Your configuration file can now include the following to load and use
-your new component:
-
-\begin{verbatim}
-%import noise
-
-<noise-generator>
-  port 1234
-  color white
-</noise-generator>
-\end{verbatim}
+your new component::
 
 
-\section{\module{ZConfig} --- Basic configuration support}
+  %import noise
 
-\declaremodule{}{ZConfig}
-\modulesynopsis{Configuration package.}
+  <noise-generator>
+    port 1234
+    color white
+  </noise-generator>
+
+
+
+ZConfig --- Basic configuration support
+=======================================
+
+.. py:module:: ZConfig
+
 
 The main :mod:`ZConfig` package exports these convenience functions:
 
-\begin{funcdesc}{loadConfig}{schema, url\optional{, overrides}}
+.. py:function:: loadConfig(schema, url, [overrides])
+
   Load and return a configuration from a URL or pathname given by
-  \var{url}.  \var{url} may be a URL, absolute pathname, or relative
+  *url*.  *url* may be a URL, absolute pathname, or relative
   pathname.  Fragment identifiers are not supported.  *schema* is
-  a reference to a schema loaded by \function{loadSchema()} or
-  \function{loadSchemaFile()}.
+  a reference to a schema loaded by :func:`loadSchema` or
+  :func:`loadSchemaFile`.
+
   The return value is a tuple containing the configuration object and
   a composite handler that, when called with a name-to-handler
   mapping, calls all the handlers for the configuration.
 
   The optional *overrides* argument represents information derived
   from command-line arguments.  If given, it must be either a sequence
-  of value specifiers, or \code{None}.  A "value specifier" is a
-  string of the form \code{\var{optionpath}=\var{value}}.  The
-  *optionpath* specifies the ``full path'' to the configuration
+  of value specifiers, or ``None``.  A "value specifier" is a
+  string of the form ``optionpath=value``.  The
+  *optionpath* specifies the "full path" to the configuration
   setting: it can contain a sequence of names, separated by
-  \character{/} characters. Each name before the last names a section
+  ``/`` characters. Each name before the last names a section
   from the configuration file, and the last name corresponds to a key
   within the section identified by the leading section names.  If
   *optionpath* contains only one name, it identifies a key in the
   top-level schema.  *value* is a string that will be treated
   just like a value in the configuration file.
-\end{funcdesc}
 
-\begin{funcdesc}{loadConfigFile}{schema, file\optional{,
-                                 url\optional{, overrides}}}
+
+.. py:function:: loadConfigFile(schema, file, [url, overrides])
+
   Load and return a configuration from an opened file object.  If
   *url* is omitted, one will be computed based on the
-  \member{name} attribute of \var{file}, if it exists.  If no URL can
+  ``name`` attribute of *file*, if it exists.  If no URL can
   be determined, all ``%include`` statements in the
   configuration must use absolute URLs.  *schema* is a reference
-  to a schema loaded by \function{loadSchema()} or
-  \function{loadSchemaFile()}.
+  to a schema loaded by :func:`loadSchema` or
+  :func:`loadSchemaFile`.
+
   The return value is a tuple containing the configuration object and
   a composite handler that, when called with a name-to-handler
   mapping, calls all the handlers for the configuration.
   The *overrides* argument is the same as for the
-  \function{loadConfig()} function.
-\end{funcdesc}
+  :func:`loadConfig` function.
 
-\begin{funcdesc}{loadSchema}{url}
-  Load a schema definition from the URL \var{url}.
+
+.. py:function:: loadSchema(url)
+
+  Load a schema definition from the URL *url*.
   *url* may be a URL, absolute pathname, or relative pathname.
   Fragment identifiers are not supported.
-  The resulting
-  schema object can be passed to \function{loadConfig()} or
-  \function{loadConfigFile()}.  The schema object may be used as many
-  times as needed.
-\end{funcdesc}
 
-\begin{funcdesc}{loadSchemaFile}{file\optional{, url}}
-  Load a schema definition from the open file object \var{file}.  If
-  *url* is given and not \code{None}, it should be the URL of
-  resource represented by \var{file}.  If \var{url} is omitted or
-  \code{None}, a URL may be computed from the \member{name} attribute
-  of \var{file}, if present.  The resulting schema object can
-  be passed to \function{loadConfig()} or \function{loadConfigFile()}.
+  The resulting
+  schema object can be passed to :func:`loadConfig` or
+  :func:`loadConfigFile`.  The schema object may be used as many
+  times as needed.
+
+
+.. py:function:: loadSchemaFile(file, [url])
+
+  Load a schema definition from the open file object *file*.  If
+  *url* is given and not ``None``, it should be the URL of
+  resource represented by *file*.  If *url* is omitted or
+  ``None``, a URL may be computed from the ``name`` attribute
+  of *file*, if present.  The resulting schema object can
+  be passed to :func:`loadConfig` or :func:`loadConfigFile`.
   The schema object may be used as many times as needed.
-\end{funcdesc}
+
 
 The following exceptions are defined by this package:
 
-\begin{excdesc}{ConfigurationError}
+.. py:exception:: ConfigurationError
+
   Base class for exceptions specific to the :mod:`ZConfig` package.
-  All instances provide a \member{message} attribute that describes
-  the specific error, and a \member{url} attribute that gives the URL
-  of the resource the error was located in, or \constant{None}.
-\end{excdesc}
+  All instances provide a ``message`` attribute that describes
+  the specific error, and a ``url`` attribute that gives the URL
+  of the resource the error was located in, or ``None``.
 
-\begin{excdesc}{ConfigurationSyntaxError}
+
+.. py:exception:: ConfigurationSyntaxError
+
   Exception raised when a configuration source does not conform to the
-  allowed syntax.  In addition to the \member{message} and
-  \member{url} attributes, exceptions of this type offer the
-  \member{lineno} attribute, which provides the line number at which
+  allowed syntax.  In addition to the ``message`` and
+  ``url`` attributes, exceptions of this type offer the
+  ``lineno`` attribute, which provides the line number at which
   the error was detected.
-\end{excdesc}
 
-\begin{excdesc}{DataConversionError}
+
+.. py:exception:: DataConversionError
+
   Raised when a data type conversion fails with
-  \exception{ValueError}.  This exception is a subclass of both
-  \exception{ConfigurationError} and \exception{ValueError}.  The
-  \function{str()} of the exception provides the explanation from the
-  original \exception{ValueError}, and the line number and URL of the
+  :exc:`ValueError``.  This exception is a subclass of both
+  :exc:`ConfigurationError`` and :exc:`ValueError`.  The
+  :func:`str` of the exception provides the explanation from the
+  original :exc:`ValueError`, and the line number and URL of the
   value which provoked the error.  The following additional attributes
   are provided:
 
-  \begin{tableii}{l|l}{member}{Attribute}{Value}
-    \lineii{colno}
-           {column number at which the value starts, or \code{None}}
-    \lineii{exception}
-           {the original \exception{ValueError} instance}
-    \lineii{lineno}
-           {line number on which the value starts}
-    \lineii{message}
-           {\function{str()} returned by the original \exception{ValueError}}
-    \lineii{value}
-           {original value passed to the conversion function}
-    \lineii{url}
-           {URL of the resource providing the value text}
-  \end{tableii}
-\end{excdesc}
 
-\begin{excdesc}{SchemaError}
+  =============    =============
+  Attribute        Value
+  =============    =============
+  ``colno``        column number at which the value starts, or ``None``
+  ``exception``    the original :exc:`ValueError` instance
+  ``lineno``       line number on which the value starts
+  ``message``      :func:`str` returned by the original :exc:`ValueError`
+  ``value``        original value passed to the conversion function
+  ``url``          URL of the resource providing the value text
+  =============    =============
+
+
+.. py:exception:: SchemaError
+
   Raised when a schema contains an error.  This exception type
-  provides the attributes \member{url}, \member{lineno}, and
-  \member{colno}, which provide the source URL, the line number, and
+  provides the attributes ``url``, ``lineno``, and
+  ``colno``, which provide the source URL, the line number, and
   the column number at which the error was detected.  These attributes
-  may be \code{None} in some cases.
-\end{excdesc}
+  may be ``None`` in some cases.
 
-\begin{excdesc}{SchemaResourceError}
+
+.. py:exception:: SchemaResourceError
+
   Raised when there's an error locating a resource required by the
-  schema.  This is derived from \exception{SchemaError}.  Instances of
-  this exception class add the attributes \member{filename},
-  \member{package}, and \member{path}, which hold the filename
+  schema.  This is derived from :exc:`SchemaError`.  Instances of
+  this exception class add the attributes ``filename``,
+  ``package``, and ``path``, which hold the filename
   searched for within the package being loaded, the name of the
-  package, and the \code{__path__} attribute of the package itself (or
-  \constant{None} if it isn't a package or could not be imported).
-\end{excdesc}
+  package, and the ``__path__`` attribute of the package itself (or
+  ``None`` if it isn't a package or could not be imported).
 
-\begin{excdesc}{SubstitutionReplacementError}
+
+.. py:exception:: SubstitutionReplacementError
+
   Raised when the source text contains references to names which are
-  not defined in \var{mapping}.  The attributes \member{source} and
-  \member{name} provide the complete source text and the name
+  not defined in *mapping*.  The attributes ``source`` and
+  ``name`` provide the complete source text and the name
   (converted to lower case) for which no replacement is defined.
-\end{excdesc}
 
-\begin{excdesc}{SubstitutionSyntaxError}
+
+.. py:exception:: SubstitutionSyntaxError
+
   Raised when the source text contains syntactical errors.
-\end{excdesc}
 
 
-\subsection{Basic Usage}
 
-The simplest use of \refmodule{ZConfig} is to load a configuration
+Basic Usage
+-----------
+
+The simplest use of :mod:`ZConfig` is to load a configuration
 based on a schema stored in a file.  This example loads a
 configuration file specified on the command line using a schema in the
-same directory as the script:
-
-\begin{verbatim}
-import os
-import sys
-import ZConfig
-
-try:
-    myfile = __file__
-except NameError:
-    myfile = os.path.realpath(sys.argv[0])
-
-mydir = os.path.dirname(myfile)
-
-schema = ZConfig.loadSchema(os.path.join(mydir, 'schema.xml'))
-conf, handler = ZConfig.loadConfig(schema, sys.argv[1])
-\end{verbatim}
-
-If the schema file contained this schema:
-
-\begin{verbatim}
-<schema>
-  <key name='server' required='yes'/>
-  <key name='attempts' datatype='integer' default='5'/>
-</schema>
-\end{verbatim}
-
-and the file specified on the command line contained this text:
-
-\begin{verbatim}
-# sample configuration
-
-server www.example.com
-\end{verbatim}
-
-then the configuration object \code{conf} loaded above would have two
-attributes:
-
-\begin{tableii}{l|l}{member}{Attribute}{Value}
-  \lineii{server}{\code{'www.example.com'}}
-  \lineii{attempts}{\code{5}}
-\end{tableii}
+same directory as the script::
 
 
-\section{\module{ZConfig.datatypes} --- Default data type registry}
+  import os
+  import sys
+  import ZConfig
 
-\declaremodule{}{ZConfig.datatypes}
-\modulesynopsis{Default implementation of a data type registry}
+  try:
+      myfile = __file__
+  except NameError:
+      myfile = os.path.realpath(sys.argv[0])
+
+  mydir = os.path.dirname(myfile)
+
+  schema = ZConfig.loadSchema(os.path.join(mydir, 'schema.xml'))
+  conf, handler = ZConfig.loadConfig(schema, sys.argv[1])
+
+
+If the schema file contained this schema::
+
+
+  <schema>
+    <key name='server' required='yes'/>
+    <key name='attempts' datatype='integer' default='5'/>
+  </schema>
+
+
+and the file specified on the command line contained this text::
+
+
+  # sample configuration
+
+  server www.example.com
+
+then the configuration object ``conf`` loaded above would have two
+attributes, *server* with the value ``'www.example.com'`` and
+*attempts* with the value ``5``.
+
+
+ZConfig.datatypes --- Default data type registry
+================================================
+
+.. py:module:: ZConfig.datatypes
+   :synopsis: Default implementation of a data type registry
 
 The :mod:`ZConfig.datatypes` module provides the implementation of
 the default data type registry and all the standard data types
@@ -1617,289 +1601,322 @@ simple.
 
 A "conversion function" is any callable object that accepts a
 single argument and returns a suitable value, or raises an exception
-if the input value is not acceptable.  \exception{ValueError} is the
+if the input value is not acceptable.  :exc:`ValueError` is the
 preferred exception for disallowed inputs, but any other exception
 will be properly propagated.
 
-\begin{classdesc}{Registry}{\optional{stock}}
-  Implementation of a simple type registry.  If given, \var{stock}
-  should be a mapping which defines the ``built-in'' data types for
-  the registry; if omitted or \code{None}, the standard set of data
-  types is used (see section~\ref{standard-datatypes}, ``Standard
-  :mod:`ZConfig` Datatypes'').
-\end{classdesc}
+.. py:class:: Registry([stock])
 
-\class{Registry} objects have the following methods:
+  Implementation of a simple type registry.  If given, *stock*
+  should be a mapping which defines the "built-in" data types for
+  the registry; if omitted or ``None``, the standard set of data
+  types is used (see :ref:`standard-datatypes`).
 
-\begin{methoddesc}{get}{name}
-  Return the type conversion routine for \var{name}.  If the
+
+
+:class:`Registry` objects have the following methods:
+
+.. py:method:: Registry.get(name)
+
+  Return the type conversion routine for *name*.  If the
   conversion function cannot be found, an (unspecified) exception is
   raised.  If the name is not provided in the stock set of data types
   by this registry and has not otherwise been registered, this method
-  uses the \method{search()} method to load the conversion function.
+  uses the :meth:`search` method to load the conversion function.
   This is the only method the rest of :mod:`ZConfig` requires.
-\end{methoddesc}
 
-\begin{methoddesc}{register}{name, conversion}
+
+.. py:method:: Registry.register(name, conversion)
+
   Register the data type name *name* to use the conversion
-  function \var{conversion}.  If \var{name} is already registered or
-  provided as a stock data type, \exception{ValueError} is raised
+  function *conversion*.  If *name* is already registered or
+  provided as a stock data type, :exc:`ValueError` is raised
   (this includes the case when *name* was found using the
-  \method{search()} method).
-\end{methoddesc}
+  :meth:`search` method).
 
-\begin{methoddesc}{search}{name}
+
+.. py:method:: Registry.search(name)
+
   This is a helper method for the default implementation of the
-  \method{get()} method.  If *name* is a Python dotted-name, this
+  :meth:`get` method.  If *name* is a Python dotted-name, this
   method loads the value for the name by dynamically importing the
   containing module and extracting the value of the name.  The name
   must refer to a usable conversion function.
-\end{methoddesc}
+
 
 
 The following classes are provided to define conversion functions:
 
-\begin{classdesc}{MemoizedConversion}{conversion}
+.. py:class:: MemoizedConversion(conversion)
+
   Simple memoization for potentially expensive conversions.  This
   conversion helper caches each successful conversion for re-use at a
   later time; failed conversions are not cached in any way, since it
   is difficult to raise a meaningful exception providing information
   about the specific failure.
-\end{classdesc}
 
-\begin{classdesc}{RangeCheckedConversion}{conversion\optional{,
-                                          min\optional{, max}}}
+
+.. py:class:: RangeCheckedConversion(conversion,[min [, max]])
+
   Helper that performs range checks on the result of another
   conversion.  Values passed to instances of this conversion are
-  converted using *conversion* and then range checked.  \var{min}
-  and \var{max}, if given and not \code{None}, are the inclusive
-  endpoints of the allowed range.  Values returned by \var{conversion}
-  which lay outside the range described by *min* and \var{max}
-  cause \exception{ValueError} to be raised.
-\end{classdesc}
+  converted using *conversion* and then range checked.  *min*
+  and *max*, if given and not ``None``, are the inclusive
+  endpoints of the allowed range.  Values returned by *conversion*
+  which lay outside the range described by *min* and *max*
+  cause :exc:`ValueError` to be raised.
 
-\begin{classdesc}{RegularExpressionConversion}{regex}
+
+.. py:class:: RegularExpressionConversion(regex)
+
   Conversion that checks that the input matches the regular expression
-  \var{regex}.  If it matches, returns the input, otherwise raises
-  \exception{ValueError}.
-\end{classdesc}
+  *regex*.  If it matches, returns the input, otherwise raises
+  :exc:`ValueError`.
 
 
-\section{\module{ZConfig.loader} --- Resource loading support}
 
-\declaremodule{}{ZConfig.loader}
-\modulesynopsis{Support classes for resource loading}
+
+ZConfig.loader --- Resource loading support
+===========================================
+
+.. py:module:: ZConfig.loader
+  :synopsis: Support classes for resource loading
 
 This module provides some helper classes used by the primary APIs
 exported by the :mod:`ZConfig` package.  These classes may be useful
 for some applications, especially applications that want to use a
 non-default data type registry.
 
-\begin{classdesc}{Resource}{file, url\optional{, fragment}}
+.. py:class:: Resource(file, url, [,fragment])
+
   Object that allows an open file object and a URL to be bound
   together to ease handling.  Instances have the attributes
-  \member{file}, \member{url}, and \member{fragment} which store the
-  constructor arguments.  These objects also have a \method{close()}
-  method which will call \method{close()} on \var{file}, then set the
-  \member{file} attribute to \code{None} and the \member{closed} to
-  \constant{True}.
-\end{classdesc}
+  :attr:`file`, :attr:`url`, and :attr:`fragment` which store the
+  constructor arguments.  These objects also have a :meth:`close`
+  method which will call :meth:`close` on *file*, then set the
+  :attr:`file` attribute to ``None`` and the :attr:`closed` to
+  ``True``.
 
-\begin{classdesc}{BaseLoader}{}
+
+.. py:class:: BaseLoader
+
   Base class for loader objects.  This should not be instantiated
-  directly, as the \method{loadResource()} method must be overridden
+  directly, as the :meth:`loadResource` method must be overridden
   for the instance to be used via the public API.
-\end{classdesc}
 
-\begin{classdesc}{ConfigLoader}{schema}
+
+
+.. py:class:: ConfigLoader(schema)
+
   Loader for configuration files.  Each configuration file must
-  conform to the schema \var{schema}.  The \method{load*()} methods
+  conform to the schema *schema*.  The ``load*()`` methods
   return a tuple consisting of the configuration object and a
   composite handler.
-\end{classdesc}
 
-\begin{classdesc}{SchemaLoader}{\optional{registry}}
+
+
+
+.. py:class::  SchemaLoader(registry=None)
+
   Loader that loads schema instances.  All schema loaded by a
-  \class{SchemaLoader} will use the same data type registry.  If
-  *registry* is provided and not \code{None}, it will be used,
-  otherwise an instance of \class{ZConfig.datatypes.Registry} will be
+  :class:`SchemaLoader` will use the same data type registry.  If
+  *registry* is provided and not ``None``, it will be used,
+  otherwise an instance of :class:`ZConfig.datatypes.Registry` will be
   used.
-\end{classdesc}
 
 
-\subsection{Loader Objects}
+
+Loader Objects
+--------------
 
 Loader objects provide a general public interface, an interface which
 subclasses must implement, and some utility methods.
 
 The following methods provide the public interface:
 
-\begin{methoddesc}[loader]{loadURL}{url}
-  Open and load a resource specified by the URL \var{url}.
-  This method uses the \method{loadResource()} method to perform the
-  actual load, and returns whatever that method returns.
-\end{methoddesc}
+.. py:method:: BaseLoader.loadURL(url)
 
-\begin{methoddesc}[loader]{loadFile}{file\optional{, url}}
-  Load from an open file object, \var{file}.  If given and not
-  \code{None}, *url* should be the URL of the resource represented
-  by \var{file}.  If omitted or \code{None}, the \member{name}
-  attribute of \var{file} is used to compute a \code{file:} URL, if
-  present.
-  This method uses the \method{loadResource()} method to perform the
+  Open and load a resource specified by the URL *url*.
+  This method uses the :meth:`loadResource` method to perform the
   actual load, and returns whatever that method returns.
-\end{methoddesc}
+
+
+.. py:method:: BaseLoader.loadFile(file, url=None)
+
+  Load from an open file object, *file*.  If given and not
+  ``None``, *url* should be the URL of the resource represented
+  by *file*.  If omitted or *None*, the ``name``
+  attribute of *file* is used to compute a ``file:`` URL, if
+  present.
+
+  This method uses the :meth:`loadResource` method to perform the
+  actual load, and returns whatever that method returns.
+
 
 The following method must be overridden by subclasses:
 
-\begin{methoddesc}[loader]{loadResource}{resource}
-  Subclasses of \class{BaseLoader} must implement this method to
+.. py:method:: BaseLoader.loadResource(resource)
+
+  Subclasses of :class:`BaseLoader` must implement this method to
   actually load the resource and return the appropriate
   application-level object.
-\end{methoddesc}
+
+
 
 The following methods can be used as utilities:
 
-\begin{methoddesc}[loader]{isPath}{s}
+.. py:method:: BaseLoader.isPath(s)
+
   Return true if *s* should be considered a filesystem path rather
   than a URL.
-\end{methoddesc}
 
-\begin{methoddesc}[loader]{normalizeURL}{url-or-path}
-  Return a URL for \var{url-or-path}.  If \var{url-or-path} refers to
-  an existing file, the corresponding \code{file:} URL is returned.
+
+.. py:method:: BaseLoader.normalizeURL(url-or-path)
+
+  Return a URL for *url-or-path*.  If *url-or-path* refers to
+  an existing file, the corresponding ``file:`` URL is returned.
   Otherwise *url-or-path* is checked for sanity: if it
-  does not have a schema, \exception{ValueError} is raised, and if it
-  does have a fragment identifier, \exception{ConfigurationError} is
+  does not have a schema, :exc:`ValueError` is raised, and if it
+  does have a fragment identifier, :exc:`ConfigurationError` is
   raised.
-  This uses \method{isPath()} to determine whether \var{url-or-path}
+
+  This uses :meth:`isPath` to determine whether *url-or-path*
   is a URL of a filesystem path.
-\end{methoddesc}
 
-\begin{methoddesc}[loader]{openResource}{url}
-  Returns a resource object that represents the URL \var{url}.  The
-  URL is opened using the \function{urllib2.urlopen()} function, and
+
+.. py:method:: BaseLoader.openResource(url)
+
+  Returns a resource object that represents the URL *url*.  The
+  URL is opened using the :func:`urllib2.urlopen` function, and
   the returned resource object is created using
-  \method{createResource()}.  If the URL cannot be opened,
-  \exception{ConfigurationError} is raised.
-\end{methoddesc}
+  :meth:`createResource`.  If the URL cannot be opened,
+  exc`ConfigurationError` is raised.
 
-\begin{methoddesc}[loader]{createResource}{file, url}
+
+.. py:method:: BaseLoader.createResource(file, url)
+
   Returns a resource object for an open file and URL, given as
-  *file* and \var{url}, respectively.  This may be overridden by a
+  *file* and *url*, respectively.  This may be overridden by a
   subclass if an alternate resource implementation is desired.
-\end{methoddesc}
 
 
-\section{\module{ZConfig.cmdline} --- Command-line override support}
 
-\declaremodule{}{ZConfig.cmdline}
-\modulesynopsis{Support for command-line overrides for configuration
-                settings.}
+ZConfig.cmdline --- Command-line override support
+=================================================
 
-This module exports an extended version of the \class{ConfigLoader}
-class from the \refmodule{ZConfig.loader} module.  This provides
+.. py:module:: ZConfig.cmdline
+   :synopsis: Support for command-line overrides for configuration settings.
+
+This module exports an extended version of the :class:`ZConfig.loader.ConfigLoader`
+class from the :mod:`ZConfig.loader` module.  This provides
 support for overriding specific settings from the configuration file
 from the command line, without requiring the application to provide
 specific options for everything the configuration file can include.
 
-\begin{classdesc}{ExtendedConfigLoader}{schema}
-  Construct a \class{ConfigLoader} subclass that adds support for
+.. py;class:: ExtendedConfigLoader(schema)
+
+  Construct a :class:`ConfigLoader` subclass that adds support for
   command-line overrides.
-\end{classdesc}
+
 
 The following additional method is provided, and is the only way to
 provide position information to associate with command-line
 parameters:
 
-\begin{methoddesc}{addOption}{spec\optional{, pos}}
-  Add a single value to the list of overridden values.  The \var{spec}
+.. py:method:: ExtendedConfigLoader.addOption(spec [, pos])
+
+  Add a single value to the list of overridden values.  The *spec*
   argument is a value specified, as described for the
-  \function{\refmodule{ZConfig}.loadConfig()} function.  A source
-  position for the specifier may be given as \var{pos}.  If \var{pos}
-  is specified and not \code{None}, it must be a sequence of three
+  :func:`ZConfig.loadConfig` function.  A source
+  position for the specifier may be given as *pos*.  If *pos*
+  is specified and not ``None``, it must be a sequence of three
   values.  The first is the URL of the source (or some other
   identifying string).  The second and third are the line number and
   column of the setting.  These position information is only used to
-  construct a \exception{DataConversionError} when data conversion
+  construct a :exc:`DataConversionError` when data conversion
   fails.
-\end{methoddesc}
 
 
-\section{\module{ZConfig.substitution} --- String substitution}
 
-\declaremodule{}{ZConfig.substitution}
-\modulesynopsis{Shell-style string substitution helper.}
+ZConfig.substitution --- String substitution
+============================================
+
+.. py:module:: ZConfig.substitution
+  :synopsis: Shell-style string substitution helper.
 
 This module provides a basic substitution facility similar to that
-found in the Bourne shell (\program{sh} on most \UNIX{} platforms).
+found in the Bourne shell (``sh`` on most UNIX platforms).
 
 The replacements supported by this module include:
 
-\begin{tableiii}{l|l|c}{code}{Source}{Replacement}{Notes}
-  \lineiii{\$\$}{\code{\$}}{(1)}
-  \lineiii{\$\var{name}}{The result of looking up \var{name}}{(2)}
-  \lineiii{\$\{\var{name}\}}{The result of looking up \var{name}}{}
-\end{tableiii}
+=========== ================================ =====
+Source      Replacement                      Notes
+=========== ================================ =====
+``$$``      ``$``                            (1)
+``$name``   The result of looking up *name*  (2)
+``${name}`` The result of looking up *name*
+=========== ================================ =====
 
-\noindent
 Notes:
-\begin{description}
-  \item[(1)]  This is different from the Bourne shell, which uses
-              \code{\textbackslash\$} to generate a \character{\$} in
-              the result text.  This difference avoids having as many
-              special characters in the syntax.
 
-  \item[(2)]  Any character which immediately follows *name* may
-              not be a valid character in a name.
-\end{description}
+1.  This is different from the Bourne shell, which uses
+    ``\$`` to generate a ``$`` in
+    the result text.  This difference avoids having as many
+    special characters in the syntax.
+
+2.  Any character which immediately follows *name* may
+    not be a valid character in a name.
+
 
 In each case, *name* is a non-empty sequence of alphanumeric and
 underscore characters not starting with a digit.  If there is not a
-replacement for \var{name}, the exception
-\exception{SubstitutionReplacementError} is raised.
+replacement for *name*, the exception
+:exc:`~.SubstitutionReplacementError` is raised.
 Note that the lookup is expected to be case-insensitive; this module
 will always use a lower-case version of the name to perform the query.
 
 This module provides these functions:
 
-\begin{funcdesc}{substitute}{s, mapping}
-  Substitute values from *mapping* into \var{s}.  \var{mapping}
-  can be a \class{dict} or any type that supports the \method{get()}
+.. py:function:: substitute(s, mapping)
+
+  Substitute values from *mapping* into *s*.  *mapping*
+  can be a :class:`dict`` or any type that supports the ``get()``
   method of the mapping protocol.  Replacement
   values are copied into the result without further interpretation.
-  Raises \exception{SubstitutionSyntaxError} if there are malformed
-  constructs in \var{s}.
-\end{funcdesc}
-
-\begin{funcdesc}{isname}{s}
-  Returns \constant{True} if *s* is a valid name for a substitution
-  text, otherwise returns \constant{False}.
-\end{funcdesc}
+  Raises :exc:`~.SubstitutionSyntaxError` if there are malformed
+  constructs in *s*.
 
 
-\subsection{Examples}
 
-\begin{verbatim}
->>> from ZConfig.substitution import substitute
->>> d = {'name': 'value',
-...      'top': '$middle',
-...      'middle' : 'bottom'}
->>>
->>> substitute('$name', d)
-'value'
->>> substitute('$top', d)
-'$middle'
-\end{verbatim}
+.. py:function:: isname(s)
+
+  Returns ``True`` if *s* is a valid name for a substitution
+  text, otherwise returns ``False``.
 
 
-\appendix
-\section{Schema Document Type Definition \label{schema-dtd}}
+
+Examples
+--------
+
+
+  >>> from ZConfig.substitution import substitute
+  >>> d = {'name': 'value',
+  ...      'top': '$middle',
+  ...      'middle' : 'bottom'}
+  >>>
+  >>> substitute('$name', d)
+  'value'
+  >>> substitute('$top', d)
+  '$middle'
+
+
+
+.. _schema-dtd:
+
+Schema Document Type Definition
+===============================
 
 The following is the XML Document Type Definition for :mod:`ZConfig`
 schema:
 
 .. literalinclude:: schema.dtd
-
-
-\end{document}
