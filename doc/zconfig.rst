@@ -45,6 +45,11 @@ whether a value can be given only once or repeatedly.
 Configuration Syntax
 ====================
 
+.. Unless we're talking about the schema, nginx syntax is closest
+.. to zconfig (those that use %import won't lex with XML)
+
+.. highlight:: nginx
+
 Like the :mod:`ConfigParser`
 format, this format supports key-value pairs arranged in sections.
 Unlike the :mod:`ConfigParser` format, sections are typed and can be
@@ -101,17 +106,21 @@ A non-empty section starts with a header, contains configuration
 data on subsequent lines, and ends with a terminator.
 
 The header for a non-empty section has this form (square brackets
-denote optional parts)::
+denote optional parts):
 
-  <section-type [name]>
+.. parsed-literal::
+
+  <*section-type* **[name]**>
 
 
 *section-type* and *name* all have the same syntactic
 constraints as key names.
 
-The terminator looks like this::
+The terminator looks like this:
 
-  </section-type>
+.. parsed-literal::
+
+  </*section-type*>
 
 
 The configuration data in a non-empty section consists of a sequence
@@ -132,10 +141,11 @@ of one or more key-value pairs and sections.  For example::
 syntactic correctness.)
 
 The header for empty sections is similar to that of non-empty
-sections, but there is no terminator::
+sections, but there is no terminator:
 
+.. parsed-literal::
 
-  <section-type [name] />
+  <*section-type* **[name]** />
 
 
 
@@ -225,10 +235,11 @@ using simple string substitution.  To use this facility, define named
 bits of replacement text using the ``%define`` directive, and
 reference these texts from values.
 
-The syntax for ``%define`` is::
+The syntax for ``%define`` is:
 
+.. parsed-literal::
 
-  %define name [value]
+  %define *name* [*value*]
 
 
 The value of *name* must be a sequence of letters, digits, and
@@ -247,7 +258,7 @@ a configuration share a single namespace for defined names.
 References to defined names from configuration values use the syntax
 described for the :mod:`ZConfig.substitution` module.
 Configuration values which include a ``$`` as part of the
-actual value will need to use ``\$\$`` to get a single
+actual value will need to use ``$$`` to get a single
 ``$`` in the result.
 
 The values of defined names are processed in the same way as
@@ -274,7 +285,7 @@ If the value can be matched to a standard data type when interpreted
 as a **basic-key**, the standard data type will be used.  If
 that fails, the value must be a **dotted-name** containing at
 least one dot, and a conversion function will be sought using the
-:meth:`search` method of the data type registry used to load the
+:meth:`~.search` method of the data type registry used to load the
 schema.
 
 .. _elements:
@@ -291,8 +302,12 @@ language is helpful.
 
 The following elements are used to describe a schema:
 
-<schema> description?, metadefault?, example?, import*, (sectiontype |
-abstracttype)*, (section | key | multisection | multikey)* </schema>
+.. code-block:: xml
+
+ <schema>
+   description?, metadefault?, example?, import*, (sectiontype |
+   abstracttype)*, (section | key | multisection | multikey)*
+ </schema>
 
 Document element for a :mod:`ZConfig` schema.
 
@@ -340,8 +355,11 @@ Document element for a :mod:`ZConfig` schema.
     overridden by an inner element with a ``prefix``
     attribute.
 
+.. code-block:: xml
 
-<description> PCDATA </description>
+  <description>
+     PCDATA
+  </description>
 
 Descriptive text explaining the purpose the container of the
 ``description``  element.  Most other elements can contain
@@ -360,33 +378,43 @@ context.
     =========      ===============================================
     ``plain``      ``text/plain``; blank lines separate paragraphs
     ``rest``       reStructuredText
-    ``stx``        Classic Strucutred Text
+    ``stx``        Classic Structured Text
     =========      ===============================================
 
-<example> PCDATA </example>
+.. code-block:: xml
+
+  <example>
+     PCDATA
+  </example>
 
 An example value.  This serves only as documentation.
 
-<metadefault> PCDATA </metadefault>
+.. code-block:: xml
+
+  <metadefault>
+    PCDATA
+  </metadefault>
 
 A description of the default value, for human readers.  This may
 include information about how a computed value is determined when
 the schema does not specify a default value.
 
+.. code-block:: xml
 
-<abstracttype>description?</abstracttype>
+  <abstracttype>
+     description?
+  </abstracttype>
 
 Define an abstract section type.
 
 **name** (**basic-key**)
     The name of the abstract section type; required.
 
+.. code-block:: xml
 
-
-<sectiontype>
-description?, example?, (section | key |
-multisection | multikey)*
-</sectiontype>
+  <sectiontype>
+     description?, example?, (section | key | multisection | multikey)*
+  </sectiontype>
 
 Define a concrete section type.
 
@@ -428,7 +456,7 @@ Define a concrete section type.
     types.  If the value is a **dotted-name** that begins
     with a period, the value of ``prefix``  will be pre-pended,
     if set.  The default value is **basic-key** .  If
-    \attribute{keytype} is omitted and \attribute{extends} is used,
+    ``keytype`` is omitted and ``extends`` is used,
     the ``keytype``  from the section type identified by the
     ``extends``  attribute is used.
 
@@ -443,8 +471,11 @@ Define a concrete section type.
     contexts in the ``sectiontype``  element.  If omitted, the
     prefix specified by a containing context is used if specified.
 
+.. code-block:: xml
 
-<import>EMPTY</import>
+  <import>
+    EMPTY
+  </import>
 
 Import a schema component.  Exactly one of the attributes
 ``package`` and ``src`` must be specified.
@@ -473,8 +504,11 @@ Import a schema component.  Exactly one of the attributes
     schema are added to the schema containing the ``import`` ;
     top-level keys and sections are ignored.
 
+.. code-block:: xml
 
-<key>description?, example?, metadefault?, default*</key>
+  <key>
+    description?, example?, metadefault?, default*
+  </key>
 
 A ``key``  element is used to describe a key-value pair which
 may occur at most once in the section type or top-level schema in
@@ -526,8 +560,11 @@ which it is listed.
     reported to the application will be that specified by the
     ``default`` attribute, if given, or ``None``.
 
+.. code-block:: xml
 
-<multikey>description?, example?, metadefault?, default*</multikey>
+  <multikey>
+    description?, example?, metadefault?, default*
+  </multikey>
 
 A ``multikey``  element is used to describe a key-value pair
 which may occur any number of times in the section type or top-level
@@ -573,8 +610,11 @@ schema in which it is listed.
     ``multikey`` .  Each value will be individually converted
     according to the ``datatype``  attribute.
 
+.. code-block:: xml
 
-<default>{PCDATA</default>
+  <default>
+    PCDATA
+  </default>
 
 Each ``default``  element specifies a single default value for
 a ``multikey`` .  This element can be repeated to produce a
@@ -603,7 +643,9 @@ element will be passed to the datatype conversion for the
       section type uses a key type which collapses multiple default
       keys which were not collapsed by the base section type.
 
-      Consider this example schema::
+      Consider this example schema:
+
+      .. code-block:: xml
 
 
         <schema>
@@ -628,9 +670,11 @@ element will be passed to the datatype conversion for the
       converted to ``foo``, which clashes since ``key``  only
       allows one value for each key.
 
+.. code-block:: xml
 
-
-<section>description?</section>
+  <section>
+    description?
+  </section>
 
 A ``section``  element is used to describe a section which may
 occur at most once in the section type or top-level schema in which
@@ -676,9 +720,11 @@ it is listed.
     implements the named abstract type.  If the name identifies a
     concrete type, the section type must match exactly.
 
+.. code-block:: xml
 
-
-<multisection>description?</multisection>
+  <multisection>
+    description?
+  </multisection>
 
 A ``multisection``  element is used to describe a section which
 may occur any number of times in the section type or top-level
@@ -736,10 +782,10 @@ provided by disparate components, and allows them to be knit together
 into concrete schema for applications.  Components cannot add
 additional keys or sections in the application schema.
 
-A schema "component" is allowed to define new abstract and
-section types.
-Components are identified using a dotted-name, similar to a Python
-module name.  For example, one component may be ``zodb.storage``.
+A schema *component* is allowed to define new abstract and section
+types. Components are identified using a dotted-name, similar to a
+Python module name. For example, one component may be
+``zodb.storage``.
 
 Schema components are stored alongside application code since they
 directly reference datatype code.  Schema components are provided by
@@ -756,7 +802,11 @@ components.  Note that schema components do not allow keys and
 sections to be added to the top-level of a schema; they serve only to
 provide type definitions.
 
-<component>description?, (abstracttype | sectiontype)*</component>
+.. code-block:: xml
+
+  <component>
+    description?, (abstracttype | sectiontype)*
+  </component>
 
 The top-level element for schema components.
 
@@ -784,10 +834,11 @@ relative path is searched for using the named package's
 the package's loader if that supports resource access (such as the
 loader for eggs and other ZIP-file based packages).
 
-The basic form of the ``package:`` URL is::
+The basic form of the ``package:`` URL is:
 
+.. parsed-literal::
 
-  package:package.name:relative-path
+  package:*package.name*:*relative-path*
 
 
 The package name must be fully specified; the current prefix, if any,
@@ -809,7 +860,7 @@ There are a number of data types which can be identified using the
 ``datatype``  attribute on ``key`` ,
 ``sectiontype``, and ``schema`` elements.
 Applications may extend the set of datatypes by calling the
-:meth:`register` method of the data type registry being used or by
+:meth:`~.register` method of the data type registry being used or by
 using Python dotted-names to refer to conversion routines defined in
 code.
 
@@ -883,20 +934,20 @@ The following data types are provided by the default type registry.
   port)`` pair.  The address is suitable for binding a socket.
   If only the port is specified, the default host will be returned for
   *hostname*.  The default host is the empty string on all
-  platforms.  If the port is omitted, *None* will be returned for
+  platforms.  If the port is omitted, ``None`` will be returned for
   *port*.
 
 **inet-connection-address**
   An Internet address expressed as a ``(hostname,
   port)`` pair.  The address is suitable for connecting a socket
-  to a server.  If only the port is specified, \code{'127.0.0.1'} will
-  be returned for \var{hostname}.  If the port is omitted, ``None``
+  to a server.  If only the port is specified, ``'127.0.0.1'`` will
+  be returned for *hostname*.  If the port is omitted, ``None``
   will be returned for *port*.
 
 **integer**
-  Convert a value to an integer.  This will be a Python \class{int} if
-  the value is in the range allowed by \class{int}, otherwise a Python
-  \class{long} is returned.
+  Convert a value to an integer.  This will be a Python :class:`int` if
+  the value is in the range allowed by :class`int`, otherwise a Python
+  :class:`long` is returned.
 
 **ipaddr-or-hostname**
   Validates a valid IP address or hostname.  If the first
@@ -908,7 +959,7 @@ The following data types are provided by the default type registry.
 
 **locale**
   Any valid locale specifier accepted by the available
-  \function{locale.setlocale()} function.  Be aware that only the
+  :func:`locale.setlocale` function.  Be aware that only the
   ``'C'`` locale is supported on some platforms.
 
 **null**
@@ -924,10 +975,10 @@ The following data types are provided by the default type registry.
 **socket-address**
   An address for a socket.  The converted value is an object providing
   two attributes.  ``family`` specifies the address family
-  (``AF_INET`` or ``AF_UNIX``), with ``None`` instead
+  (:data:`socket.AF_INET` or :data:`socket.AF_UNIX`), with ``None`` instead
   of ``AF_UNIX`` on platforms that don't support it.  The
   ``address`` attribute will be the address that should be passed
-  to the socket's :meth:`bind` method.  If the family is
+  to the socket's :meth:`~socket.socket.bind` method.  If the family is
   ``AF_UNIX``, the specific address will be a pathname; if the
   family is ``AF_INET``, the second part will be the result of
   the **inet-address** conversion.
@@ -961,6 +1012,7 @@ Standard :mod:`ZConfig` Schema Components
 of the package.  These may be used directly or can server as examples
 for creating new components.
 
+.. highlight:: xml
 
 ZConfig.components.basic
 ------------------------
@@ -992,7 +1044,7 @@ mapping; this can be imported directly using::
   <import package="ZConfig.components.basic" file="mapping.xml"/>
 
 
-This defines a single section type, **{ZConfig.basic.mapping**.
+This defines a single section type, **ZConfig.basic.mapping**.
 When this is used, the section value is a Python dictionary mapping
 keys to string values.
 
@@ -1013,8 +1065,9 @@ for the application::
            />
 
 This allows a configuration to contain a mapping from
-**basic-key** names to string values like this::
+**basic-key** names to string values like this:
 
+.. code-block:: nginx
 
   <my-mapping>
     This that
@@ -1022,8 +1075,9 @@ This allows a configuration to contain a mapping from
   </my-mapping>
 
 The value of the configuration object's ``map`` attribute would
-then be the dictionary::
+then be the dictionary:
 
+.. code-block:: python
 
   {'this': 'that',
    'and': 'the other',
@@ -1035,8 +1089,9 @@ lower case.)
 
 Perhaps a more interesting application of
 **ZConfig.basic.mapping** is using the derived type to override
-the ``keytype`` .  If we have the conversion function::
+the ``keytype`` .  If we have the conversion function:
 
+.. code-block:: python
 
   def email_address(value):
       userid, hostname = value.split("@", 1)
@@ -1133,14 +1188,14 @@ same objects to be returned each time, so it's safe to simply call
 them to retrieve the objects.
 
 The factories for the logger objects, whether the **eventlog**
-or **logger** section type is used, provide a :meth:`reopen`
+or **logger** section type is used, provide a :meth:`~.reopen`
 method which may be called to close any log files and re-open them.
 This is useful when using a UNIX signal to effect log file
 rotation: the signal handler can call this method, and not have to
 worry about what handlers have been registered for the logger.  There
 is also a function in the
 :mod:`ZConfig.components.logger.loghandler` module that re-opens all
-open log files created using ZConfig configuraiton:
+open log files created using ZConfig configuration:
 
 .. py:function:: ZConfig.components.logger.loghandler.reopenFiles()
 
@@ -1165,7 +1220,9 @@ and declare their use::
 
 In the application, the schema and configuration file should be loaded
 normally.  Once the configuration object is available, the logger
-factory should be called to configure Python's :mod:`logging` package::
+factory should be called to configure Python's :mod:`logging` package:
+
+.. code-block:: python
 
 
   import os
@@ -1203,17 +1260,17 @@ An example configuration file for this application may look like this::
   </eventlog>
 
 
-Refer to the :mod:`logging` package documentation for the names
+Refer to the :class:`logging.LogRecord` documentation for the names
 available in the message format strings (the ``format`` key in the
 log handlers).  The date format strings (the ``dateformat`` key in
 the log handlers) are the same as those accepted by the
-\function{time.strftime()} function.
+:func:`time.strftime` function.
 
 Configuring the email logger
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ZConfig has support for Python's STMTPHandler via the <email-notifier>
-handler::
+ZConfig has support for Python's :class:`logging.handlers.SMTPHandler`
+via the ``<email-notifier>`` handler::
 
 
   <eventlog>
@@ -1228,7 +1285,8 @@ handler::
   </eventlog>
 
 
-For details about the SMTPHandler see the Python :mod:`logging` module.
+For details about the :class:`~logging.handlers.SMTPHandler` see the
+Python :mod:`logging` module.
 
 
 Using Components to Extend Schema
@@ -1317,11 +1375,12 @@ this::
 This example uses one of the standard ZConfig datatypes,
 **port-number**, and requires two additional types to be
 provided by the :mod:`noise.server` module:
-``NoiseServerFactory`` and ``{noise_color()``.
+``NoiseServerFactory`` and ``noise_color()``.
 
 The ``noise_color()`` function is a datatype conversion for a
-key, so it accepts a string and returns the value that should be used::
+key, so it accepts a string and returns the value that should be used:
 
+.. code-block:: python
 
   _noise_colors = {
       # color -> r,g,b
@@ -1348,7 +1407,9 @@ implemented at the constructor for the class of the factory object.
 classes based on the configuration values, it makes more sense to use
 a simple function that returns the appropriate implementation.)
 
-A class that implements this datatype might look like this::
+A class that implements this datatype might look like this:
+
+.. code-block:: python
 
 
   from ZServer.datatypes import ServerFactory
@@ -1393,6 +1454,7 @@ ZConfig --- Basic configuration support
 =======================================
 
 .. py:module:: ZConfig
+   :synopsis: Configuration package.
 
 
 The main :mod:`ZConfig` package exports these convenience functions:
@@ -1485,8 +1547,8 @@ The following exceptions are defined by this package:
 .. py:exception:: DataConversionError
 
   Raised when a data type conversion fails with
-  :exc:`ValueError``.  This exception is a subclass of both
-  :exc:`ConfigurationError`` and :exc:`ValueError`.  The
+  :exc:`ValueError`.  This exception is a subclass of both
+  :exc:`ConfigurationError` and :exc:`ValueError`.  The
   :func:`str` of the exception provides the explanation from the
   original :exc:`ValueError`, and the line number and URL of the
   value which provoked the error.  The following additional attributes
@@ -1545,7 +1607,9 @@ Basic Usage
 The simplest use of :mod:`ZConfig` is to load a configuration
 based on a schema stored in a file.  This example loads a
 configuration file specified on the command line using a schema in the
-same directory as the script::
+same directory as the script:
+
+.. code-block:: python
 
 
   import os
@@ -1675,7 +1739,6 @@ The following classes are provided to define conversion functions:
 
 
 
-
 ZConfig.loader --- Resource loading support
 ===========================================
 
@@ -1693,8 +1756,8 @@ non-default data type registry.
   together to ease handling.  Instances have the attributes
   :attr:`file`, :attr:`url`, and :attr:`fragment` which store the
   constructor arguments.  These objects also have a :meth:`close`
-  method which will call :meth:`close` on *file*, then set the
-  :attr:`file` attribute to ``None`` and the :attr:`closed` to
+  method which will call :meth:`~file.close` on *file*, then set the
+  :attr:`file` attribute to ``None`` and the :attr:`closed` attribute to
   ``True``.
 
 
@@ -1777,7 +1840,7 @@ The following methods can be used as utilities:
   an existing file, the corresponding ``file:`` URL is returned.
   Otherwise *url-or-path* is checked for sanity: if it
   does not have a schema, :exc:`ValueError` is raised, and if it
-  does have a fragment identifier, :exc:`ConfigurationError` is
+  does have a fragment identifier, :exc:`~.ConfigurationError` is
   raised.
 
   This uses :meth:`isPath` to determine whether *url-or-path*
@@ -1813,7 +1876,7 @@ support for overriding specific settings from the configuration file
 from the command line, without requiring the application to provide
 specific options for everything the configuration file can include.
 
-.. py;class:: ExtendedConfigLoader(schema)
+.. py:class:: ExtendedConfigLoader(schema)
 
   Construct a :class:`ConfigLoader` subclass that adds support for
   command-line overrides.
@@ -1833,7 +1896,7 @@ parameters:
   values.  The first is the URL of the source (or some other
   identifying string).  The second and third are the line number and
   column of the setting.  These position information is only used to
-  construct a :exc:`DataConversionError` when data conversion
+  construct a :exc:`~.DataConversionError` when data conversion
   fails.
 
 
@@ -1880,7 +1943,7 @@ This module provides these functions:
 .. py:function:: substitute(s, mapping)
 
   Substitute values from *mapping* into *s*.  *mapping*
-  can be a :class:`dict`` or any type that supports the ``get()``
+  can be a :class:`dict` or any type that supports the ``get()``
   method of the mapping protocol.  Replacement
   values are copied into the result without further interpretation.
   Raises :exc:`~.SubstitutionSyntaxError` if there are malformed
@@ -1898,6 +1961,9 @@ This module provides these functions:
 Examples
 --------
 
+.. highlight:: pycon
+
+::
 
   >>> from ZConfig.substitution import substitute
   >>> d = {'name': 'value',
@@ -1920,3 +1986,4 @@ The following is the XML Document Type Definition for :mod:`ZConfig`
 schema:
 
 .. literalinclude:: schema.dtd
+   :language: dtd
