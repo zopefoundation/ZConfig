@@ -11,7 +11,7 @@ Welcome to ZConfig's documentation!
    :caption: Contents:
 
    zconfig
-
+   changelog
 
 
 Indices and tables

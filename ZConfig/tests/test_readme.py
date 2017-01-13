@@ -31,7 +31,7 @@ def tearDown(test):
 
 def test_suite():
     return doctest.DocFileSuite(
-        '../../README.txt',
+        '../../README.rst',
         optionflags=options,
         setUp=setUp, tearDown=tearDown,
         )

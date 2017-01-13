@@ -1252,7 +1252,7 @@ Abstract types are generally used to represent interfaces.  Sometimes
 these are interfaces for factory objects, and sometimes not, but
 there's an interface that the new component needs to implement.  What
 interface is required should be documented in the
-\element{description} element in the \element{abstracttype} element;
+``description`` element in the ``abstracttype`` element;
 this may be by reference to an interface specified in a Python module
 or described in some other bit of documentation.
 
@@ -1273,7 +1273,7 @@ Python class.
 
 The example component we build here will be in the :mod:`noise`
 package, but any package will do.  Components loadable using
-\keyword{\%import} must be contained in the 'component.xml' file;
+``%import`` must be contained in the 'component.xml' file;
 alternate filenames may not be selected by the ``%import``
 construct.
 

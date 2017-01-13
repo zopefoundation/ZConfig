@@ -1,5 +1,7 @@
-README = open("README.txt").read()
-CHANGES = open("CHANGES.txt").read()
+with open("README.rst") as f:
+    README = f.read()
+with open("CHANGES.rst") as f:
+    CHANGES = f.read()
 
 def alltests():
     import os

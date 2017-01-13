@@ -5,6 +5,13 @@ include bootstrap.py
 include buildout.cfg
 
 recursive-include ZConfig *
-recursive-include doc *
+recursive-include doc *.py
+recursive-include doc *.rst
+recursive-include doc *.dtd
+recursive-include doc Makefile
+recursive-include doc make.bat
+
+prune doc/_build
 
 global-exclude *.pyc
+global-exclude *.pyo
