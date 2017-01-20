@@ -9,7 +9,7 @@ Change History for ZConfig
 
 - Run tests with pypy and pypy3 as well.
 
-- Host docs at http://zconfig.readthedocs.io
+- Host docs at https://zconfig.readthedocs.io
 
 
 3.1.0 (2015-10-17)

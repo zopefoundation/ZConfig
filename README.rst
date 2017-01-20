@@ -21,7 +21,7 @@ separate packages.
 ZConfig is licensed under the Zope Public License, version 2.1.  See
 the file LICENSE.txt in the distribution for the full license text.
 
-Reference documentation is available at http://zconfig.readthedocs.io.
+Reference documentation is available at https://zconfig.readthedocs.io.
 
 One common use of ZConfig is to configure the Python logging
 framework. This is extremely simple to do as the following example
