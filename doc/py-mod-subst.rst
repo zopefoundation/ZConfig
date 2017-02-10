@@ -2,8 +2,7 @@
  ZConfig.substitution --- String substitution
 ==============================================
 
-.. py:module:: ZConfig.substitution
-  :synopsis: Shell-style string substitution helper.
+.. automodule:: ZConfig.substitution
 
 This module provides a basic substitution facility similar to that
 found in the Bourne shell (``sh`` on most UNIX platforms).
@@ -38,22 +37,10 @@ will always use a lower-case version of the name to perform the query.
 
 This module provides these functions:
 
-.. py:function:: substitute(s, mapping)
-
-  Substitute values from *mapping* into *s*.  *mapping*
-  can be a :class:`dict` or any type that supports the ``get()``
-  method of the mapping protocol.  Replacement
-  values are copied into the result without further interpretation.
-  Raises :exc:`~.SubstitutionSyntaxError` if there are malformed
-  constructs in *s*.
+.. autofunction:: substitute
 
 
-
-.. py:function:: isname(s)
-
-  Returns ``True`` if *s* is a valid name for a substitution
-  text, otherwise returns ``False``.
-
+.. autofunction:: isname
 
 
 Examples

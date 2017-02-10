@@ -11,14 +11,22 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Substitution support for ZConfig values."""
+"""Shell-style string substitution helper."""
 
 import os
 import ZConfig
 
 
 def substitute(s, mapping):
-    """Interpolate variables from `mapping` into `s`."""
+    """Substitute values from *mapping* into *s*.
+
+    *mapping* can be a :class:`dict` or any type that supports the
+    ``get()`` method of the mapping protocol. Replacement values are
+    copied into the result without further interpretation. Raises
+    :exc:`~.SubstitutionSyntaxError` if there are malformed constructs
+    in *s*.
+    """
+
     if "$" in s:
         result = ''
         rest = s
@@ -41,7 +49,10 @@ def substitute(s, mapping):
 
 
 def isname(s):
-    """Return True iff s is a valid substitution name."""
+    """Returns ``True`` if *s* is a valid name for a substitution
+    text, otherwise returns ``False``.
+    """
+
     m = _name_match(s)
     if m:
         return m.group() == s

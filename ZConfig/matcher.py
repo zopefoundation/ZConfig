@@ -18,7 +18,7 @@ import ZConfig
 from ZConfig.info import ValueInfo
 
 
-class BaseMatcher:
+class BaseMatcher(object):
     def __init__(self, info, type, handlers):
         self.info = info
         self.type = type
@@ -254,7 +254,7 @@ class SchemaMatcher(BaseMatcher):
         return v
 
 
-class SectionValue:
+class SectionValue(object):
     """Generic 'bag-of-values' object for a section.
 
     Derived classes should always call the SectionValue constructor

@@ -11,7 +11,23 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Selection of standard datatypes for ZConfig."""
+"""Default implementation of a data type registry
+
+This module provides the implementation of the default data type
+registry and all the standard data types supported by :mod:`ZConfig`.
+A number of convenience classes are also provided to assist in the
+creation of additional data types.
+
+A "data type registry" is an object that provides conversion functions
+for data types. The interface for a :class:`registry <Registry>` is
+fairly simple.
+
+A "conversion function" is any callable object that accepts a single
+argument and returns a suitable value, or raises an exception if the
+input value is not acceptable. :exc:`ValueError` is the preferred
+exception for disallowed inputs, but any other exception will be
+properly propagated.
+"""
 
 import os
 import re
@@ -26,8 +42,14 @@ else:
     have_unicode = True
 
 
-class MemoizedConversion:
-    """Conversion helper that caches the results of expensive conversions."""
+class MemoizedConversion(object):
+    """Simple memoization for potentially expensive conversions.
+
+    This conversion helper caches each successful conversion for re-use
+    at a later time; failed conversions are not cached in any way, since
+    it is difficult to raise a meaningful exception providing
+    information about the specific failure.
+    """
 
     def __init__(self, conversion):
         self._memo = {}
@@ -42,8 +64,16 @@ class MemoizedConversion:
             return v
 
 
-class RangeCheckedConversion:
-    """Conversion helper that range checks another conversion."""
+class RangeCheckedConversion(object):
+    """Conversion helper that performs range checks on the result of
+    another conversion.
+
+    Values passed to instances of this conversion are converted using
+    *conversion* and then range checked. *min* and *max*, if given and
+    not ``None``, are the inclusive endpoints of the allowed range.
+    Values returned by *conversion* which lay outside the range
+    described by *min* and *max* cause :exc:`ValueError` to be raised.
+    """
 
     def __init__(self, conversion, min=None, max=None):
         self._min = min
@@ -61,7 +91,14 @@ class RangeCheckedConversion:
         return v
 
 
-class RegularExpressionConversion:
+class RegularExpressionConversion(object):
+    """Conversion that checks that the input matches the regular
+    expression *regex*.
+
+    If it matches, returns the input, otherwise raises
+    :exc:`ValueError`.
+    """
+
     reason = "value did not match regular expression"
 
     def __init__(self, regex):
@@ -162,7 +199,7 @@ def string_list(s):
 port_number = RangeCheckedConversion(integer, min=0, max=0xffff).__call__
 
 
-class InetAddress:
+class InetAddress(object):
 
     def __init__(self, default_host):
         self.DEFAULT_HOST = default_host
@@ -177,7 +214,7 @@ class InetAddress:
                 # [IPv6]:port
                 host = host[1:-1]
             elif ':' in host:
-                # Unbracketed IPv6 address; 
+                # Unbracketed IPv6 address;
                 # last part is not the port number
                 host = s
                 p = None
@@ -205,11 +242,11 @@ inet_address = InetAddress(DEFAULT_HOST)
 inet_connection_address = InetAddress("127.0.0.1")
 inet_binding_address = InetAddress("")
 
-class SocketAddress:
+class SocketAddress(object):
     # Parsing results in family and address
     # Family can be AF_UNIX (for addresses that are path names)
     # or AF_INET6 (for inet addresses with colons in them)
-    # or AF_INET (for all other inet addresses); 
+    # or AF_INET (for all other inet addresses);
     # An inet address is a (host, port) pair
     # Notice that no DNS lookup is performed, so if the host
     # is a DNS name, DNS lookup may end up with either IPv4 or
@@ -263,7 +300,7 @@ class IpaddrOrHostname(RegularExpressionConversion):
                 r"|([A-Za-z_][-A-Za-z0-9_.]*[-A-Za-z0-9_])" # or hostname
                 r"|([0-9A-Fa-f:.]+:[0-9A-Fa-f:.]*)" # or superset of IPv6 addresses
                                      # (requiring at least one colon)
-                ) 
+                )
         RegularExpressionConversion.__init__(self, expr)
 
     def __call__(self, value):
@@ -308,7 +345,7 @@ def existing_dirpath(v):
                      'does not exist.' % v)
 
 
-class SuffixMultiplier:
+class SuffixMultiplier(object):
     # d is a dictionary of suffixes to integer multipliers.  If no suffixes
     # match, default is the multiplier.  Matches are case insensitive.  Return
     # values are in the fundamental unit.
@@ -405,7 +442,13 @@ stock_datatypes = {
     }
 
 
-class Registry:
+class Registry(object):
+    """Implementation of a simple type registry.
+
+    If given, *stock* should be a mapping which defines the "built-in"
+    data types for the registry; if omitted or ``None``, the standard
+    set of data types is used (see :ref:`standard-datatypes`).
+    """
     def __init__(self, stock=None):
         if stock is None:
             stock = stock_datatypes.copy()
@@ -414,6 +457,15 @@ class Registry:
         self._basic_key = None
 
     def get(self, name):
+        """Return the type conversion routine for *name*.
+
+        If the conversion function cannot be found, an (unspecified)
+        exception is raised. If the name is not provided in the stock
+        set of data types by this registry and has not otherwise been
+        registered, this method uses the :meth:`search` method to load
+        the conversion function. This is the only method the rest of
+        :mod:`ZConfig` requires.
+        """
         if '.' not in name:
             if self._basic_key is None:
                 self._basic_key = self._other.get("basic-key")
@@ -430,6 +482,13 @@ class Registry:
         return t
 
     def register(self, name, conversion):
+        """Register the data type name *name* to use the conversion function
+        *conversion*.
+
+        If *name* is already registered or provided as a stock data
+        type, :exc:`ValueError` is raised (this includes the case when
+        *name* was found using the :meth:`search` method).
+        """
         if name in self._stock:
             raise ValueError("datatype name conflicts with built-in type: "
                              + repr(name))
@@ -438,6 +497,14 @@ class Registry:
         self._other[name] = conversion
 
     def search(self, name):
+        """This is a helper method for the default implementation of the
+        :meth:`get` method.
+
+        If *name* is a Python dotted-name, this method loads the value
+        for the name by dynamically importing the containing module
+        and extracting the value of the name. The name must refer to a
+        usable conversion function.
+        """
         if not "." in name:
             raise ValueError("unloadable datatype name: " + repr(name))
         components = name.split('.')
