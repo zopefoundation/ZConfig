@@ -12,11 +12,15 @@
 #
 ##############################################################################
 
-"""Support for command-line provision of settings.
+"""Support for command-line overrides for configuration settings.
 
-This module provides an extension of the ConfigLoader class which adds
-a way to add configuration settings from an alternate source.  Each
-setting is described by a string of the form::
+This module exports an extended version of the :class:`~.ConfigLoader`
+class from the :mod:`ZConfig.loader` module. This provides support for
+overriding specific settings from the configuration file from the
+command line, without requiring the application to provide specific
+options for everything the configuration file can include.
+
+Each setting is described by a string of the form::
 
     some/path/to/key=value
 """
@@ -27,11 +31,28 @@ import ZConfig.matcher
 
 
 class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
+    """A :class:`~.ConfigLoader` subclass that adds support for
+    command-line overrides.
+    """
+
     def __init__(self, schema):
         ZConfig.loader.ConfigLoader.__init__(self, schema)
         self.clopts = []   # [(optpath, value, source-position), ...]
 
     def addOption(self, spec, pos=None):
+        """Add a single value to the list of overridden values.
+
+        The *spec* argument is a value specified, as described for the
+        :func:`~.loadConfig` function.
+
+        A source position for the specifier may be given as *pos*. If
+        *pos* is specified and not ``None``, it must be a sequence of
+        three values. The first is the URL of the source (or some
+        other identifying string). The second and third are the line
+        number and column of the setting. These position information
+        is only used to construct a :exc:`~.DataConversionError` when
+        data conversion fails.
+        """
         if pos is None:
             pos = "<command-line option>", -1, -1
         if "=" not in spec:
@@ -66,7 +87,7 @@ class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
             return None
 
 
-class OptionBag:
+class OptionBag(object):
     def __init__(self, schema, sectiontype, options):
         self.sectiontype = sectiontype
         self.schema = schema
@@ -142,7 +163,10 @@ class OptionBag:
         return string.lower()
 
 
-class MatcherMixin:
+class MatcherMixin: # pylint:disable=old-style-class
+    # Can't extend object without getting __init__ errors due to
+    # parameters
+
     def set_optionbag(self, bag):
         self.optionbag = bag
 
