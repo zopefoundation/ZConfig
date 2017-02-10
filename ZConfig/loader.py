@@ -16,7 +16,6 @@
 import os.path
 import re
 import sys
-import urllib
 
 import ZConfig
 import ZConfig.cfgparser
@@ -69,14 +68,32 @@ def _get_config_loader(schema, overrides):
     return loader
 
 
-class BaseLoader:
+class BaseLoader(object):
+    """Base class for loader objects.
+
+    This should not be instantiated
+    directly, as the :meth:`loadResource` method must be overridden
+    for the instance to be used via the public API.
+    """
+
     def __init__(self):
         pass
 
     def createResource(self, file, url):
+        """Returns a resource object for an open file and URL, given as *file*
+        and *url*, respectively.
+
+        This may be overridden by a subclass if an alternate resource
+        implementation is desired.
+        """
         return Resource(file, url)
 
     def loadURL(self, url):
+        """Open and load a resource specified by the URL *url*.
+
+        This method uses the :meth:`loadResource` method to perform the
+        actual load, and returns whatever that method returns.
+        """
         url = self.normalizeURL(url)
         r = self.openResource(url)
         try:
@@ -85,6 +102,16 @@ class BaseLoader:
             r.close()
 
     def loadFile(self, file, url=None):
+        """Load from an open file object, *file*.
+
+        If given and not ``None``, *url* should be the URL of the
+        resource represented by *file*. If omitted or *None*, the
+        ``name`` attribute of *file* is used to compute a ``file:``
+        URL, if present.
+
+        This method uses the :meth:`loadResource` method to perform the
+        actual load, and returns whatever that method returns.
+        """
         if not url:
             url = _url_from_file(file)
         r = self.createResource(file, url)
@@ -96,10 +123,23 @@ class BaseLoader:
     # utilities
 
     def loadResource(self, resource):
+        """Abstract method.
+
+        Subclasses of :class:`BaseLoader` must implement this method to
+        actually load the resource and return the appropriate
+        application-level object.
+        """
         raise NotImplementedError(
             "BaseLoader.loadResource() must be overridden by a subclass")
 
     def openResource(self, url):
+        """Returns a resource object that represents the URL *url*.
+
+        The URL is opened using the :func:`urllib2.urlopen` function,
+        and the returned resource object is created using
+        :meth:`createResource`. If the URL cannot be opened,
+        :exc:`~.ConfigurationError` is raised.
+        """
         # ConfigurationError exceptions raised here should be
         # str()able to generate a message for an end user.
         #
@@ -145,6 +185,17 @@ class BaseLoader:
             url)
 
     def normalizeURL(self, url):
+        """Return a URL for *url*
+
+        If *url* refers to an existing file, the corresponding
+        ``file:`` URL is returned. Otherwise *url* is checked
+        for sanity: if it does not have a schema, :exc:`ValueError` is
+        raised, and if it does have a fragment identifier,
+        :exc:`~.ConfigurationError` is raised.
+
+        This uses :meth:`isPath` to determine whether *url* is
+        a URL of a filesystem path.
+        """
         if self.isPath(url):
             url = "file://" + pathname2url(os.path.abspath(url))
         newurl, fragment = ZConfig.url.urldefrag(url)
@@ -159,7 +210,9 @@ class BaseLoader:
     _pathsep_rx = re.compile(r"[a-zA-Z][-+.a-zA-Z0-9]*:")
 
     def isPath(self, s):
-        """Return True iff 's' should be handled as a filesystem path."""
+        """Return true if *s* should be considered a filesystem path rather
+        than a URL.
+        """
         if ":" in s:
             # XXX This assumes that one-character scheme identifiers
             # are always Windows drive letters; I don't know of any
@@ -215,6 +268,14 @@ def _url_from_file(file):
 
 
 class SchemaLoader(BaseLoader):
+    """ Loader that loads schema instances.
+
+    All schema loaded by a :class:`SchemaLoader` will use the same
+    data type registry. If *registry* is provided and not ``None``, it
+    will be used, otherwise an instance of
+    :class:`ZConfig.datatypes.Registry` will be used.
+    """
+
     def __init__(self, registry=None):
         if registry is None:
             registry = ZConfig.datatypes.Registry()
@@ -258,6 +319,15 @@ class SchemaLoader(BaseLoader):
 
 
 class ConfigLoader(BaseLoader):
+    """Loader for configuration files.
+
+    Each configuration file must
+    conform to the schema *schema*.  The ``load*()`` methods
+    return a tuple consisting of the configuration object and a
+    composite handler.
+    """
+
+
     def __init__(self, schema):
         if schema.isabstract():
             raise ZConfig.SchemaError(
@@ -353,7 +423,19 @@ class CompositeHandler:
         return len(self._handlers)
 
 
-class Resource:
+class Resource(object):
+    """Object that allows an open file object and a URL to be bound
+    together to ease handling.
+
+    Instances have the attributes :attr:`file` and :attr:`url`, which
+    store the constructor arguments. These objects also have a
+    :meth:`close` method which will call :meth:`~file.close` on
+    *file*, then set the :attr:`file` attribute to ``None`` and the
+    :attr:`closed` attribute to ``True``.
+
+    All other attributes are delegated to *file*.
+    """
+
     def __init__(self, file, url):
         self.file = file
         self.url = url
