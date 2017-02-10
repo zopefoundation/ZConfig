@@ -12,12 +12,3 @@
 #
 ##############################################################################
 """ZConfig schema component package for logging configuration."""
-
-# Make sure we can't import this if "logging" isn't available; we
-# don't want partial imports to appear to succeed.
-
-try:
-    import logging
-except ImportError:
-    import sys
-    del sys.modules[__name__]
