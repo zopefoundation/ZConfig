@@ -30,8 +30,6 @@ separate configuration support from configuration loading even with
 configuration data being defined and consumed by a wide range of
 separate packages.
 
-
-$Id: __init__.py,v 1.18 2004/04/15 20:33:32 fdrake Exp $
 """
 __docformat__ = "reStructuredText"
 
@@ -49,7 +47,13 @@ except ImportError:
 
 
 class ConfigurationError(Exception):
-    """Base class for ZConfig exceptions."""
+    """Base class for exceptions specific to the :mod:`ZConfig` package.
+
+    All instances provide a ``message`` attribute that describes
+    the specific error, and a ``url`` attribute that gives the URL
+    of the resource the error was located in, or ``None``.
+    """
+
 
     # The 'message' attribute was deprecated for BaseException with
     # Python 2.6; here we create descriptor properties to continue using it
@@ -99,14 +103,27 @@ class _ParseError(ConfigurationError):
 
 
 class SchemaError(_ParseError):
-    """Raised when there's an error in the schema itself."""
+    """Raised when a schema contains an error.
+
+    This exception type provides the attributes ``url``, ``lineno``,
+    and ``colno``, which provide the source URL, the line number, and
+    the column number at which the error was detected. These attributes
+    may be ``None`` in some cases.
+    """
 
     def __init__(self, msg, url=None, lineno=None, colno=None):
         _ParseError.__init__(self, msg, url, lineno, colno)
 
 
 class SchemaResourceError(SchemaError):
-    """Raised when there's an error locating a resource required by the schema.
+    """Raised when there's an error locating a resource required by the
+    schema.
+
+    Instances of this exception class add the attributes ``filename``,
+    ``package``, and ``path``, which hold the filename searched for
+    within the package being loaded, the name of the package, and the
+    ``__path__`` attribute of the package itself (or ``None`` if it
+    isn't a package or could not be imported).
     """
 
     def __init__(self, msg, url=None, lineno=None, colno=None,
@@ -130,11 +147,37 @@ class SchemaResourceError(SchemaError):
 
 
 class ConfigurationSyntaxError(_ParseError):
-    """Raised when there's a syntax error in a configuration file."""
+    """Exception raised when a configuration source does not conform to
+    the allowed syntax.
+
+    In addition to the ``message`` and ``url`` attributes, exceptions
+    of this type offer the ``lineno`` attribute, which provides the
+    line number at which the error was detected.
+    """
 
 
 class DataConversionError(ConfigurationError, ValueError):
-    """Raised when a data type conversion function raises ValueError."""
+    """Raised when a data type conversion fails with :exc:`ValueError`.
+
+    This exception is a subclass of both :exc:`ConfigurationError` and
+    :exc:`ValueError`. The :func:`str` of the exception provides the
+    explanation from the original :exc:`ValueError`, and the line
+    number and URL of the value which provoked the error. The
+    following additional attributes are provided:
+
+    ``colno``
+       column number at which the value starts, or ``None``
+    ``exception``
+       the original :exc:`ValueError` instance
+    ``lineno``
+       line number on which the value starts
+    ``message``
+      :func:`str` returned by the original :exc:`ValueError`
+    ``value``
+        original value passed to the conversion function
+    ``url``
+        URL of the resource providing the value text
+    """
 
     def __init__(self, exception, value, position):
         ConfigurationError.__init__(self, str(exception))
@@ -158,7 +201,13 @@ class SubstitutionSyntaxError(ConfigurationError):
 
 
 class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
-    """Raised when no replacement is available for a reference."""
+    """Raised when the source text contains references to names which are
+    not defined in *mapping*.
+
+    The attributes ``source`` and ``name`` provide the complete source
+    text and the name (converted to lower case) for which no replacement
+    is defined.
+    """
 
     def __init__(self, source, name, url=None, lineno=None):
         self.source = source

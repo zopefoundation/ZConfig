@@ -45,15 +45,82 @@ except ImportError:
 
 
 def loadSchema(url):
+    """Load a schema definition from the URL *url*.
+
+    *url* may be a URL, absolute pathname, or relative pathname.
+    Fragment identifiers are not supported.
+
+    The resulting schema object can be passed to :func:`loadConfig` or
+    :func:`loadConfigFile`. The schema object may be used as many
+    times as needed.
+
+    .. seealso:: :class:`~.SchemaLoader`, :meth:`.BaseLoader.loadURL`
+    """
     return SchemaLoader().loadURL(url)
 
+
 def loadSchemaFile(file, url=None):
+    """Load a schema definition from the open file object *file*.
+
+    If *url* is given and not ``None``, it should be the URL of
+    resource represented by *file*. If *url* is omitted or ``None``, a
+    URL may be computed from the ``name`` attribute of *file*, if
+    present. The resulting schema object can be passed to
+    :func:`loadConfig` or :func:`loadConfigFile`. The schema object
+    may be used as many times as needed.
+
+    .. seealso:: :class:`~.SchemaLoader`, :meth:`.BaseLoader.loadFile`
+    """
     return SchemaLoader().loadFile(file, url)
 
+
 def loadConfig(schema, url, overrides=()):
+    """Load and return a configuration from a URL or pathname given by
+    *url*.
+
+    *url* may be a URL, absolute pathname, or relative pathname.
+    Fragment identifiers are not supported. *schema* is a reference to a
+    schema loaded by :func:`loadSchema` or :func:`loadSchemaFile`.
+
+    The return value is a tuple containing the configuration object and
+    a composite handler that, when called with a name-to-handler
+    mapping, calls all the handlers for the configuration.
+
+    The optional *overrides* argument represents information derived
+    from command-line arguments. If given, it must be either a
+    sequence of value specifiers, or ``None``. A "value specifier" is
+    a string of the form ``optionpath=value``, for example,
+    ``some/path/to/key=value``.
+
+    .. seealso::
+       :meth:`.ExtendedConfigLoader.addOption`
+            For information on the format of value specifiers.
+       :class:`~.ConfigLoader`
+            For information about loading configs.
+       :meth:`.BaseLoader.loadURL`
+            For information about the format of *url*
+    """
     return _get_config_loader(schema, overrides).loadURL(url)
 
+
 def loadConfigFile(schema, file, url=None, overrides=()):
+    """Load and return a configuration from an opened file object.
+
+    If *url* is omitted, one will be computed based on the ``name``
+    attribute of *file*, if it exists. If no URL can be determined,
+    all ``%include`` statements in the configuration must use absolute
+    URLs. *schema* is a reference to a schema loaded by
+    :func:`loadSchema` or :func:`loadSchemaFile`.
+
+    The return value is a tuple containing the configuration object
+    and a composite handler that, when called with a name-to-handler
+    mapping, calls all the handlers for the configuration. The
+    *overrides* argument is the same as for the :func:`loadConfig`
+    function.
+
+    .. seealso:: :class:`~.ConfigLoader`, :meth:`.BaseLoader.loadFile`,
+       :meth:`.ExtendedConfigLoader.addOption`
+    """
     return _get_config_loader(schema, overrides).loadFile(file, url)
 
 

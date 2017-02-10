@@ -20,9 +20,8 @@ overriding specific settings from the configuration file from the
 command line, without requiring the application to provide specific
 options for everything the configuration file can include.
 
-Each setting is described by a string of the form::
-
-    some/path/to/key=value
+Each setting is given by a value specifier string, as described by
+:meth:`ExtendedConfigLoader.addOption`.
 """
 
 import ZConfig
@@ -42,8 +41,20 @@ class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
     def addOption(self, spec, pos=None):
         """Add a single value to the list of overridden values.
 
-        The *spec* argument is a value specified, as described for the
-        :func:`~.loadConfig` function.
+        The *spec* argument is a value specifier string of the form
+        ``optionpath=value``. For example::
+
+            some/path/to/key=value
+
+        The *optionpath* specifies the "full path" to the
+        configuration setting: it can contain a sequence of names,
+        separated by ``/`` characters. Each name before the last names
+        a section from the configuration file, and the last name
+        corresponds to a key within the section identified by the
+        leading section names. If *optionpath* contains only one name,
+        it identifies a key in the top-level schema. *value* is a
+        string that will be treated just like a value in the
+        configuration file.
 
         A source position for the specifier may be given as *pos*. If
         *pos* is specified and not ``None``, it must be a sequence of
