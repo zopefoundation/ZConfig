@@ -174,9 +174,7 @@ class OptionBag(object):
         return string.lower()
 
 
-class MatcherMixin: # pylint:disable=old-style-class
-    # Can't extend object without getting __init__ errors due to
-    # parameters
+class MatcherMixin(object):
 
     def set_optionbag(self, bag):
         self.optionbag = bag
