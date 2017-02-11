@@ -20,8 +20,7 @@ from abc import abstractmethod
 
 from ZConfig._compat import AbstractBaseClass
 
-class UnboundedThing:
-    __metaclass__ = type # XXX Python 3
+class UnboundedThing(object):
     __slots__ = ()
 
     def __lt__(self, other):
@@ -48,8 +47,7 @@ class UnboundedThing:
 Unbounded = UnboundedThing()
 
 
-class ValueInfo:
-    __metaclass__ = type # XXX Python 3
+class ValueInfo(object):
     __slots__ = 'value', 'position'
 
     def __init__(self, value, position):

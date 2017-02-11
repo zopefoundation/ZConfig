@@ -22,16 +22,11 @@ from ZConfig.loader import ConfigLoader
 from ZConfig.url import urljoin
 
 from ZConfig._compat import NStringIO as StringIO
-
-try:
-    from urllib import pathname2url
-except ImportError:
-    # Python 3 support.
-    from urllib.request import pathname2url
+from ZConfig._compat import pathname2url
 
 try:
     __file__
-except NameError:
+except NameError: # pragma: no cover
     import sys
     __file__ = sys.argv[0]
 

@@ -30,7 +30,7 @@ from ZConfig.tests.support import CONFIG_BASE, TestHelper
 
 try:
     myfile = __file__
-except NameError:
+except NameError: # pragma: no cover
     myfile = sys.argv[0]
 
 myfile = os.path.abspath(myfile)
@@ -84,16 +84,15 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         sio = StringIO("<schema>"
                        "  <import package='ZConfig.tests.test_loader'/>"
                        "</schema>")
-        try:
+        with self.assertRaises(ZConfig.SchemaResourceError) as ctx:
             ZConfig.loadSchemaFile(sio)
-        except ZConfig.SchemaResourceError as e:
-            self.assertEqual(e.filename, "component.xml")
-            self.assertEqual(e.package, "ZConfig.tests.test_loader")
-            self.assertTrue(e.path is None)
-            # make sure the str() doesn't raise an unexpected exception
-            str(e)
-        else:
-            self.fail("expected SchemaResourceError")
+
+        e = ctx.exception
+        self.assertEqual(e.filename, "component.xml")
+        self.assertEqual(e.package, "ZConfig.tests.test_loader")
+        self.assertTrue(e.path is None)
+        # make sure the str() doesn't raise an unexpected exception
+        str(e)
 
     def test_import_from_package(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -127,16 +126,14 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "  <import package='ZConfig.tests.library.widget'"
                        "          file='notthere.xml' />"
                        "</schema>")
-        try:
+        with self.assertRaises(ZConfig.SchemaResourceError) as ctx:
             loader.loadFile(sio)
-        except ZConfig.SchemaResourceError as e:
-            self.assertEqual(e.filename, "notthere.xml")
-            self.assertEqual(e.package, "ZConfig.tests.library.widget")
-            self.assertTrue(e.path)
-            # make sure the str() doesn't raise an unexpected exception
-            str(e)
-        else:
-            self.fail("expected SchemaResourceError")
+        e = ctx.exception
+        self.assertEqual(e.filename, "notthere.xml")
+        self.assertEqual(e.package, "ZConfig.tests.library.widget")
+        self.assertTrue(e.path)
+        # make sure the str() doesn't raise an unexpected exception
+        str(e)
 
     def test_import_from_package_with_directory_file(self):
         loader = ZConfig.loader.SchemaLoader()

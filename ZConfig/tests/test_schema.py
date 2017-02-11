@@ -731,12 +731,10 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         self.assertEqual(e.lineno, 3)
 
     def get_data_conversion_error(self, schema, src, url):
-        try:
+        with self.assertRaises(ZConfig.DataConversionError) as e:
             self.load_config_text(schema, src, url=url)
-        except ZConfig.DataConversionError as e:
-            return e
-        else:
-            self.fail("expected ZConfig.DataConversionError")
+
+        return e.exception
 
     def test_numeric_section_name(self):
         schema = self.load_schema_text("""\
@@ -1077,10 +1075,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
 
     def test_srepr(self):
         from ZConfig.schema import _srepr
-        try:
-            FOO = unicode('foo')
-        except NameError:
-            FOO = 'foo'
+        FOO = u'foo'
         self.assertEqual(_srepr('foo'), "'foo'")
         self.assertEqual(_srepr(FOO), "'foo'")
 

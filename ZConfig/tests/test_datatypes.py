@@ -25,7 +25,7 @@ import ZConfig.datatypes
 
 try:
     here = __file__
-except NameError:
+except NameError: # pragma: no cover
     here = sys.argv[0]
 
 here = os.path.abspath(here)
@@ -93,14 +93,13 @@ class DatatypeTestCase(unittest.TestCase):
 
         # These are not portable representations; make sure they are
         # disallowed everywhere for consistency.
-        raises(ValueError, convert, "inf")
-        raises(ValueError, convert, "-inf")
-        raises(ValueError, convert, "nan")
+        raises(ValueError, convert, b"inf")
+        raises(ValueError, convert, b"-inf")
+        raises(ValueError, convert, b"nan")
 
-        if have_unicode:
-            raises(ValueError, convert, unicode("inf"))
-            raises(ValueError, convert, unicode("-inf"))
-            raises(ValueError, convert, unicode("nan"))
+        raises(ValueError, convert, u"inf")
+        raises(ValueError, convert, u"-inf")
+        raises(ValueError, convert, u"nan")
 
     def test_datatype_identifier(self):
         convert = self.types.get("identifier")
@@ -277,7 +276,7 @@ class DatatypeTestCase(unittest.TestCase):
         if hasattr(socket, "AF_UNIX"):
             self.assertEqual(a1.family, socket.AF_UNIX)
             self.assertEqual(a2.family, socket.AF_UNIX)
-        else:
+        else: # pragma: no cover
             self.assertTrue(a1.family is None)
             self.assertTrue(a2.family is None)
 

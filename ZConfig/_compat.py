@@ -40,10 +40,27 @@ except ImportError:
 
 urllib2 = urllib2
 
+try:
+    from urllib import pathname2url
+except ImportError:
+    # Python 3 support.
+    from urllib.request import pathname2url
+
+pathname2url = pathname2url
+
+try:
+    import urlparse as urlparse
+except ImportError:
+    # Python 3 support
+    import urllib.parse as urlparse
+
+urlparse = urlparse
+
 if PY3: # pragma: no cover
     import builtins
     exec_ = getattr(builtins, "exec")
-
+    text_type = str
+    binary_type = bytes
 
     def reraise(tp, value, tb=None): #pragma NO COVER
         if value.__traceback__ is not tb:
@@ -51,6 +68,9 @@ if PY3: # pragma: no cover
         raise value
 
 else: # pragma: no cover
+    text_type = unicode
+    binary_type = bytes
+
     def exec_(code, globs=None, locs=None): #pragma NO COVER
         """Execute code in a namespace."""
         if globs is None:

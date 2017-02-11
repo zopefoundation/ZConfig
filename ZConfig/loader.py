@@ -31,12 +31,7 @@ import ZConfig.url
 from ZConfig._compat import reraise
 from ZConfig._compat import urllib2
 from ZConfig._compat import AbstractBaseClass
-
-try:
-    from urllib import pathname2url
-except ImportError:
-    # Python 3 support
-    from urllib.request import pathname2url
+from ZConfig._compat import pathname2url
 
 
 def loadSchema(url):

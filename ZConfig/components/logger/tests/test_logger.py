@@ -72,7 +72,7 @@ class LoggingTestHelper:
         for h in self._old_logger.handlers:
             self._old_logger.removeHandler(h)
         for h in self._old_handlers:
-            self._old_logger.addHandler(h)
+            self._old_logger.addHandler(h) # pragma: no cover
         self._old_logger.setLevel(self._old_level)
 
         while self._created:
@@ -205,24 +205,6 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                                           "    path %s\n"
                                           "    level debug\n"
                                           "    when D\n"
-                                          "    old-files 11\n"
-                                          "  </logfile>\n"
-                                          "</eventlog>" % fn)
-        logfile = logger.handlers[0]
-        self.assertEqual(logfile.level, logging.DEBUG)
-        self.assertEqual(logfile.backupCount, 11)
-        self.assertEqual(logfile.interval, 86400)
-        self.assertTrue(isinstance(logfile, loghandler.TimedRotatingFileHandler))
-        logger.removeHandler(logfile)
-        logfile.close()
-
-    def test_with_timed_rotating_logfile(self):
-        fn = self.mktemp()
-        logger = self.check_simple_logger("<eventlog>\n"
-                                          "  <logfile>\n"
-                                          "    path %s\n"
-                                          "    level debug\n"
-                                          "    when D\n"
                                           "    interval 3\n"
                                           "    old-files 11\n"
                                           "  </logfile>\n"
@@ -311,7 +293,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         syslog.close() # avoid ResourceWarning
         try:
             syslog.socket.close() # ResourceWarning under 3.2
-        except socket.SocketError:
+        except socket.SocketError: # pragma: no cover
             pass
 
     def test_with_http_logger_localhost(self):
@@ -362,30 +344,24 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(handler.level, logging.FATAL)
 
     def test_with_email_notifier_with_credentials(self):
-        try:
-            logger = self.check_simple_logger("<eventlog>\n"
-                                              "  <email-notifier>\n"
-                                              "    to sysadmin@example.com\n"
-                                              "    from zlog-user@example.com\n"
-                                              "    level fatal\n"
-                                              "    smtp-username john\n"
-                                              "    smtp-password johnpw\n"
-                                              "  </email-notifier>\n"
-                                              "</eventlog>")
-        except ValueError:
-            if sys.version_info >= (2, 6):
-                # For python 2.6 no ValueError must be raised.
-                raise
-        else:
-            # This path must only be reached with python >=2.6
-            self.assertTrue(sys.version_info >= (2, 6))
-            handler = logger.handlers[0]
-            self.assertEqual(handler.toaddrs, ["sysadmin@example.com"])
-            self.assertEqual(handler.fromaddr, "zlog-user@example.com")
-            self.assertEqual(handler.fromaddr, "zlog-user@example.com")
-            self.assertEqual(handler.level, logging.FATAL)
-            self.assertEqual(handler.username, 'john')
-            self.assertEqual(handler.password, 'johnpw')
+        logger = self.check_simple_logger("<eventlog>\n"
+                                          "  <email-notifier>\n"
+                                          "    to sysadmin@example.com\n"
+                                          "    from zlog-user@example.com\n"
+                                          "    level fatal\n"
+                                          "    smtp-username john\n"
+                                          "    smtp-password johnpw\n"
+                                          "  </email-notifier>\n"
+                                          "</eventlog>")
+
+        self.assertTrue(sys.version_info >= (2, 6))
+        handler = logger.handlers[0]
+        self.assertEqual(handler.toaddrs, ["sysadmin@example.com"])
+        self.assertEqual(handler.fromaddr, "zlog-user@example.com")
+        self.assertEqual(handler.fromaddr, "zlog-user@example.com")
+        self.assertEqual(handler.level, logging.FATAL)
+        self.assertEqual(handler.username, 'john')
+        self.assertEqual(handler.password, 'johnpw')
 
     def test_with_email_notifier_with_invalid_credentials(self):
         self.assertRaises(ValueError,
@@ -469,17 +445,7 @@ class TestReopeningRotatingLogfiles(LoggingTestHelper, unittest.TestCase):
     def test_filehandler_reopen(self):
 
         def mkrecord(msg):
-            #
-            # Python 2.5.0 added an additional required argument to the
-            # LogRecord constructor, making it incompatible with prior
-            # versions.  Python 2.5.1 corrected the bug by making the
-            # additional argument optional.  We deal with 2.5.0 by adding
-            # the extra arg in only that case, using the default value
-            # from Python 2.5.1.
-            #
             args = ["foo.bar", logging.ERROR, __file__, 42, msg, (), ()]
-            if sys.version_info[:3] == (2, 5, 0):
-                args.append(None)
             return logging.LogRecord(*args)
 
         # This goes through the reopening operation *twice* to make

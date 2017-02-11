@@ -26,7 +26,7 @@ def loadConfigFile(file, url=None):
     return c.top
 
 
-class Resource:
+class Resource(object):
 
     def __init__(self, file, url=''):
         self.file, self.url = file, url

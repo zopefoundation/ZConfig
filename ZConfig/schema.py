@@ -22,10 +22,8 @@ import ZConfig
 from ZConfig import info
 from ZConfig import url
 
-try:
-    BLANK = unicode('')
-except NameError:
-    BLANK = ''
+BLANK = u''
+
 
 def parseResource(resource, loader):
     parser = SchemaParser(loader, resource.url)
