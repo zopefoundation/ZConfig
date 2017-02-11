@@ -16,13 +16,9 @@
 from abc import abstractmethod
 import sys
 
-from ZConfig.components.logger.factory import Factory
+from ZConfig._compat import urlparse
 
-try:
-    import urlparse
-except ImportError:
-    # Python 3 support.
-    import urllib.parse as urlparse
+from ZConfig.components.logger.factory import Factory
 
 _log_format_variables = {
     'name': '',
@@ -94,7 +90,7 @@ class HandlerFactory(Factory):
         logger.setLevel(self.section.level)
         return logger
 
-    def getLevel(self):
+    def getLevel(self): # pragma: no cover Is this used?
         return self.section.level
 
 class FileHandlerFactory(HandlerFactory):
@@ -218,10 +214,6 @@ class SMTPHandlerFactory(HandlerFactory):
             mailhost = host, port
         kwargs = {}
         if self.section.smtp_username and self.section.smtp_password:
-            # Since credentials were only added in py2.6 we use a kwarg to not
-            # break compatibility with older py
-            if sys.version_info < (2, 6):
-                raise ValueError('SMTP auth requires at least Python 2.6.')
             kwargs['credentials'] = (self.section.smtp_username,
                                      self.section.smtp_password)
         elif (self.section.smtp_username or self.section.smtp_password):

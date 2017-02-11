@@ -221,15 +221,59 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         fn = self.mktemp()
         self.assertRaises(
             ValueError,
-            self.check_simple_logger, "<eventlog>\n"
-                                          "  <logfile>\n"
-                                          "    path %s\n"
-                                          "    level debug\n"
-                                          "    max-size 5mb\n"
-                                          "    when D\n"
-                                          "    old-files 10\n"
-                                          "  </logfile>\n"
-                                          "</eventlog>" % fn)
+            self.check_simple_logger,
+            "<eventlog>\n"
+            "  <logfile>\n"
+            "    path %s\n"
+            "    level debug\n"
+            "    max-size 5mb\n"
+            "    when D\n"
+            "    old-files 10\n"
+            "  </logfile>\n"
+            "</eventlog>" % fn)
+
+        # Mising old-files
+        self.assertRaisesRegexp(
+            ValueError,
+            "old-files must be set",
+            self.check_simple_logger,
+            "<eventlog>\n"
+            "  <logfile>\n"
+            "    path %s\n"
+            "    level debug\n"
+            "    max-size 5mb\n"
+            "    when D\n"
+            "  </logfile>\n"
+            "</eventlog>" % fn)
+
+        self.assertRaisesRegexp(
+            ValueError,
+            "max-bytes or when must be set",
+            self.check_simple_logger,
+            "<eventlog>\n"
+            "  <logfile>\n"
+            "    path %s\n"
+            "    level debug\n"
+            "    interval 1\n"
+            "    old-files 10\n"
+            "  </logfile>\n"
+            "</eventlog>" % fn)
+
+
+    def test_with_rotating_logfile_and_STD_should_fail(self):
+        for path in ('STDERR', 'STDOUT'):
+            for param in ('old-files 10', 'max-size 5mb'):
+                self.assertRaises(
+                    ValueError,
+                    self.check_simple_logger,
+                    "<eventlog>\n"
+                    "  <logfile>\n"
+                    "    path %s\n"
+                    "    level debug\n"
+                    "    when D\n"
+                    "    %s\n"
+                    "  </logfile>\n"
+                    "</eventlog>" % (path, param))
 
 
     def check_standard_stream(self, name):
@@ -349,6 +393,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                                           "    to sysadmin@example.com\n"
                                           "    from zlog-user@example.com\n"
                                           "    level fatal\n"
+                                          "    smtp-server foo:487\n"
                                           "    smtp-username john\n"
                                           "    smtp-password johnpw\n"
                                           "  </email-notifier>\n"
@@ -362,6 +407,8 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(handler.level, logging.FATAL)
         self.assertEqual(handler.username, 'john')
         self.assertEqual(handler.password, 'johnpw')
+        self.assertEqual(handler.mailhost, 'foo')
+        self.assertEqual(handler.mailport, 487)
 
     def test_with_email_notifier_with_invalid_credentials(self):
         self.assertRaises(ValueError,
@@ -623,6 +670,43 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
 
         self.assertEqual(calls, ["acquire", "release"])
 
+class TestFunctions(unittest.TestCase):
+
+    def test_log_format_bad(self):
+        self.assertRaisesRegexp(ValueError,
+                                "Invalid log format string",
+                                handlers.log_format,
+                                "%{no-such-key}s")
+
+    def test_resolve_deep(self):
+        old_mod = None
+        if hasattr(logging, 'handlers'):
+            # This module is nested so it hits our coverage target,
+            # and it doesn't alter any state
+            # on import, so a "reimport" is fine
+            del logging.handlers
+            old_mod = sys.modules['logging.handlers']
+            del sys.modules['logging.handlers']
+        try:
+            handlers.resolve('logging.handlers')
+        finally:
+            if old_mod is not None:
+                logging.handlers = old_mod
+                sys.modules['logging.handlers'] = old_mod
+
+    def test_http_handler_url(self):
+        self.assertRaisesRegexp(ValueError,
+                                'must be an http',
+                                handlers.http_handler_url, 'file://foo/baz')
+        self.assertRaisesRegexp(ValueError,
+                                'must specify a location',
+                                handlers.http_handler_url, 'http://')
+        self.assertRaisesRegexp(ValueError,
+                                'must specify a path',
+                                handlers.http_handler_url, 'http://server')
+
+        v = handlers.http_handler_url("http://server/path;param?q=v#fragment")
+        self.assertEqual(v, ('server', '/path;param?q=v#fragment'))
 
 def test_logger_convenience_function_and_ommiting_name_to_get_root_logger():
     """
@@ -680,6 +764,7 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite())
     suite.addTest(unittest.makeSuite(TestConfig))
+    suite.addTest(unittest.makeSuite(TestFunctions))
     if os.name != "nt":
         # Though log files can be closed and re-opened on Windows, these
         # tests expect to be able to move the underlying files out from
