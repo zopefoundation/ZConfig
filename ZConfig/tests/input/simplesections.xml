@@ -10,9 +10,14 @@
     <key name="var" />
   </sectiontype>
 
+  <sectiontype name="hasmin">
+    <key name="var" required="yes" />
+  </sectiontype>
+
   <multisection type="section" name="*" attribute="sections" />
   <section type="minimal" name="*" attribute="minimal" />
   <section type="trivial" name="*" attribute="trivial" />
+  <section type="hasmin" name="+" attribute="hasmin" />
 
   <key name="var" />
   <key name="var-0" />
