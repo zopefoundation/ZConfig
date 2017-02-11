@@ -58,6 +58,41 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         schema2 = loader.loadFile(sio, url2)
         self.assertTrue(schema1.gettype("type-a") is schema2.gettype("type-a"))
 
+    def test_schema_loader_source_errors(self):
+        loader = ZConfig.loader.SchemaLoader()
+        self.assertRaisesRegexp(ZConfig.SchemaError,
+                                "illegal schema component name",
+                                loader.schemaComponentSource,
+                                '', None)
+        self.assertRaisesRegexp(ZConfig.SchemaError,
+                                "illegal schema component name",
+                                loader.schemaComponentSource,
+                                'foo..bar', None)
+
+    def test_config_loader_abstract_schema(self):
+        class MockSchema(object):
+            _abstract = True
+            def isabstract(self):
+                return self._abstract
+            def gettype(self, _t):
+                return self
+
+        self.assertRaisesRegexp(ZConfig.SchemaError,
+                                "abstract type",
+                                ZConfig.loader.ConfigLoader,
+                                MockSchema())
+
+        s = MockSchema()
+        s._abstract = False
+
+        loader = ZConfig.loader.ConfigLoader(s)
+        s._abstract = True
+
+        self.assertRaisesRegexp(ZConfig.ConfigurationError,
+                                "cannot match abstract section",
+                                loader.startSection,
+                                None, None, None)
+
     def test_simple_import_using_prefix(self):
         self.load_schema_text("""\
             <schema prefix='ZConfig.tests.library'>
@@ -217,6 +252,12 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             ZConfig.url.urldefrag("file:/abc/def#frag"),
             ("file:///abc/def", "frag"))
 
+    def test_url_from_file(self):
+        class MockFile(object):
+            name = 'path'
+        self.assertEqual('file://',
+                         ZConfig.loader._url_from_file(MockFile)[:7])
+
     def test_isPath(self):
         assertTrue = self.assertTrue
         isPath = ZConfig.loader.SchemaLoader().isPath
@@ -323,20 +364,60 @@ class TestResourcesInZip(unittest.TestCase):
             </schema>
             ''')
         schema = ZConfig.loadSchemaFile(sio)
-        sio = StringIO('''
+
+        value = '''
             %import foo.sample
             <sample>
               data value
             </sample>
-            ''')
+            '''
+        sio = StringIO(value)
         config, _ = ZConfig.loadConfigFile(schema, sio)
         self.assertEqual(config.something.data, "| value |")
+
+        sio = StringIO(value)
+        with self.assertRaises(ZConfig.ConfigurationSyntaxError):
+            ZConfig.loadConfigFile(schema, sio,
+                                   overrides=["sample/data=othervalue"])
+
+class TestOpenPackageResource(unittest.TestCase):
+
+    magic_name = 'not a valid import name'
+
+    def setUp(self):
+        sys.modules[self.magic_name] = self
+
+    def tearDown(self):
+        del sys.modules[self.magic_name]
+
+    def test_package_loader_resource_error(self):
+        class MockLoader(object):
+            pass
+        self.__loader__ = MockLoader()
+        self.__path__ = ['dir']
+
+        self.assertRaisesRegexp(ZConfig.SchemaResourceError,
+                                "error opening schema component",
+                                ZConfig.loader.openPackageResource,
+                                self.magic_name, 'a path')
+
+        # Now with an empty path
+        self.__path__ = []
+        self.assertRaisesRegexp(ZConfig.SchemaResourceError,
+                                "schema component not found",
+                                ZConfig.loader.openPackageResource,
+                                self.magic_name, 'a path')
+
+    def test_resource(self):
+        r = ZConfig.loader.Resource(self, None)
+        self.assertEqual(self.magic_name, r.magic_name)
 
 
 def test_suite():
     suite = unittest.makeSuite(LoaderTestCase)
     suite.addTest(unittest.makeSuite(TestNonExistentResources))
     suite.addTest(unittest.makeSuite(TestResourcesInZip))
+    suite.addTest(unittest.makeSuite(TestOpenPackageResource))
     return suite
 
 if __name__ == '__main__':

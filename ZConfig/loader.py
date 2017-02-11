@@ -213,7 +213,7 @@ class BaseLoader(AbstractBaseClass):
             except urllib2.URLError as e:
                 # urllib2.URLError has a particularly hostile str(), so we
                 # generally don't want to pass it along to the user.
-                self._raise_open_error(url, e.reason)
+                self._raise_open_error(url, e.reason) # pragma: no cover
             except (IOError, OSError) as e:
                 # Python 2.1 raises a different error from Python 2.2+,
                 # so we catch both to make sure we detect the situation.
@@ -239,9 +239,11 @@ class BaseLoader(AbstractBaseClass):
         else:
             what = "URL"
             ident = url
-        raise ZConfig.ConfigurationError(
+        error = ZConfig.ConfigurationError(
             "error opening %s %s: %s" % (what, ident, message),
             url)
+
+        reraise(type(error), error, sys.exc_info()[2])
 
     def normalizeURL(self, url):
         """Return a URL for *url*
@@ -367,7 +369,7 @@ class SchemaLoader(BaseLoader):
 
     def schemaComponentSource(self, package, file):
         parts = package.split(".")
-        if not parts:
+        if not parts: # pragma: no cover. can we even get here?
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + repr(package))
         if "" in parts:
