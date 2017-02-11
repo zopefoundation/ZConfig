@@ -258,7 +258,7 @@ class DatatypeTestCase(unittest.TestCase):
         AF_INET6 = socket.AF_INET6
         defhost = ZConfig.datatypes.DEFAULT_HOST
 
-        def check(value, family, address, self=self, convert=convert):
+        def check(value, family, address):
             a = convert(value)
             self.assertEqual(a.family, family)
             self.assertEqual(a.address, address)
@@ -279,6 +279,12 @@ class DatatypeTestCase(unittest.TestCase):
         else: # pragma: no cover
             self.assertTrue(a1.family is None)
             self.assertTrue(a2.family is None)
+
+        convert = self.types.get('socket-binding-address')
+        check(":80",                 AF_INET, (defhost, 80))
+
+        convert = self.types.get('socket-connection-address')
+        check(":80",                 AF_INET, ("127.0.0.1", 80))
 
     def test_ipaddr_or_hostname(self):
         convert = self.types.get('ipaddr-or-hostname')
@@ -380,6 +386,7 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert('4w 2d 7h 12m 14s'),
            datetime.timedelta(2, 14, minutes=12, hours=7, weeks=4))
 
+        raises(TypeError, convert, '1y')
 
 class RegistryTestCase(unittest.TestCase):
 
@@ -400,6 +407,29 @@ class RegistryTestCase(unittest.TestCase):
             shutil.rmtree(tmpdir)
             sys.path[:] = old_sys_path
         self.assertEqual(datatype, 42)
+
+
+    def test_register_shadow(self):
+        reg = ZConfig.datatypes.Registry()
+        self.assertRaisesRegexp(ValueError,
+                                "conflicts with built-in type",
+                                reg.register,
+                                'integer', None)
+
+        reg.register("foobar", None)
+        self.assertRaisesRegexp(ValueError,
+                                "already registered",
+                                reg.register,
+                                'foobar', None)
+
+    def test_get_fallback_basic_key(self):
+        reg = ZConfig.datatypes.Registry({})
+        self.assertIsNone(reg._basic_key)
+        self.assertRaisesRegexp(ValueError,
+                                "unloadable datatype name",
+                                reg.get,
+                                'integer')
+        self.assertIsNotNone(reg._basic_key)
 
 TEST_DATATYPE_SOURCE = """
 # sample datatypes file

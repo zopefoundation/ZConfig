@@ -12,5 +12,6 @@ exclude_lines =
     if os.name == 'nt':
     if os.name == "nt":
     if sys.platform == 'win32':
+    if sys.platform\[:3\] == "win":
     if __name__ == "__main__":
     if __name__ == '__main__':
