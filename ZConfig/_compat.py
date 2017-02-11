@@ -61,6 +61,7 @@ if PY3: # pragma: no cover
     exec_ = getattr(builtins, "exec")
     text_type = str
     binary_type = bytes
+    maxsize = sys.maxsize
 
     def reraise(tp, value, tb=None): #pragma NO COVER
         if value.__traceback__ is not tb:
@@ -70,6 +71,7 @@ if PY3: # pragma: no cover
 else: # pragma: no cover
     text_type = unicode
     binary_type = bytes
+    maxsize = sys.maxint
 
     def exec_(code, globs=None, locs=None): #pragma NO COVER
         """Execute code in a namespace."""

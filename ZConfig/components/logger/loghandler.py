@@ -14,7 +14,7 @@
 """Handlers which can plug into a PEP 282 logger."""
 
 import os
-import sys
+
 import weakref
 
 from logging import Handler, StreamHandler
@@ -25,6 +25,13 @@ from logging.handlers import SysLogHandler, BufferingHandler
 from logging.handlers import HTTPHandler, SMTPHandler
 from logging.handlers import NTEventLogHandler as Win32EventLogHandler
 
+# Export these, they're used in handlers.py
+SysLogHandler = SysLogHandler
+HTTPHandler = HTTPHandler
+SMTPHandler = SMTPHandler
+Win32EventLogHandler = Win32EventLogHandler
+
+from ZConfig._compat import maxsize
 
 
 _reopenable_handlers = []
@@ -162,7 +169,7 @@ class StartupHandler(BufferingHandler):
     """
 
     def __init__(self):
-        BufferingHandler.__init__(self, sys.maxint)
+        BufferingHandler.__init__(self, maxsize)
 
     def shouldFlush(self, record):
         return False

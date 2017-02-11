@@ -28,6 +28,7 @@ from ZConfig.components.logger import handlers
 from ZConfig.components.logger import loghandler
 
 from ZConfig._compat import NStringIO as StringIO
+from ZConfig._compat import maxsize
 
 class CustomFormatter(logging.Formatter):
     def formatException(self, ei):
@@ -117,38 +118,6 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
       </schema>
     """
 
-    def test_logging_level(self):
-        # Make sure the expected names are supported; it's not clear
-        # how to check the values in a meaningful way.
-        # Just make sure they're case-insensitive.
-        convert = datatypes.logging_level
-        for name in ["notset", "all", "trace", "debug", "blather",
-                     "info", "warn", "warning", "error", "fatal",
-                     "critical"]:
-            self.assertEqual(convert(name), convert(name.upper()))
-        self.assertRaises(ValueError, convert, "hopefully-not-a-valid-value")
-        self.assertEqual(convert('10'), 10)
-        self.assertRaises(ValueError, convert, '100')
-
-    def test_http_method(self):
-        convert = handlers.get_or_post
-        self.assertEqual(convert("get"), "GET")
-        self.assertEqual(convert("GET"), "GET")
-        self.assertEqual(convert("post"), "POST")
-        self.assertEqual(convert("POST"), "POST")
-        self.assertRaises(ValueError, convert, "")
-        self.assertRaises(ValueError, convert, "foo")
-
-    def test_syslog_facility(self):
-        convert = handlers.syslog_facility
-        for name in ["auth", "authpriv", "cron", "daemon", "kern",
-                     "lpr", "mail", "news", "security", "syslog",
-                     "user", "uucp", "local0", "local1", "local2",
-                     "local3", "local4", "local5", "local6", "local7"]:
-            self.assertEqual(convert(name), name)
-            self.assertEqual(convert(name.upper()), name)
-        self.assertRaises(ValueError, convert, "hopefully-never-a-valid-value")
-
     def test_config_without_logger(self):
         conf = self.get_config("")
         self.assertTrue(conf.eventlog is None)
@@ -163,6 +132,29 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         # And it does nothing
         logger.handlers[0].emit(None)
         logger.handlers[0].handle(None)
+
+    def test_factory_without_stream(self):
+        factory = self.check_simple_logger_factory("<eventlog>\n"
+                                                   "  <logfile>\n"
+                                                   "    path STDERR\n"
+                                                   "  </logfile>\n"
+                                                   "  <logfile>\n"
+                                                   "    path STDERR\n"
+                                                   "    level info\n"
+                                                   "  </logfile>\n"
+                                                   "  <logfile>\n"
+                                                   "    path STDERR\n"
+                                                   "    level debug\n"
+                                                   "  </logfile>\n"
+                                                   "</eventlog>")
+
+        factory.startup()
+        logger = factory.instance
+
+        factory.level = logging.NOTSET
+        self.assertEqual(factory.getLowestHandlerLevel(), logging.DEBUG)
+        logger.handlers[0].reopen = lambda: None
+        factory.reopen()
 
     def test_with_logfile(self):
         fn = self.mktemp()
@@ -436,11 +428,14 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                           "  </email-notifier>\n"
                           "</eventlog>")
 
-    def check_simple_logger(self, text, level=logging.INFO):
+    def check_simple_logger_factory(self, text, level=logging.INFO):
         conf = self.get_config(text)
         self.assertTrue(conf.eventlog is not None)
         self.assertEqual(conf.eventlog.level, level)
-        logger = conf.eventlog()
+        return conf.eventlog
+
+    def check_simple_logger(self, text, level=logging.INFO):
+        logger = self.check_simple_logger_factory(text, level)()
         self.assertTrue(isinstance(logger, logging.Logger))
         self.assertEqual(len(logger.handlers), 1)
         return logger
@@ -735,12 +730,45 @@ class TestFunctions(unittest.TestCase):
         loghandler._reopenable_handlers.append(wr)
         loghandler.reopenFiles()
 
+    def test_logging_level(self):
+        # Make sure the expected names are supported; it's not clear
+        # how to check the values in a meaningful way.
+        # Just make sure they're case-insensitive.
+        convert = datatypes.logging_level
+        for name in ["notset", "all", "trace", "debug", "blather",
+                     "info", "warn", "warning", "error", "fatal",
+                     "critical"]:
+            self.assertEqual(convert(name), convert(name.upper()))
+        self.assertRaises(ValueError, convert, "hopefully-not-a-valid-value")
+        self.assertEqual(convert('10'), 10)
+        self.assertRaises(ValueError, convert, '100')
+
+    def test_http_method(self):
+        convert = handlers.get_or_post
+        self.assertEqual(convert("get"), "GET")
+        self.assertEqual(convert("GET"), "GET")
+        self.assertEqual(convert("post"), "POST")
+        self.assertEqual(convert("POST"), "POST")
+        self.assertRaises(ValueError, convert, "")
+        self.assertRaises(ValueError, convert, "foo")
+
+    def test_syslog_facility(self):
+        convert = handlers.syslog_facility
+        for name in ["auth", "authpriv", "cron", "daemon", "kern",
+                     "lpr", "mail", "news", "security", "syslog",
+                     "user", "uucp", "local0", "local1", "local2",
+                     "local3", "local4", "local5", "local6", "local7"]:
+            self.assertEqual(convert(name), name)
+            self.assertEqual(convert(name.upper()), name)
+        self.assertRaises(ValueError, convert, "hopefully-never-a-valid-value")
+
+
 class TestStartupHandler(unittest.TestCase):
 
     def test_buffer(self):
         handler = loghandler.StartupHandler()
         self.assertFalse(handler.shouldFlush(None))
-        self.assertEqual(sys.maxint, handler.capacity)
+        self.assertEqual(maxsize, handler.capacity)
 
         records = []
         def handle(record):
