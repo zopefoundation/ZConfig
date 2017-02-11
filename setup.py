@@ -18,6 +18,10 @@ def alltests():
     suites = list(zope.testrunner.find.find_suites(options))
     return unittest.TestSuite(suites)
 
+tests_require = [
+    'zope.testrunner',
+]
+
 options = dict(
     name="ZConfig",
     version='3.2.0.dev0',
@@ -56,6 +60,8 @@ options = dict(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Operating System :: OS Independent',
@@ -63,9 +69,10 @@ options = dict(
         ],
     # Support for 'setup.py test' when setuptools is available:
     test_suite='__main__.alltests',
-    tests_require=[
-        'zope.testrunner',
-        ],
+    tests_require=tests_require,
+    extras_require={
+        'test': tests_require,
+    },
     )
 
 try:
