@@ -14,7 +14,6 @@
 
 import unittest
 
-import ZConfig
 from ZConfig import SchemaError
 from ZConfig import ConfigurationError
 
