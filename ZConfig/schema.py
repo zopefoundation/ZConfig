@@ -451,13 +451,13 @@ class BaseParser(xml.sax.ContentHandler):
         try:
             return self._basic_key(s)
         except ValueError as e:
-            self.error(e[0])
+            self.error(str(e))
 
     def identifier(self, s):
         try:
             return self._identifier(s)
         except ValueError as e:
-            self.error(e[0])
+            self.error(str(e))
 
     # exception setup helpers
 
