@@ -18,12 +18,7 @@ import unittest
 import ZConfig
 import ZConfig.tests.support
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    # Python 3 support.
-    from io import StringIO
-
+from ZConfig._compat import NStringIO as StringIO
 
 class TestImportFromConfiguration(
     ZConfig.tests.support.TestHelper, unittest.TestCase):

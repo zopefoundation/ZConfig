@@ -22,19 +22,10 @@ import ZConfig
 import ZConfig.loader
 import ZConfig.url
 
+from ZConfig._compat import NStringIO as StringIO
+from ZConfig._compat import urllib2
+
 from ZConfig.tests.support import CONFIG_BASE, TestHelper
-
-try:
-    import urllib2
-except ImportError:
-    # Python 3 support.
-    import urllib.request as urllib2
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    # Python 3 support.
-    from io import StringIO
 
 
 try:

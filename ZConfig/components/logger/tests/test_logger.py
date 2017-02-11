@@ -27,11 +27,7 @@ from ZConfig.components.logger import datatypes
 from ZConfig.components.logger import handlers
 from ZConfig.components.logger import loghandler
 
-try:
-    import StringIO as StringIO
-except ImportError:
-    # Python 3 support.
-    import io as StringIO
+from ZConfig._compat import NStringIO as StringIO
 
 class CustomFormatter(logging.Formatter):
     def formatException(self, ei):
@@ -40,7 +36,7 @@ class CustomFormatter(logging.Formatter):
         This adds helpful advice to the end of the traceback.
         """
         import traceback
-        sio = StringIO.StringIO()
+        sio = StringIO()
         traceback.print_exception(ei[0], ei[1], ei[2], file=sio)
         return sio.getvalue() + "... Don't panic!"
 
@@ -101,13 +97,13 @@ class LoggingTestHelper:
 
     def get_schema(self):
         if self._schema is None:
-            sio = StringIO.StringIO(self._schematext)
+            sio = StringIO(self._schematext)
             self.__class__._schema = ZConfig.loadSchemaFile(sio)
         return self._schema
 
     def get_config(self, text):
         conf, handler = ZConfig.loadConfigFile(self.get_schema(),
-                                               StringIO.StringIO(text))
+                                               StringIO(text))
         self.assertTrue(not handler)
         return conf
 
@@ -268,7 +264,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         # The factory has already been created; make sure it picks up
         # the stderr we set here when we create the logger and
         # handlers:
-        sio = StringIO.StringIO()
+        sio = StringIO()
         setattr(sys, name, sio)
         try:
             logger = conf.eventlog()
@@ -288,7 +284,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         </logfile>
         </eventlog>
         """)
-        sio = StringIO.StringIO()
+        sio = StringIO()
         sys.stdout = sio
         try:
             logger = conf.eventlog()

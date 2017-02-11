@@ -20,11 +20,7 @@ import ZConfig
 
 from ZConfig.tests.support import CONFIG_BASE
 
-try:
-    import StringIO as StringIO
-except ImportError:
-    # Python 3 support.
-    import io as StringIO
+from ZConfig._compat import NStringIO as StringIO
 
 class ConfigurationTestCase(unittest.TestCase):
 
@@ -47,7 +43,7 @@ class ConfigurationTestCase(unittest.TestCase):
         return conf
 
     def loadtext(self, text):
-        sio = StringIO.StringIO(text)
+        sio = StringIO(text)
         return self.loadfile(sio)
 
     def loadfile(self, file):
@@ -112,7 +108,7 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertEqual(conf.var4, "value")
 
     def test_includes_with_defines(self):
-        self.schema = ZConfig.loadSchemaFile(StringIO.StringIO("""\
+        self.schema = ZConfig.loadSchemaFile(StringIO("""\
             <schema>
               <key name='refinner' />
               <key name='refouter' />
@@ -145,8 +141,8 @@ class ConfigurationTestCase(unittest.TestCase):
                           self.load, "simplesections.conf#another")
 
     def test_load_from_fileobj(self):
-        sio = StringIO.StringIO("%define name value\n"
-                                "getname x $name y \n")
+        sio = StringIO("%define name value\n"
+                       "getname x $name y \n")
         cf = self.loadfile(sio)
         self.assertEqual(cf.getname, "x value y")
 
