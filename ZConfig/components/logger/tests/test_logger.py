@@ -160,6 +160,10 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(len(logger.handlers), 1)
         self.assertTrue(isinstance(logger.handlers[0], loghandler.NullHandler))
 
+        # And it does nothing
+        logger.handlers[0].emit(None)
+        logger.handlers[0].handle(None)
+
     def test_with_logfile(self):
         fn = self.mktemp()
         logger = self.check_simple_logger("<eventlog>\n"
@@ -708,6 +712,50 @@ class TestFunctions(unittest.TestCase):
         v = handlers.http_handler_url("http://server/path;param?q=v#fragment")
         self.assertEqual(v, ('server', '/path;param?q=v#fragment'))
 
+    def test_close_files(self):
+        class F(object):
+            closed = 0
+            def close(self):
+                self.closed += 1
+        f = F()
+        def wr():
+            return f
+
+        loghandler._reopenable_handlers.append(wr)
+        loghandler.closeFiles()
+        loghandler.closeFiles()
+
+        self.assertEqual(1, f.closed)
+
+    def test_reopen_files_missing_wref(self):
+        # simulate concurrent iteration that pops the ref
+        def wr():
+            loghandler._reopenable_handlers.remove(wr)
+
+        loghandler._reopenable_handlers.append(wr)
+        loghandler.reopenFiles()
+
+class TestStartupHandler(unittest.TestCase):
+
+    def test_buffer(self):
+        handler = loghandler.StartupHandler()
+        self.assertFalse(handler.shouldFlush(None))
+        self.assertEqual(sys.maxint, handler.capacity)
+
+        records = []
+        def handle(record):
+            records.append(record)
+        handle.handle = handle
+
+        handler.flushBufferTo(handle)
+        self.assertEqual([], records)
+
+        handler.buffer.append(1)
+        handler.flushBufferTo(handle)
+        self.assertEqual([1], records)
+
+        del handle.handle
+
 def test_logger_convenience_function_and_ommiting_name_to_get_root_logger():
     """
 
@@ -765,6 +813,7 @@ def test_suite():
     suite.addTest(doctest.DocTestSuite())
     suite.addTest(unittest.makeSuite(TestConfig))
     suite.addTest(unittest.makeSuite(TestFunctions))
+    suite.addTest(unittest.makeSuite(TestStartupHandler))
     if os.name != "nt":
         # Though log files can be closed and re-opened on Windows, these
         # tests expect to be able to move the underlying files out from

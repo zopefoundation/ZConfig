@@ -79,7 +79,7 @@ class FileHandler(StreamHandler):
         # compromise.  :-(
         try:
             StreamHandler.close(self)
-        except KeyError:
+        except KeyError: # pragma: no cover
             pass
         _remove_from_reopenable(self._wr)
 
