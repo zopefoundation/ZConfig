@@ -17,31 +17,23 @@ import copy
 import ZConfig
 
 from abc import abstractmethod
+from functools import total_ordering
 
 from ZConfig._compat import AbstractBaseClass
 
+@total_ordering
 class UnboundedThing(object):
     __slots__ = ()
 
-    def __lt__(self, other):
-        return False
-
-    def __le__(self, other):
-        return isinstance(other, self.__class__)
-
     def __gt__(self, other):
-        return True
-
-    def __ge__(self, other):
+        if isinstance(other, self.__class__):
+            return False
         return True
 
     def __eq__(self, other):
         return isinstance(other, self.__class__)
 
-    def __ne__(self, other):
-        return not isinstance(other, self.__class__)
-
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return "<Unbounded>"
 
 Unbounded = UnboundedThing()
@@ -62,7 +54,7 @@ class ValueInfo(object):
             raise ZConfig.DataConversionError(e, self.value, self.position)
 
 
-class BaseInfo(AbstractBaseClass):
+class BaseInfo(object):
     """Information about a single configuration key."""
 
     description = None
@@ -71,13 +63,13 @@ class BaseInfo(AbstractBaseClass):
 
     def __init__(self, name, datatype, minOccurs, maxOccurs, handler,
                  attribute):
-        if maxOccurs is not None and maxOccurs < 1:
+        if maxOccurs is not None:
             if maxOccurs < 1:
                 raise ZConfig.SchemaError(
                     "maxOccurs must be at least 1")
-            if minOccurs is not None and minOccurs < maxOccurs:
+            if minOccurs is not None and minOccurs > maxOccurs:
                 raise ZConfig.SchemaError(
-                    "minOccurs must be at least maxOccurs")
+                    "minOccurs cannot be more than maxOccurs")
         self.name = name
         self.datatype = datatype
         self.minOccurs = minOccurs
@@ -99,7 +91,7 @@ class BaseInfo(AbstractBaseClass):
         return False
 
 
-class BaseKeyInfo(BaseInfo):
+class BaseKeyInfo(AbstractBaseClass, BaseInfo):
 
     _rawdefaults = None
 
@@ -228,6 +220,8 @@ class SectionInfo(BaseInfo):
         # handler     - handler name called when value(s) must take effect,
         #               or None
         # attribute   - name of the attribute on the SectionValue object
+        assert maxOccurs is not None
+        # because we compare it to 1 which is a Py3 error
         if maxOccurs > 1:
             if name not in ('*', '+'):
                 raise ZConfig.SchemaError(
@@ -274,8 +268,8 @@ class SectionInfo(BaseInfo):
             return None
 
 
-class AbstractType:
-    __metaclass__ = type
+class AbstractType(object):
+
     __slots__ = '_subtypes', 'name', 'description'
 
     def __init__(self, name):
@@ -305,7 +299,7 @@ class AbstractType:
         return True
 
 
-class SectionType:
+class SectionType(object):
     def __init__(self, name, keytype, valuetype, datatype, registry, types):
         # name      - name of the section, or '*' or '+'
         # datatype  - type for the section itself
@@ -398,7 +392,7 @@ class SectionType:
                     if st.isabstract():
                         try:
                             st = st.getsubtype(type)
-                        except ZConfig.ConfigurationError:
+                        except ZConfig.ConfigurationError: # pragma: no cover
                             raise ZConfig.ConfigurationError(
                                 "section type %s not allowed for name %s"
                                 % (repr(type), repr(key)))
@@ -415,12 +409,12 @@ class SectionType:
                 return info
             elif info.sectiontype.isabstract():
                 st = info.sectiontype
-                if st.name == type:
+                if st.name == type: # pragma: no cover
                     raise ZConfig.ConfigurationError(
                         "cannot define section with an abstract type")
                 try:
                     st = st.getsubtype(type)
-                except ZConfig.ConfigurationError:
+                except ZConfig.ConfigurationError: # pragma: no cover
                     # not this one; maybe a different one
                     pass
                 else:
@@ -464,7 +458,8 @@ class SchemaType(SectionType):
         for n in reqtypes:
             alltypes.remove(n)
         if self.name and self.name in alltypes:
-            alltypes.remove(self.name)
+            # Not clear we can get here
+            alltypes.remove(self.name) # pragma: no cover.
         return alltypes
 
     def createSectionType(self, name, keytype, valuetype, datatype):
