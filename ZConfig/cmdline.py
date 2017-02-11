@@ -24,10 +24,13 @@ Each setting is given by a value specifier string, as described by
 :meth:`ExtendedConfigLoader.addOption`.
 """
 
+import sys
+
 import ZConfig
 import ZConfig.loader
 import ZConfig.matcher
 
+from ZConfig._compat import reraise
 
 class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
     """A :class:`~.ConfigLoader` subclass that adds support for
@@ -94,8 +97,6 @@ class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
     def cook(self):
         if self.clopts:
             return OptionBag(self.schema, self.schema, self.clopts)
-        else:
-            return None
 
 
 class OptionBag(object):
@@ -116,9 +117,10 @@ class OptionBag(object):
     def basic_key(self, s, pos):
         try:
             return self._basic_key(s)
-        except ValueError:
-            raise ZConfig.ConfigurationSyntaxError(
-                "could not convert basic-key value", *pos)
+        except ValueError as e:
+            e = ZConfig.ConfigurationSyntaxError(
+                "could not convert basic-key value: " + str(e), *pos)
+            reraise(type(e), e, sys.exc_info()[2])
 
     def add_value(self, name, val, pos):
         if name in self.keypairs:
@@ -155,7 +157,7 @@ class OptionBag(object):
             bk = self.basic_key(s, pos)
             if name and self._normalize_case(s) == name:
                 L.append((optpath[1:], val, pos))
-            elif bk == type:
+            elif bk == type: # pragma: no cover
                 L.append((optpath[1:], val, pos))
             else:
                 R.append(item)
@@ -183,7 +185,8 @@ class MatcherMixin(object):
         try:
             realkey = self.type.keytype(key)
         except ValueError as e:
-            raise ZConfig.DataConversionError(e, key, position)
+            dce = ZConfig.DataConversionError(e, key, position)
+            reraise(type(dce), dce, sys.exc_info()[2])
         if realkey in self.optionbag:
             return
         ZConfig.matcher.BaseMatcher.addValue(self, key, value, position)
