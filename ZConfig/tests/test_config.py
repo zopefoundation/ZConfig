@@ -80,7 +80,18 @@ class ConfigurationTestCase(unittest.TestCase):
         raises(Error, self.loadtext, "neg-int false")
         raises(Error, self.loadtext, "true-var-1 0")
         raises(Error, self.loadtext, "true-var-1 1")
-        raises(Error, self.loadtext, "true-var-1 -1")
+        with raises(Error) as e:
+            self.loadtext("true-var-1 -1")
+
+        # str doesn't fail
+        exc = e.exception
+        str(exc)
+        self.assertIsNone(exc.colno)
+        self.assertIsNone(exc.url)
+
+        exc.colno = 1
+        exc.url = 'url'
+        self.assertIn('url', str(exc))
 
     def test_simple_sections(self):
         self.schema = ZConfig.loadSchema(CONFIG_BASE + "simplesections.xml")
@@ -127,14 +138,42 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertEqual(conf.getwords, "abc two words def")
 
     def test_define_errors(self):
+        # doesn't raise if value is equal
+        self.loadtext("%define a value\n%define a value\n")
+
         self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define\n")
         self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define abc-def\n")
-        self.assertRaises(ZConfig.ConfigurationSyntaxError,
-                          self.loadtext, "%define a value\n%define a other\n")
-        # doesn't raise if value is equal
-        self.loadtext("%define a value\n%define a value\n")
+
+        with self.assertRaises(ZConfig.ConfigurationSyntaxError) as e:
+            self.loadtext("%define a value\n%define a other\n")
+
+        # str doesn't throw unexpected exceptions
+        exc = e.exception
+        self.assertIn('line', str(exc))
+        self.assertNotIn('column', str(exc))
+        # doesn't have these properties
+        self.assertIsNone(exc.colno)
+        self.assertIsNone(exc.url)
+
+        # If we fill them in, we get different str output
+        exc.colno = 10
+        exc.url = 'a url'
+        self.assertIn('column', str(exc))
+
+        # There's also a case if we don't have a line number
+        exc.lineno = None
+        self.assertNotIn('line', str(exc))
+
+    def test_configuration_error_str(self):
+
+        e = ZConfig.ConfigurationError('message')
+        self.assertEqual(e.message, 'message')
+        self.assertEqual('message', str(e))
+
+        # We can delete the message, for some reason
+        del e.message
 
     def test_fragment_ident_disallowed(self):
         self.assertRaises(ZConfig.ConfigurationError,
