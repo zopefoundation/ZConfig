@@ -16,9 +16,12 @@
 import copy
 import ZConfig
 
+from abc import abstractmethod
+
+from ZConfig._compat import AbstractBaseClass
 
 class UnboundedThing:
-    __metaclass__ = type
+    __metaclass__ = type # XXX Python 3
     __slots__ = ()
 
     def __lt__(self, other):
@@ -46,7 +49,7 @@ Unbounded = UnboundedThing()
 
 
 class ValueInfo:
-    __metaclass__ = type
+    __metaclass__ = type # XXX Python 3
     __slots__ = 'value', 'position'
 
     def __init__(self, value, position):
@@ -61,7 +64,7 @@ class ValueInfo:
             raise ZConfig.DataConversionError(e, self.value, self.position)
 
 
-class BaseInfo:
+class BaseInfo(AbstractBaseClass):
     """Information about a single configuration key."""
 
     description = None
@@ -128,6 +131,7 @@ class BaseKeyInfo(BaseInfo):
                 "unexpected key for default value")
         self.add_valueinfo(ValueInfo(value, position), key)
 
+    @abstractmethod
     def add_valueinfo(self, vi, key):
         """Actually add a ValueInfo to this key-info object.
 
@@ -138,8 +142,6 @@ class BaseKeyInfo(BaseInfo):
         This method is a requirement for subclasses, and should not be
         called by client code.
         """
-        raise NotImplementedError(
-            "add_valueinfo() must be implemented by subclasses of BaseKeyInfo")
 
     def prepare_raw_defaults(self):
         assert self.name == "+"

@@ -17,6 +17,7 @@ import os.path
 import re
 import sys
 
+from abc import abstractmethod
 from io import StringIO
 
 import ZConfig
@@ -29,6 +30,7 @@ import ZConfig.url
 
 from ZConfig._compat import reraise
 from ZConfig._compat import urllib2
+from ZConfig._compat import AbstractBaseClass
 
 try:
     from urllib import pathname2url
@@ -128,7 +130,7 @@ def _get_config_loader(schema, overrides):
     return loader
 
 
-class BaseLoader(object):
+class BaseLoader(AbstractBaseClass):
     """Base class for loader objects.
 
     This should not be instantiated
@@ -182,6 +184,7 @@ class BaseLoader(object):
 
     # utilities
 
+    @abstractmethod
     def loadResource(self, resource):
         """Abstract method.
 
@@ -189,8 +192,6 @@ class BaseLoader(object):
         actually load the resource and return the appropriate
         application-level object.
         """
-        raise NotImplementedError(
-            "BaseLoader.loadResource() must be overridden by a subclass")
 
     def openResource(self, url):
         """Returns a resource object that represents the URL *url*.

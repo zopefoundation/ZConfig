@@ -66,3 +66,7 @@ else: # pragma: no cover
     exec_("""def reraise(tp, value, tb=None):
     raise tp, value, tb
 """)
+
+import abc
+
+AbstractBaseClass = abc.ABCMeta('AbstractBaseClass', (object,), {})

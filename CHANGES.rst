@@ -11,6 +11,7 @@ Change History for ZConfig
 
 - Host docs at https://zconfig.readthedocs.io
 
+- BaseLoader is now an abstract class that cannot be instantiated.
 
 3.1.0 (2015-10-17)
 ------------------

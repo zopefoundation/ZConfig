@@ -222,7 +222,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
 
     def test_isPath(self):
         assertTrue = self.assertTrue
-        isPath = ZConfig.loader.BaseLoader().isPath
+        isPath = ZConfig.loader.SchemaLoader().isPath
         assertTrue(isPath("abc"))
         assertTrue(isPath("abc/def"))
         assertTrue(isPath("/abc"))

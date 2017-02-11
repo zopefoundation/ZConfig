@@ -13,6 +13,7 @@
 ##############################################################################
 """ZConfig factory datatypes for log handlers."""
 
+from abc import abstractmethod
 import sys
 
 from ZConfig.components.logger.factory import Factory
@@ -78,9 +79,9 @@ class HandlerFactory(Factory):
         Factory.__init__(self)
         self.section = section
 
+    @abstractmethod
     def create_loghandler(self):
-        raise NotImplementedError(
-            "subclasses must override create_loghandler()")
+        "subclasses must override create_loghandler()"
 
     def create(self):
         import logging
