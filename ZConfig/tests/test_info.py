@@ -71,7 +71,7 @@ class BaseKeyInfoTestCase(InfoMixin, unittest.TestCase):
 
     class Class(BaseKeyInfo):
         def add_valueinfo(self, vi, key):
-            pass
+            "This wont actually be called"
 
     def test_cant_instantiate(self):
         self.Class = BaseKeyInfo

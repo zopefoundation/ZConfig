@@ -1150,6 +1150,175 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             </schema>
             """)
 
+    def checkErrorText(self, schema, error_text):
+        self.assertRaisesRegexp(ZConfig.SchemaError, error_text,
+                                self.load_schema_text, schema)
+
+    def test_error_bad_parent(self):
+        self.checkErrorText(
+            "<schema><schema>",
+            "Unknown tag")
+
+    def test_error_unknown_doc(self):
+        self.checkErrorText("<bad>", "Unknown document type")
+
+    def test_error_extra_cdata(self):
+        self.checkErrorText("<schema>text",
+                            "non-blank character data")
+
+
+    def test_error_subclass(self):
+        import ZConfig.schema
+        import ZConfig.datatypes
+        class MockLoader(object):
+            registry = ZConfig.datatypes.Registry()
+        parser = ZConfig.schema.SchemaParser(MockLoader(), 'url')
+        parser.push_prefix({'prefix': __name__})
+        parser.push_prefix({'prefix': '.' + __name__})
+
+        def cv(n):
+            raise ValueError()
+        MockLoader.registry._stock['dotted-suffix'] = cv
+
+        self.assertRaises(ZConfig.SchemaError,
+                          parser.push_prefix,
+                          {'prefix': __name__})
+
+        self.assertRaises(ZConfig.SchemaError,
+                          parser.basic_key,
+                          "not a basic key")
+
+        self.assertRaises(ZConfig.SchemaError,
+                          parser.identifier,
+                          "not an identifier")
+
+    def test_error_required_value(self):
+        self.checkErrorText(
+            """
+            <schema>
+              <key name='+' required='maybe' attribute='keymap' />
+            </schema>
+            """,
+            "value for 'required' must be")
+
+    def test_error_section(self):
+        self.checkErrorText(
+            """
+            <schema>
+              <section />
+            """,
+            "section must specify type")
+
+    def test_error_multisection(self):
+        self.checkErrorText(
+            """
+            <schema>
+              <sectiontype name="abc" />
+              <multisection type="abc" name="doreme"/>
+            """,
+            "multisection must specify .* for the name")
+
+    def test_error_multikey(self):
+
+        self.checkErrorText(
+            """
+            <schema>
+              <multikey name='foo' required="yes" default="1" attribute='keymap'/>
+            </schema>
+            """,
+            "default values for multikey must be given")
+
+    def test_error_key_info(self):
+
+        self.checkErrorText(
+            """
+            <schema>
+              <key name='foo' required="yes" default="1" attribute='keymap'/>
+            </schema>
+            """,
+            "required key cannot have a default")
+
+        self.checkErrorText(
+            """
+            <schema>
+              <key name='*' attribute='keymap'/>
+            </schema>
+            """,
+            r"key may not specify '\*' for name")
+
+        self.checkErrorText(
+            """
+            <schema>
+              <key name='' attribute='keymap'/>
+            </schema>
+            """,
+            "name must be specified and non-empty")
+
+        self.checkErrorText(
+            """
+            <schema>
+              <key name='*' />
+            </schema>
+            """,
+            "container attribute must be specified")
+
+        self.checkErrorText(
+            """
+            <schema>
+              <key name='invalid key name' attribute='keymap'/>
+            </schema>
+            """,
+            "could not convert key name to keytype")
+
+    def test_error_import_fragment(self):
+        self.checkErrorText(
+            """
+            <schema>
+              <import src='http://path/with#fragment' />
+            """,
+            "may not include a fragment identifier")
+
+    def test_error_sectiontype(self):
+        self.checkErrorText(
+            """
+            <schema>
+              <sectiontype>
+            """,
+            "sectiontype name must not be omitted or empty")
+
+    def test_error_abstracttype(self):
+        self.checkErrorText(
+            """
+            <schema>
+              <abstracttype>
+            """,
+            "abstracttype name must not be omitted or empty")
+
+    def test_metadefault(self):
+        self.load_schema_text(
+            """
+            <schema>
+              <key name="name">
+                <metadefault>a default</metadefault>
+              </key>
+            </schema>
+        """)
+
+    def test_error_component_section(self):
+        self.checkErrorText(
+            """
+            <schema>
+              <import package="ZConfig.tests" file="bad-component.xml" />
+            """,
+            "elements may not be nested")
+
+        self.load_schema_text(
+            """
+            <schema>
+              <import package="ZConfig.tests" file="bad-component2.xml" />
+            </schema>
+            """)
+
 
 def test_suite():
     return unittest.makeSuite(SchemaTestCase)
