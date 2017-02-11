@@ -5,7 +5,7 @@ Change History for ZConfig
 3.2.0 (unreleased)
 ------------------
 
-- Drop support for Python 2.6 and 3.2.
+- Drop support for Python 2.6 and 3.2 and add support for Python 3.6.
 
 - Run tests with pypy and pypy3 as well.
 

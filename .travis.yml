@@ -5,11 +5,20 @@ python:
     - 3.3
     - 3.4
     - 3.5
-    - pypy
-    - pypy3
+    - 3.6
+    - pypy-5.4.1
+    - pypy3.3-5.2-alpha1
 install:
-    - pip install .
+    - pip install -U pip setuptools
+    - pip install -U coverage coveralls
+    - pip install -U -e .[test]
 script:
-    - python setup.py -q test -q
+    - coverage run setup.py -q test -q
 notifications:
     email: false
+after_success:
+    - coveralls
+
+cache: pip
+before_cache:
+    - rm -f $HOME/.cache/pip/log/debug.log

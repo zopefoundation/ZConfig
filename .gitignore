@@ -9,3 +9,5 @@ develop-eggs/
 eggs/
 parts/
 doc/_build
+htmlcov/
+.coverage
