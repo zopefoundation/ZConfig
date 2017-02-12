@@ -20,8 +20,8 @@ import ZConfig.url
 from ZConfig.substitution import isname, substitute
 from ZConfig._compat import reraise
 
-class ZConfigParser:
-    __metaclass__ = type
+class ZConfigParser(object):
+
     __slots__ = ('resource', 'context', 'lineno',
                  'stack', 'defines', 'file', 'url')
 
@@ -171,9 +171,7 @@ class ZConfigParser:
 
     def error(self, message):
         v = ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)
-        if sys.exc_info() and sys.exc_info()[2]:
-            reraise(type(v), v, sys.exc_info()[2])
-        raise v
+        reraise(type(v), v, sys.exc_info()[2])
 
     def _normalize_case(self, string):
         # This method is factored out solely to allow subclasses to modify
