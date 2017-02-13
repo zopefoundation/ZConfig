@@ -113,7 +113,7 @@ class BaseParser(xml.sax.ContentHandler):
             if self._schema is None: # pragma: no cover
                 self.error(name + " element outside of schema")
             if self._cdata is not None: # pragma: no cover
-                # this should be handled by the earliel nesting check
+                # this should be handled by the earlier nesting check
                 self.error(name + " element improperly nested")
             self._cdata = []
             self._position = None
@@ -240,7 +240,7 @@ class BaseParser(xml.sax.ContentHandler):
         if any == '*':
             self.error(element + " may not specify '*' for name")
         if not name and any != '+': # pragma: no cover
-            # Con we even get here?
+            # Can we even get here?
             self.error(element + " name may not be omitted or empty")
         datatype = self.get_datatype(attrs, "datatype", "string")
         handler = self.get_handler(attrs)

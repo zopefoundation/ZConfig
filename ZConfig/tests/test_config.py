@@ -210,7 +210,7 @@ class ConfigurationTestCase(unittest.TestCase):
                                 'malformed section start',
                                 self.loadtext, '<section')
 
-        # ConfigLoader.endSection raises this and its recaught and changed to a
+        # ConfigLoader.endSection raises this and it is recaught and changed to a
         # SyntaxError
         self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
                                 "no values for",
