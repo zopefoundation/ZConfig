@@ -18,12 +18,12 @@ PY3 = sys.version_info[0] >= 3
 
 # Native string object IO
 if str is not bytes:
-    from io import StringIO as _NStringIO
+    from io import StringIO as NStringIO
 else:
     # Python 2
-    from io import BytesIO as _NStringIO
+    from io import BytesIO as NStringIO
 
-NStringIO = _NStringIO
+NStringIO = NStringIO
 
 from io import StringIO
 from io import BytesIO
