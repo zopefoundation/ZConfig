@@ -7,7 +7,6 @@ source = ZConfig
 # things. Omit the main methods of test files.
 exclude_lines =
     pragma: no cover
-    pragma no cover
     class Win32
     if os.name == 'nt':
     if os.name == "nt":
