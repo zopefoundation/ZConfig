@@ -17,11 +17,7 @@ ZConfig and urllib2 expect file: URLs to consistently use the '//'
 hostpart seperator; the functions here enforce this constraint.
 """
 
-try:
-    import urlparse as _urlparse
-except ImportError:
-    # Python 3 support
-    import urllib.parse as _urlparse
+from ZConfig._compat import urlparse as _urlparse
 
 urlsplit = _urlparse.urlsplit
 
@@ -39,7 +35,9 @@ def urlunsplit(parts):
     if (parts[0] == "file"
         and url.startswith("file:/")
         and not url.startswith("file:///")):
-        url = "file://" + url[5:]
+        # It may not be possible to get here anymore with
+        # modern urlparse, at least not on posix?
+        url = "file://" + url[5:] # pragma: no cover
     return url
 
 
@@ -51,5 +49,7 @@ def urldefrag(url):
 def urljoin(base, relurl):
     url = _urlparse.urljoin(base, relurl)
     if url.startswith("file:/") and not url.startswith("file:///"):
-        url = "file://" + url[5:]
+        # It may not be possible to get here anymore with
+        # modern urlparse, at least not on posix?
+        url = "file://" + url[5:] # pragma: no cover
     return url

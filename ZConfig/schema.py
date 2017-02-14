@@ -22,10 +22,9 @@ import ZConfig
 from ZConfig import info
 from ZConfig import url
 
-try:
-    BLANK = unicode('')
-except NameError:
-    BLANK = ''
+from ZConfig._compat import raise_with_same_tb
+
+BLANK = u''
 
 def parseResource(resource, loader):
     parser = SchemaParser(loader, resource.url)
@@ -97,19 +96,24 @@ class BaseParser(xml.sax.ContentHandler):
                            % (_srepr(name), _srepr(parent)))
         elif name != self._top_level:
             self.error("Unknown document type " + name)
+
         self._elem_stack.append(name)
+
+        # self._schema is assigned to in self.start_<_top_level>, so
+        # most of the checks for it being None are just extra precaution.
         if name == self._top_level:
-            if self._schema is not None:
+            if self._schema is not None: # pragma: no cover
                 self.error("schema element improperly nested")
             getattr(self, "start_" + name)(attrs)
         elif name in self._handled_tags:
-            if self._schema is None:
+            if self._schema is None: # pragma: no cover
                 self.error(name + " element outside of schema")
             getattr(self, "start_" + name)(attrs)
         elif name in self._cdata_tags:
-            if self._schema is None:
+            if self._schema is None: # pragma: no cover
                 self.error(name + " element outside of schema")
-            if self._cdata is not None:
+            if self._cdata is not None: # pragma: no cover
+                # this should be handled by the earlier nesting check
                 self.error(name + " element improperly nested")
             self._cdata = []
             self._position = None
@@ -134,7 +138,8 @@ class BaseParser(xml.sax.ContentHandler):
             getattr(self, "characters_" + name)(data)
 
     def endDocument(self):
-        if self._schema is None:
+        if self._schema is None: # pragma: no cover
+            # this would have to be a broken subclass
             self.error("no %s found" % self._top_level)
 
     # helper methods
@@ -144,7 +149,7 @@ class BaseParser(xml.sax.ContentHandler):
             return (self._locator.getLineNumber(),
                     self._locator.getColumnNumber(),
                     (self._locator.getSystemId() or self._url))
-        else:
+        else: # pragma: no cover
             return None, None, self._url
 
     def get_handler(self, attrs):
@@ -234,7 +239,8 @@ class BaseParser(xml.sax.ContentHandler):
         any, name, attribute = self.get_name_info(attrs, element)
         if any == '*':
             self.error(element + " may not specify '*' for name")
-        if not name and any != '+':
+        if not name and any != '+': # pragma: no cover
+            # Can we even get here?
             self.error(element + " name may not be omitted or empty")
         datatype = self.get_datatype(attrs, "datatype", "string")
         handler = self.get_handler(attrs)
@@ -302,7 +308,7 @@ class BaseParser(xml.sax.ContentHandler):
             src = url.urljoin(self._url, src)
             src, fragment = url.urldefrag(src)
             if fragment:
-                self.error("import src many not include"
+                self.error("import src may not include"
                            " a fragment identifier")
             schema = self._loader.loadURL(src)
             for n in schema.gettypenames():
@@ -363,7 +369,8 @@ class BaseParser(xml.sax.ContentHandler):
         handler = self.get_handler(attrs)
         min = self.get_required(attrs) and 1 or 0
         any, name, attribute = self.get_name_info(attrs, "section", "*")
-        if any and not attribute:
+        if any and not attribute: # pragma: no cover
+            # It seems like this is handled by get_name_info.
             self.error(
                 "attribute must be specified if section name is '*' or '+'")
         section = info.SectionInfo(any or name, sectiontype,
@@ -444,13 +451,13 @@ class BaseParser(xml.sax.ContentHandler):
         try:
             return self._basic_key(s)
         except ValueError as e:
-            self.error(e[0])
+            self.error(str(e))
 
     def identifier(self, s):
         try:
             return self._identifier(s)
         except ValueError as e:
-            self.error(e[0])
+            self.error(str(e))
 
     # exception setup helpers
 
@@ -462,7 +469,7 @@ class BaseParser(xml.sax.ContentHandler):
         return e
 
     def error(self, message):
-        raise self.initerror(ZConfig.SchemaError(message))
+        raise_with_same_tb(self.initerror(ZConfig.SchemaError(message)))
 
 
 class SchemaParser(BaseParser):
@@ -595,6 +602,9 @@ class ComponentParser(BaseParser):
         self.pop_prefix()
 
     def _check_not_toplevel(self, what):
-        if not self._stack:
+        if not self._stack: # pragma: no cover
+            # we can't get here because the elements that call
+            # this function have specified _allowed_parents that are
+            # checked first
             self.error("cannot define top-level %s in a schema %s"
                        % (what, self._top_level))

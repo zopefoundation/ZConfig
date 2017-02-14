@@ -12,15 +12,16 @@
 #
 ##############################################################################
 """Configuration parser."""
+import sys
 
 import ZConfig
 import ZConfig.url
 
 from ZConfig.substitution import isname, substitute
+from ZConfig._compat import raise_with_same_tb
 
+class ZConfigParser(object):
 
-class ZConfigParser:
-    __metaclass__ = type
     __slots__ = ('resource', 'context', 'lineno',
                  'stack', 'defines', 'file', 'url')
 
@@ -135,14 +136,8 @@ class ZConfigParser:
             self.error("unknown directive: " + repr(name))
         if not arg:
             self.error("missing argument to %%%s directive" % name)
-        if name == "include":
-            self.handle_include(section, arg)
-        elif name == "define":
-            self.handle_define(section, arg)
-        elif name == "import":
-            self.handle_import(section, arg)
-        else:
-            assert 0, "unexpected directive for " + repr("%" + rest)
+
+        getattr(self, 'handle_' + name)(section, arg)
 
     def handle_import(self, section, rest):
         pkgname = self.replace(rest.strip())
@@ -175,7 +170,10 @@ class ZConfigParser:
             raise
 
     def error(self, message):
-        raise ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)
+        raise_with_same_tb(
+            ZConfig.ConfigurationSyntaxError(
+                message, self.url, self.lineno))
+
 
     def _normalize_case(self, string):
         # This method is factored out solely to allow subclasses to modify

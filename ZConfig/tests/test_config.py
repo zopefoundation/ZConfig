@@ -20,11 +20,7 @@ import ZConfig
 
 from ZConfig.tests.support import CONFIG_BASE
 
-try:
-    import StringIO as StringIO
-except ImportError:
-    # Python 3 support.
-    import io as StringIO
+from ZConfig._compat import NStringIO as StringIO
 
 class ConfigurationTestCase(unittest.TestCase):
 
@@ -47,7 +43,7 @@ class ConfigurationTestCase(unittest.TestCase):
         return conf
 
     def loadtext(self, text):
-        sio = StringIO.StringIO(text)
+        sio = StringIO(text)
         return self.loadfile(sio)
 
     def loadfile(self, file):
@@ -84,7 +80,18 @@ class ConfigurationTestCase(unittest.TestCase):
         raises(Error, self.loadtext, "neg-int false")
         raises(Error, self.loadtext, "true-var-1 0")
         raises(Error, self.loadtext, "true-var-1 1")
-        raises(Error, self.loadtext, "true-var-1 -1")
+        with raises(Error) as e:
+            self.loadtext("true-var-1 -1")
+
+        # str doesn't fail
+        exc = e.exception
+        str(exc)
+        self.assertIsNone(exc.colno)
+        self.assertIsNone(exc.url)
+
+        exc.colno = 1
+        exc.url = 'url'
+        self.assertIn('url', str(exc))
 
     def test_simple_sections(self):
         self.schema = ZConfig.loadSchema(CONFIG_BASE + "simplesections.xml")
@@ -112,7 +119,7 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertEqual(conf.var4, "value")
 
     def test_includes_with_defines(self):
-        self.schema = ZConfig.loadSchemaFile(StringIO.StringIO("""\
+        self.schema = ZConfig.loadSchemaFile(StringIO("""\
             <schema>
               <key name='refinner' />
               <key name='refouter' />
@@ -131,22 +138,101 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertEqual(conf.getwords, "abc two words def")
 
     def test_define_errors(self):
+        # doesn't raise if value is equal
+        self.loadtext("%define a value\n%define a value\n")
+
         self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define\n")
         self.assertRaises(ZConfig.ConfigurationSyntaxError,
                           self.loadtext, "%define abc-def\n")
-        self.assertRaises(ZConfig.ConfigurationSyntaxError,
-                          self.loadtext, "%define a value\n%define a other\n")
-        # doesn't raise if value is equal
-        self.loadtext("%define a value\n%define a value\n")
+
+        self.assertRaises(ZConfig.SubstitutionReplacementError,
+                          self.loadtext,
+                          "foo $name")
+
+        with self.assertRaises(ZConfig.ConfigurationSyntaxError) as e:
+            self.loadtext("%define a value\n%define a other\n")
+
+        # str doesn't throw unexpected exceptions
+        exc = e.exception
+        self.assertIn('line', str(exc))
+        self.assertNotIn('column', str(exc))
+        # doesn't have these properties
+        self.assertIsNone(exc.colno)
+        self.assertIsNone(exc.url)
+
+        # If we fill them in, we get different str output
+        exc.colno = 10
+        exc.url = 'a url'
+        self.assertIn('column', str(exc))
+
+        # There's also a case if we don't have a line number
+        exc.lineno = None
+        self.assertNotIn('line', str(exc))
+
+    def test_bad_directive(self):
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'unknown directive',
+                                self.loadtext, '%not a directive')
+
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'missing or unrecognized',
+                                self.loadtext, '%')
+
+    def test_bad_key(self):
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'malformed configuration data',
+                                self.loadtext, '(int-var')
+
+    def test_bad_section(self):
+        self.schema = ZConfig.loadSchema(CONFIG_BASE + "simplesections.xml")
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'unexpected section end',
+                                self.loadtext, '</close>')
+
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'unbalanced section end',
+                                self.loadtext, '<section>\n</close>')
+
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'unclosed sections not allowed',
+                                self.loadtext, '<section>\n')
+
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'malformed section header',
+                                self.loadtext, '<section()>\n</close>')
+
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'malformed section end',
+                                self.loadtext, '<section>\n</section')
+
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                'malformed section start',
+                                self.loadtext, '<section')
+
+        # ConfigLoader.endSection raises this and it is recaught and changed to a
+        # SyntaxError
+        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
+                                "no values for",
+                                self.loadtext,
+                                "<hasmin foo>\n</hasmin>")
+
+    def test_configuration_error_str(self):
+
+        e = ZConfig.ConfigurationError('message')
+        self.assertEqual(e.message, 'message')
+        self.assertEqual('message', str(e))
+
+        # We can delete the message, for some reason
+        del e.message
 
     def test_fragment_ident_disallowed(self):
         self.assertRaises(ZConfig.ConfigurationError,
                           self.load, "simplesections.conf#another")
 
     def test_load_from_fileobj(self):
-        sio = StringIO.StringIO("%define name value\n"
-                                "getname x $name y \n")
+        sio = StringIO("%define name value\n"
+                       "getname x $name y \n")
         cf = self.loadfile(sio)
         self.assertEqual(cf.getname, "x value y")
 

@@ -18,7 +18,17 @@ Test driver for ZConfig.schemaless.
 __docformat__ = "reStructuredText"
 
 import doctest
+import unittest
 
+from ZConfig.schemaless import Section
+
+class TestSection(unittest.TestCase):
+
+    def test_init_with_data(self):
+        s = Section(data={'k': 'v'})
+        self.assertDictEqual(s, {'k': 'v'})
 
 def test_suite():
-    return doctest.DocFileSuite("schemaless.txt", package="ZConfig")
+    suite = unittest.makeSuite(TestSection)
+    suite.addTest(doctest.DocFileSuite("schemaless.txt", package="ZConfig"))
+    return suite

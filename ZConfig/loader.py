@@ -17,6 +17,9 @@ import os.path
 import re
 import sys
 
+from abc import abstractmethod
+from io import StringIO
+
 import ZConfig
 import ZConfig.cfgparser
 import ZConfig.datatypes
@@ -25,23 +28,11 @@ import ZConfig.matcher
 import ZConfig.schema
 import ZConfig.url
 
-try:
-    import StringIO as StringIO
-except ImportError:
-    # Python 3 support.
-    import io as StringIO
-
-try:
-    import urllib2
-except ImportError:
-    # Python 3 support
-    import urllib.request as urllib2
-
-try:
-    from urllib import pathname2url
-except ImportError:
-    # Python 3 support
-    from urllib.request import pathname2url
+from ZConfig._compat import reraise
+from ZConfig._compat import raise_with_same_tb
+from ZConfig._compat import urllib2
+from ZConfig._compat import AbstractBaseClass
+from ZConfig._compat import pathname2url
 
 
 def loadSchema(url):
@@ -135,7 +126,7 @@ def _get_config_loader(schema, overrides):
     return loader
 
 
-class BaseLoader(object):
+class BaseLoader(AbstractBaseClass):
     """Base class for loader objects.
 
     This should not be instantiated
@@ -189,6 +180,7 @@ class BaseLoader(object):
 
     # utilities
 
+    @abstractmethod
     def loadResource(self, resource):
         """Abstract method.
 
@@ -196,8 +188,6 @@ class BaseLoader(object):
         actually load the resource and return the appropriate
         application-level object.
         """
-        raise NotImplementedError(
-            "BaseLoader.loadResource() must be overridden by a subclass")
 
     def openResource(self, url):
         """Returns a resource object that represents the URL *url*.
@@ -224,20 +214,23 @@ class BaseLoader(object):
             except urllib2.URLError as e:
                 # urllib2.URLError has a particularly hostile str(), so we
                 # generally don't want to pass it along to the user.
-                self._raise_open_error(url, e.reason)
+                self._raise_open_error(url, e.reason) # pragma: no cover
             except (IOError, OSError) as e:
                 # Python 2.1 raises a different error from Python 2.2+,
                 # so we catch both to make sure we detect the situation.
                 self._raise_open_error(url, str(e))
-            if sys.version_info[0] >= 3:
-                # Python 3 support: file.read() returns bytes, so we convert it
-                # to an StringIO.  (Can't use io.TextIOWrapper because of
-                # http://bugs.python.org/issue16723 and probably other bugs)
-                try:
-                    data = file.read().decode()
-                finally:
-                    file.close()
-                file = StringIO.StringIO(data)
+
+            # Python 3 support: file.read() returns bytes, so we convert it
+            # to an StringIO.  (Can't use io.TextIOWrapper because of
+            # http://bugs.python.org/issue16723 and probably other bugs).
+            # Do this even on Python 2 to avoid keeping a network connection
+            # open for an unbounded amount of time and to catch IOErrors here,
+            # where they make sense.
+            try:
+                data = file.read().decode()
+            finally:
+                file.close()
+            file = StringIO(data)
         return self.createResource(file, url)
 
     def _raise_open_error(self, url, message):
@@ -247,9 +240,10 @@ class BaseLoader(object):
         else:
             what = "URL"
             ident = url
-        raise ZConfig.ConfigurationError(
+        error = ZConfig.ConfigurationError(
             "error opening %s %s: %s" % (what, ident, message),
             url)
+        raise_with_same_tb(error)
 
     def normalizeURL(self, url):
         """Return a URL for *url*
@@ -313,13 +307,26 @@ def openPackageResource(package, path):
         url = ZConfig.url.urlnormalize(url)
         return urllib2.urlopen(url)
     else:
+        v, tb = (None, None)
         for dir in pkg.__path__:
             loadpath = os.path.join(dir, path)
             try:
-                return StringIO.StringIO(
+                return StringIO(
                     loader.get_data(loadpath).decode('utf-8'))
-            except Exception:
-                pass
+            except Exception as e:
+                v = ZConfig.SchemaResourceError(
+                    "error opening schema component: " + repr(e),
+                    filename=path,
+                    package=package,
+                    path=pkg.__path__)
+                tb = sys.exc_info()[2]
+
+        if v is not None:
+            try:
+                reraise(type(v), v, tb)
+            finally:
+                del tb
+
         raise ZConfig.SchemaResourceError("schema component not found",
                                           filename=path,
                                           package=package,
@@ -362,7 +369,7 @@ class SchemaLoader(BaseLoader):
 
     def schemaComponentSource(self, package, file):
         parts = package.split(".")
-        if not parts:
+        if not parts: # pragma: no cover. can we even get here?
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + repr(package))
         if "" in parts:

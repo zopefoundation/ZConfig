@@ -39,11 +39,7 @@ __version__ = ".".join([str(n) for n in version_info])
 from ZConfig.loader import loadConfig, loadConfigFile
 from ZConfig.loader import loadSchema, loadSchemaFile
 
-try:
-    import StringIO as StringIO
-except ImportError:
-    # Python 3 support.
-    import io as StringIO
+from ZConfig._compat import TextIO
 
 
 class ConfigurationError(Exception):
@@ -218,11 +214,12 @@ class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
 
 def configureLoggers(text):
     """Configure one or more loggers from configuration text."""
-    schema = loadSchemaFile(StringIO.StringIO("""
+    schema = loadSchemaFile(TextIO("""
     <schema>
     <import package='ZConfig.components.logger'/>
     <multisection type='logger' name='*' attribute='loggers'/>
     </schema>
     """))
-    for factory in loadConfigFile(schema, StringIO.StringIO(text))[0].loggers:
+
+    for factory in loadConfigFile(schema, TextIO(text))[0].loggers:
         factory()

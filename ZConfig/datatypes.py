@@ -34,6 +34,9 @@ import re
 import sys
 import datetime
 
+from ZConfig._compat import text_type
+from ZConfig._compat import binary_type
+
 try:
     unicode
 except NameError:
@@ -277,13 +280,10 @@ class SocketConnectionAddress(SocketAddress):
 
 
 def float_conversion(v):
-    try:
-        is_str = isinstance(v, basestring)
-    except NameError:
-        # Python 3 support.
-        is_str = isinstance(v, str)
+    # float() will accept both bytes and unicode on both 2 and 3
+    is_str = isinstance(v, text_type) or isinstance(v, binary_type)
     if is_str:
-        if v.lower() in ["inf", "-inf", "nan"]:
+        if v.lower() in (u"inf", u"-inf", u"nan", b'inf', b'-inf', b'nan'):
             raise ValueError(repr(v) + " is not a portable float representation")
     return float(v)
 

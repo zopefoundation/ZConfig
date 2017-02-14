@@ -1,0 +1,16 @@
+[run]
+source = ZConfig
+
+[report]
+# Coverage is run on Py2 and Py3
+# on POSIX platforms, so omit Windows-specific
+# things. Omit the main methods of test files.
+exclude_lines =
+    pragma: no cover
+    class Win32
+    if os.name == 'nt':
+    if os.name == "nt":
+    if sys.platform == 'win32':
+    if sys.platform\[:3\] == "win":
+    if __name__ == "__main__":
+    if __name__ == '__main__':

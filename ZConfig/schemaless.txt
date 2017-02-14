@@ -46,12 +46,8 @@ open for reading.  Let's take a look at this, and what it returns::
   ...
   ... '''
 
-  >>> try:
-  ...     import StringIO
-  ... except ImportError:
-  ...     import io as StringIO
-
-  >>> config = schemaless.loadConfigFile(StringIO.StringIO(config_text))
+  >>> from ZConfig._compat import NStringIO as StringIO
+  >>> config = schemaless.loadConfigFile(StringIO(config_text))
 
 The `config` object is a mapping from top-level keys to lists of
 values::
@@ -200,7 +196,7 @@ other elements of a configuration are::
   ...
   ... '''
 
-  >>> config = schemaless.loadConfigFile(StringIO.StringIO(config_text))
+  >>> config = schemaless.loadConfigFile(StringIO(config_text))
 
   >>> print(config)
   %import some.package
@@ -231,7 +227,7 @@ Multiple imports of the same name are removed::
   ...
   ... '''
 
-  >>> config = schemaless.loadConfigFile(StringIO.StringIO(config_text))
+  >>> config = schemaless.loadConfigFile(StringIO(config_text))
 
   >>> print(config)
   %import some.package
@@ -280,7 +276,7 @@ raised when loading the configuration::
   ...
   ... '''
 
-  >>> schemaless.loadConfigFile(StringIO.StringIO(config_text))
+  >>> schemaless.loadConfigFile(StringIO(config_text))
   Traceback (most recent call last):
   NotImplementedError: defines are not supported
 
@@ -292,6 +288,6 @@ A similar exception is raised for %include::
   ...
   ... '''
 
-  >>> schemaless.loadConfigFile(StringIO.StringIO(config_text))
+  >>> schemaless.loadConfigFile(StringIO(config_text))
   Traceback (most recent call last):
   NotImplementedError: includes are not supported

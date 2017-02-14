@@ -14,7 +14,11 @@
 
 _marker = object()
 
-class Factory:
+from abc import abstractmethod
+
+from ZConfig._compat import AbstractBaseClass
+
+class Factory(AbstractBaseClass):
     """Generic wrapper for instance construction.
 
     Calling the factory causes the instance to be created if it hasn't
@@ -32,5 +36,6 @@ class Factory:
             self.instance = self.create()
         return self.instance
 
+    @abstractmethod
     def create(self):
-        raise NotImplementedError("subclasses need to override create()")
+        "Subclasses must override create()"

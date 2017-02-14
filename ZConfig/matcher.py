@@ -13,9 +13,12 @@
 ##############################################################################
 """Utility that manages the binding of configuration data to a section."""
 
+import sys
+
 import ZConfig
 
 from ZConfig.info import ValueInfo
+from ZConfig._compat import raise_with_same_tb
 
 
 class BaseMatcher(object):
@@ -33,9 +36,7 @@ class BaseMatcher(object):
             assert info.attribute is not None
             self._values[info.attribute] = v
         self._sectionnames = {}
-        if handlers is None:
-            handlers = []
-        self.handlers = handlers
+        self.handlers = handlers if handlers is not None else []
 
     def __repr__(self):
         clsname = self.__class__.__name__
@@ -56,7 +57,7 @@ class BaseMatcher(object):
             v.append(sectvalue)
         elif v is None:
             self._values[attr] = sectvalue
-        else:
+        else: # pragma: no cover
             raise ZConfig.ConfigurationError(
                 "too many instances of %s section" % repr(ci.sectiontype.name))
 
@@ -77,7 +78,7 @@ class BaseMatcher(object):
                 raise ZConfig.ConfigurationError(
                     repr(key) + " is not a known key name")
             k, ci = arbkey_info
-        if ci.issection():
+        if ci.issection(): # pragma: no cover
             if ci.name:
                 extra = " in %s sections" % repr(self.type.name)
             else:
@@ -91,17 +92,20 @@ class BaseMatcher(object):
         v = self._values[attr]
         if v is None:
             if k == '+':
-                v = {}
+                v = {} # pragma: no cover
             elif ismulti:
-                v = []
+                v = [] # pragma: no cover
             self._values[attr] = v
         elif not ismulti:
             if k != '+':
                 raise ZConfig.ConfigurationError(
                     repr(key) + " does not support multiple values")
-        elif len(v) == ci.maxOccurs:
+        elif len(v) == ci.maxOccurs: # pragma: no cover
+            # This code may be impossible to hit. Previously it would
+            # have raised a NameError because it used an unbound
+            # local.
             raise ZConfig.ConfigurationError(
-                "too many values for " + repr(name))
+                "too many values for " + repr(ci))
 
         value = ValueInfo(value, position)
         if k == '+':
@@ -111,7 +115,7 @@ class BaseMatcher(object):
                 else:
                     v[realkey] = [value]
             else:
-                if realkey in v:
+                if realkey in v: # pragma: no cover
                     raise ZConfig.ConfigurationError(
                         "too many values for " + repr(key))
                 v[realkey] = value
@@ -153,7 +157,7 @@ class BaseMatcher(object):
                     raise ZConfig.ConfigurationError(
                         "no values for %s; %s required" % (key, ci.minOccurs))
                 else:
-                    v = values[attr] = default[:]
+                    v = values[attr] = default[:] # pragma: no cover
             if ci.ismulti():
                 if not v:
                     default = ci.getdefault()
@@ -167,7 +171,7 @@ class BaseMatcher(object):
                         % (key, len(v), ci.minOccurs))
             if v is None and not ci.issection():
                 if ci.ismulti():
-                    v = ci.getdefault()[:]
+                    v = ci.getdefault()[:] # pragma: no cover
                 else:
                     v = ci.getdefault()
                 values[attr] = v
@@ -187,8 +191,9 @@ class BaseMatcher(object):
                             try:
                                 s = st.datatype(s)
                             except ValueError as e:
-                                raise ZConfig.DataConversionError(
-                                    e, s, (-1, -1, None))
+                                raise_with_same_tb(ZConfig.DataConversionError(
+                                    e, s, (-1, -1, None)))
+
                         v.append(s)
                 elif ci.name == '+':
                     v = values[attr]
@@ -202,8 +207,9 @@ class BaseMatcher(object):
                     try:
                         v = st.datatype(values[attr])
                     except ValueError as e:
-                        raise ZConfig.DataConversionError(
-                            e, values[attr], (-1, -1, None))
+                        raise_with_same_tb(ZConfig.DataConversionError(
+                            e, values[attr], (-1, -1, None)))
+
                 else:
                     v = None
             elif name == '+':

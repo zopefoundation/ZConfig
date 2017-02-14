@@ -21,21 +21,12 @@ import ZConfig
 from ZConfig.loader import ConfigLoader
 from ZConfig.url import urljoin
 
-try:
-    import StringIO
-except ImportError:
-    # Python 3 support.
-    import io as StringIO
-
-try:
-    from urllib import pathname2url
-except ImportError:
-    # Python 3 support.
-    from urllib.request import pathname2url
+from ZConfig._compat import NStringIO as StringIO
+from ZConfig._compat import pathname2url
 
 try:
     __file__
-except NameError:
+except NameError: # pragma: no cover
     import sys
     __file__ = sys.argv[0]
 
@@ -61,7 +52,7 @@ class TestHelper:
         return self.schema
 
     def load_schema_text(self, text, url=None):
-        sio = StringIO.StringIO(text)
+        sio = StringIO(text)
         self.schema = ZConfig.loadSchemaFile(sio, url)
         return self.schema
 
@@ -73,7 +64,7 @@ class TestHelper:
         return self.conf
 
     def load_config_text(self, schema, text, num_handlers=0, url=None):
-        sio = StringIO.StringIO(text)
+        sio = StringIO(text)
         loader = self.create_config_loader(schema)
         self.conf, self.handlers = loader.loadFile(sio, url)
         self.assertEqual(len(self.handlers), num_handlers)

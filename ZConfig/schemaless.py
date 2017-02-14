@@ -26,7 +26,7 @@ def loadConfigFile(file, url=None):
     return c.top
 
 
-class Resource:
+class Resource(object):
 
     def __init__(self, file, url=''):
         self.file, self.url = file, url
@@ -75,7 +75,7 @@ class Section(dict):
 
         for section in self.sections:
             result.append(section.__str__(pre))
-        
+
         if self.type:
             pre = pre[:-2]
             result.append('%s</%s>' % (pre, self.type))
@@ -87,7 +87,7 @@ class Section(dict):
         return result
 
 
-class Context:
+class Context(object):
 
     def __init__(self):
         self.top = Section()
