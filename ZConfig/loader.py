@@ -29,6 +29,7 @@ import ZConfig.schema
 import ZConfig.url
 
 from ZConfig._compat import reraise
+from ZConfig._compat import raise_with_same_tb
 from ZConfig._compat import urllib2
 from ZConfig._compat import AbstractBaseClass
 from ZConfig._compat import pathname2url
@@ -242,8 +243,7 @@ class BaseLoader(AbstractBaseClass):
         error = ZConfig.ConfigurationError(
             "error opening %s %s: %s" % (what, ident, message),
             url)
-
-        reraise(type(error), error, sys.exc_info()[2])
+        raise_with_same_tb(error)
 
     def normalizeURL(self, url):
         """Return a URL for *url*

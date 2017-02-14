@@ -89,6 +89,11 @@ else: # pragma: no cover
     raise tp, value, tb
 """)
 
-import abc
 
+def raise_with_same_tb(exception):
+	"Raise an exception having the current traceback (if there is one)"
+	reraise(type(exception), exception, sys.exc_info()[2])
+
+import abc
+# workaround the metaclass diff in Py2/Py3
 AbstractBaseClass = abc.ABCMeta('AbstractBaseClass', (object,), {})

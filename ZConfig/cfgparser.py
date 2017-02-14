@@ -18,7 +18,7 @@ import ZConfig
 import ZConfig.url
 
 from ZConfig.substitution import isname, substitute
-from ZConfig._compat import reraise
+from ZConfig._compat import raise_with_same_tb
 
 class ZConfigParser(object):
 
@@ -170,8 +170,10 @@ class ZConfigParser(object):
             raise
 
     def error(self, message):
-        v = ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)
-        reraise(type(v), v, sys.exc_info()[2])
+        raise_with_same_tb(
+            ZConfig.ConfigurationSyntaxError(
+                message, self.url, self.lineno))
+
 
     def _normalize_case(self, string):
         # This method is factored out solely to allow subclasses to modify

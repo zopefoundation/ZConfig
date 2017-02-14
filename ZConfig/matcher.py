@@ -18,7 +18,7 @@ import sys
 import ZConfig
 
 from ZConfig.info import ValueInfo
-from ZConfig._compat import reraise
+from ZConfig._compat import raise_with_same_tb
 
 
 class BaseMatcher(object):
@@ -191,9 +191,9 @@ class BaseMatcher(object):
                             try:
                                 s = st.datatype(s)
                             except ValueError as e:
-                                dce = ZConfig.DataConversionError(
-                                    e, s, (-1, -1, None))
-                                reraise(type(dce), dce, sys.exc_info()[2])
+                                raise_with_same_tb(ZConfig.DataConversionError(
+                                    e, s, (-1, -1, None)))
+
                         v.append(s)
                 elif ci.name == '+':
                     v = values[attr]
@@ -207,9 +207,9 @@ class BaseMatcher(object):
                     try:
                         v = st.datatype(values[attr])
                     except ValueError as e:
-                        dce = ZConfig.DataConversionError(
-                            e, values[attr], (-1, -1, None))
-                        reraise(type(dce), dce, sys.exc_info()[2])
+                        raise_with_same_tb(ZConfig.DataConversionError(
+                            e, values[attr], (-1, -1, None)))
+
                 else:
                     v = None
             elif name == '+':

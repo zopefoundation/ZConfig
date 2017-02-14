@@ -30,7 +30,7 @@ import ZConfig
 import ZConfig.loader
 import ZConfig.matcher
 
-from ZConfig._compat import reraise
+from ZConfig._compat import raise_with_same_tb
 
 class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
     """A :class:`~.ConfigLoader` subclass that adds support for
@@ -118,9 +118,8 @@ class OptionBag(object):
         try:
             return self._basic_key(s)
         except ValueError as e:
-            e = ZConfig.ConfigurationSyntaxError(
-                "could not convert basic-key value: " + str(e), *pos)
-            reraise(type(e), e, sys.exc_info()[2])
+            raise_with_same_tb(ZConfig.ConfigurationSyntaxError(
+                "could not convert basic-key value: " + str(e), *pos))
 
     def add_value(self, name, val, pos):
         if name in self.keypairs:
@@ -185,8 +184,8 @@ class MatcherMixin(object):
         try:
             realkey = self.type.keytype(key)
         except ValueError as e:
-            dce = ZConfig.DataConversionError(e, key, position)
-            reraise(type(dce), dce, sys.exc_info()[2])
+            raise_with_same_tb(ZConfig.DataConversionError(e, key, position))
+
         if realkey in self.optionbag:
             return
         ZConfig.matcher.BaseMatcher.addValue(self, key, value, position)

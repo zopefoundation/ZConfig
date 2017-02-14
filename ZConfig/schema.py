@@ -22,7 +22,7 @@ import ZConfig
 from ZConfig import info
 from ZConfig import url
 
-from ZConfig._compat import reraise
+from ZConfig._compat import raise_with_same_tb
 
 BLANK = u''
 
@@ -469,8 +469,7 @@ class BaseParser(xml.sax.ContentHandler):
         return e
 
     def error(self, message):
-        e = self.initerror(ZConfig.SchemaError(message))
-        reraise(type(e), e, sys.exc_info()[2])
+        raise_with_same_tb(self.initerror(ZConfig.SchemaError(message)))
 
 
 class SchemaParser(BaseParser):
