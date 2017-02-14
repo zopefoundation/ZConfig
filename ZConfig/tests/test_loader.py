@@ -28,12 +28,7 @@ from ZConfig._compat import urllib2
 from ZConfig.tests.support import CONFIG_BASE, TestHelper
 
 
-try:
-    myfile = __file__
-except NameError: # pragma: no cover
-    myfile = sys.argv[0]
-
-myfile = os.path.abspath(myfile)
+myfile = os.path.abspath(__file__)
 LIBRARY_DIR = os.path.join(os.path.dirname(myfile), "library")
 
 

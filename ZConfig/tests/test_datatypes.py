@@ -23,12 +23,7 @@ import unittest
 
 import ZConfig.datatypes
 
-try:
-    here = __file__
-except NameError: # pragma: no cover
-    here = sys.argv[0]
-
-here = os.path.abspath(here)
+here = os.path.abspath(__file__)
 
 try:
     unicode
