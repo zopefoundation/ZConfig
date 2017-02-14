@@ -280,12 +280,8 @@ class SocketConnectionAddress(SocketAddress):
 
 
 def float_conversion(v):
-    # float() will accept both bytes and unicode on both 2 and 3
-    is_str = isinstance(v, text_type) or isinstance(v, binary_type)
-    if is_str:
-        if v.lower() in (u"inf", u"-inf", u"nan", b'inf', b'-inf', b'nan'):
-            raise ValueError(repr(v) + " is not a portable float representation")
     return float(v)
+
 
 class IpaddrOrHostname(RegularExpressionConversion):
     def __init__(self):
