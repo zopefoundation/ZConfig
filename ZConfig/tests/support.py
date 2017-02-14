@@ -24,12 +24,6 @@ from ZConfig.url import urljoin
 from ZConfig._compat import NStringIO as StringIO
 from ZConfig._compat import pathname2url
 
-try:
-    __file__
-except NameError: # pragma: no cover
-    import sys
-    __file__ = sys.argv[0]
-
 d = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
 CONFIG_BASE = "file://%s/" % pathname2url(d)
 
