@@ -86,15 +86,15 @@ class DatatypeTestCase(unittest.TestCase):
         raises(ValueError, convert, "0x234.1.9")
         raises(ValueError, convert, "0.9-")
 
-        # These are not portable representations; make sure they are
-        # disallowed everywhere for consistency.
-        raises(ValueError, convert, b"inf")
-        raises(ValueError, convert, b"-inf")
-        raises(ValueError, convert, b"nan")
+        # float handles inf/nan portably in both bytes and
+        # unicode on both Python 2.6+ and Python 3. Make sure conversion
+        # does too.
+        for literal in ("inf", "-inf", b"inf", b"-inf"):
+            eq(convert(literal), float(literal))
 
-        raises(ValueError, convert, u"inf")
-        raises(ValueError, convert, u"-inf")
-        raises(ValueError, convert, u"nan")
+        # notably, nan is not equal to itself
+        self.assertNotEqual(convert("nan"), float("nan"))
+        self.assertNotEqual(convert(b"nan"), float(b"nan"))
 
     def test_datatype_identifier(self):
         convert = self.types.get("identifier")
