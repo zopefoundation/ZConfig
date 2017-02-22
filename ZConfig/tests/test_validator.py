@@ -20,30 +20,10 @@ import unittest
 from ZConfig import validator
 
 from .support import input_file
+from .support import with_stdin_from_input_file
 
 def run_validator(*args):
     return validator.main(args)
-
-def with_stdin_from_input_file(fname):
-    input_fname = input_file(fname)
-    @contextlib.contextmanager
-    def stdin_replaced():
-        old_stdin = sys.stdin
-        sys.stdin = open(input_fname)
-        try:
-            yield
-        finally:
-            sys.stdin = old_stdin
-
-    def make_wrapper(f):
-        def f2(self):
-            with stdin_replaced():
-                f(self)
-        return f2
-
-    return make_wrapper
-
-
 
 class TestValidator(unittest.TestCase):
 
