@@ -14,3 +14,11 @@ that can validate both schemas and configurations written against
 those schemas:
 
   .. program-output:: zconfig --help
+
+Documenting Schemas
+===================
+
+ZConfig also installs a tool called ``zconfig_schema2html`` that can
+print schemas in a simple HTML format:
+
+  .. program-output:: zconfig_schema2html --help

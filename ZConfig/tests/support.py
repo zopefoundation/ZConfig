@@ -14,7 +14,9 @@
 
 """Support code shared among the tests."""
 
+import contextlib
 import os
+import sys
 
 import ZConfig
 
@@ -29,6 +31,27 @@ CONFIG_BASE = "file://%s/" % pathname2url(INPUT_DIR)
 
 def input_file(fname):
     return os.path.abspath(os.path.join(INPUT_DIR, fname))
+
+def with_stdin_from_input_file(fname):
+    input_fname = input_file(fname)
+    @contextlib.contextmanager
+    def stdin_replaced():
+        old_stdin = sys.stdin
+        sys.stdin = open(input_fname)
+        try:
+            yield
+        finally:
+            sys.stdin.close()
+            sys.stdin = old_stdin
+
+    def make_wrapper(f):
+        def f2(self):
+            with stdin_replaced():
+                f(self)
+        return f2
+
+    return make_wrapper
+
 
 class TestHelper(object):
     """Utility methods which can be used with the schema support."""

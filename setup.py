@@ -51,10 +51,10 @@ options = dict(
         "ZConfig.tests.library.thing",
         "ZConfig.tests.library.widget",
         ],
-    scripts=["scripts/zconfig_schema2html"],
     entry_points={
         'console_scripts': [
             'zconfig = ZConfig.validator:main',
+            'zconfig_schema2html = ZConfig.schema2html:main',
         ],
     },
     include_package_data=True,
