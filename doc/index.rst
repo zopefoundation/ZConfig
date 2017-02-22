@@ -32,6 +32,7 @@ Development of ZConfig is hosted on `GitHub <https://github.com/zopefoundation/Z
    using-zconfig
    developing-with-zconfig
    zconfig
+   tools
 
 .. toctree::
    :maxdepth: 1
