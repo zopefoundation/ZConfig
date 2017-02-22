@@ -14,7 +14,11 @@ Change History for ZConfig
 - BaseLoader is now an abstract class that cannot be instantiated.
 
 - Allow ``nan``, ``inf`` and ``-inf`` values for floats in
-  configurations. See https://github.com/zopefoundation/ZConfig/issues/16.
+  configurations. See
+  https://github.com/zopefoundation/ZConfig/issues/16.
+
+- Scripts ``zconfig`` (for schema validation) and
+  ``zconfig_schema2html`` are ported to Python 3.
 
 3.1.0 (2015-10-17)
 ------------------
