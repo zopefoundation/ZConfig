@@ -1321,7 +1321,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
 
 
 def test_suite():
-    return unittest.makeSuite(SchemaTestCase)
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

@@ -434,10 +434,7 @@ my_sample_datatype = 42
 
 
 def test_suite():
-    suite = unittest.makeSuite(DatatypeTestCase)
-    suite.addTest(unittest.makeSuite(RegistryTestCase))
-    return suite
-
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

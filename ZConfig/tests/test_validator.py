@@ -13,8 +13,6 @@
 ##############################################################################
 from __future__ import absolute_import
 
-import contextlib
-import sys
 import unittest
 
 from ZConfig import validator
@@ -53,7 +51,7 @@ class TestValidator(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.makeSuite(TestValidator)
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
 
-if __name__ == "__main__":
-    unittest.main(defaultTest="test_suite")
+if __name__ == '__main__':
+    unittest.main(defaultTest='test_suite')

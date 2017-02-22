@@ -441,7 +441,21 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         return logger
 
 
-class TestReopeningRotatingLogfiles(LoggingTestHelper, unittest.TestCase):
+if os.name == 'nt':
+    # Though log files can be closed and re-opened on Windows, these
+    # tests expect to be able to move the underlying files out from
+    # underneath the logger while open.  That's not possible on
+    # Windows. So we don't extend TestCase so that they don't get run.
+    #
+    # Different tests are needed that only test that close/re-open
+    # operations are performed by the handler; those can be run on
+    # any platform.
+    _RotateTestBase = object
+else:
+    _RotateTestBase = unittest.TestCase
+
+
+class TestReopeningRotatingLogfiles(LoggingTestHelper, _RotateTestBase):
 
     # These tests should not be run on Windows.
 
@@ -837,23 +851,10 @@ We'll configure the rot logger and a non-root logger.
     """
 
 def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite())
-    suite.addTest(unittest.makeSuite(TestConfig))
-    suite.addTest(unittest.makeSuite(TestFunctions))
-    suite.addTest(unittest.makeSuite(TestStartupHandler))
-    if os.name != "nt":
-        # Though log files can be closed and re-opened on Windows, these
-        # tests expect to be able to move the underlying files out from
-        # underneath the logger while open.  That's not possible on
-        # Windows.
-        #
-        # Different tests are needed that only test that close/re-open
-        # operations are performed by the handler; those can be run on
-        # any platform.
-        suite.addTest(unittest.makeSuite(TestReopeningLogfiles))
-        suite.addTest(unittest.makeSuite(TestReopeningRotatingLogfiles))
-    return suite
+    return unittest.TestSuite([
+        unittest.defaultTestLoader.loadTestsFromName(__name__),
+        doctest.DocTestSuite()
+    ])
 
 if __name__ == '__main__':
     unittest.main(defaultTest="test_suite")

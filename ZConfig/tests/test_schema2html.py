@@ -81,7 +81,7 @@ class TestSchema2HTML(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.makeSuite(TestSchema2HTML)
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
 
-if __name__ == "__main__":
-    unittest.main(defaultTest="test_suite")
+if __name__ == '__main__':
+    unittest.main(defaultTest='test_suite')
