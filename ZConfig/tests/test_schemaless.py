@@ -28,7 +28,12 @@ class TestSection(unittest.TestCase):
         s = Section(data={'k': 'v'})
         self.assertDictEqual(s, {'k': 'v'})
 
+
 def test_suite():
-    suite = unittest.makeSuite(TestSection)
-    suite.addTest(doctest.DocFileSuite("schemaless.txt", package="ZConfig"))
-    return suite
+    return unittest.TestSuite([
+        unittest.defaultTestLoader.loadTestsFromName(__name__),
+        doctest.DocFileSuite("schemaless.txt", package="ZConfig")
+    ])
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='test_suite')

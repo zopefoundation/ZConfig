@@ -212,17 +212,9 @@ class SchemaTypeTestCase(unittest.TestCase):
                                 schema.addComponent,
                                 'name')
 
-def test_suite():
-    suite = unittest.makeSuite(UnboundTestCase)
-    suite.addTest(unittest.makeSuite(BaseInfoTestCase))
-    suite.addTest(unittest.makeSuite(BaseKeyInfoTestCase))
-    suite.addTest(unittest.makeSuite(KeyInfoTestCase))
-    suite.addTest(unittest.makeSuite(SectionInfoTestCase))
-    suite.addTest(unittest.makeSuite(AbstractTypeTestCase))
-    suite.addTest(unittest.makeSuite(SectionTypeTestCase))
-    suite.addTest(unittest.makeSuite(SchemaTypeTestCase))
-    return suite
 
+def test_suite():
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

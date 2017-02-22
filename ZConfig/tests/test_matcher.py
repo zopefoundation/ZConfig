@@ -141,11 +141,7 @@ class BaseMatcherTestCase(unittest.TestCase):
 
 
 def test_suite():
-    suite = unittest.makeSuite(SectionValueTestCase)
-    suite.addTest(unittest.makeSuite(SectionMatcherTestCase))
-    suite.addTest(unittest.makeSuite(BaseMatcherTestCase))
-    return suite
-
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

@@ -409,11 +409,7 @@ class TestOpenPackageResource(unittest.TestCase):
 
 
 def test_suite():
-    suite = unittest.makeSuite(LoaderTestCase)
-    suite.addTest(unittest.makeSuite(TestNonExistentResources))
-    suite.addTest(unittest.makeSuite(TestResourcesInZip))
-    suite.addTest(unittest.makeSuite(TestOpenPackageResource))
-    return suite
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
