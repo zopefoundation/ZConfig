@@ -22,6 +22,7 @@ import ZConfig.loader
 from ZConfig.info import SectionType
 from ZConfig.info import SectionInfo
 from ZConfig.info import ValueInfo
+from ZConfig.info import AbstractType
 
 def esc(x):
     return cgi.escape(str(x))
@@ -32,7 +33,10 @@ def dt(x):
     if isinstance(x, type):
         return '%s %s' % (tn, x.__module__ + '.' + x.__name__)
 
-    return '%s %s' % (tn, x.__name__)
+    if hasattr(x, '__name__'):
+        return '%s %s' % (tn, x.__name__)
+
+    return tn
 
 class explain(object):
     done = []
@@ -88,6 +92,13 @@ def printContents(name, info, file=None):
             for sub in info.sectiontype:
                 printContents(*sub, file=out)
             print('</dl></dd>', file=out)
+    elif isinstance(info, AbstractType):
+        print('<dt><b><i>', info.name, '</i></b>', file=out)
+        print('<dd>', file=out)
+        if info.description:
+            print(info.description, file=out) # pragma: no cover
+        explain(info, file=out)
+        print('</dd>', file=out)
     else:
         print('<dt><b>',info.name, '</b>', '(%s)' % dt(info.datatype), file=out)
         default = info.getdefault()
@@ -108,26 +119,47 @@ def main(argv=None):
         description="Print an HTML version of a schema")
     argparser.add_argument(
         "schema",
-        help="The schema to print",
-        default="-",
-        type=argparse.FileType('r'))
+        metavar='[SCHEMA-OR-PACKAGE]',
+        help="The schema to print. By default, a file. Optionally, a Python package."
+             " If not given, defaults to reading a schema file from stdin",
+        default="-"
+        )
     argparser.add_argument(
         "--out", "-o",
         help="Write the schema to this file; if not given, write to stdout",
         type=argparse.FileType('w'))
+    argparser.add_argument(
+        "--package",
+        action='store_true',
+        default=False,
+        help="The SCHEMA-OR-PACKAGE argument indicates a Python package instead of a file."
+             " The component.xml (by default) from the package will be read.")
+    argparser.add_argument(
+        "--package-file",
+        action="store",
+        default="component.xml",
+        help="When PACKAGE is given, this can specify the file inside it to load.")
 
     args = argparser.parse_args(argv)
 
     out = args.out or sys.stdout
 
-    schema = ZConfig.loader.loadSchemaFile(args.schema)
+    if not args.package:
+        schema_reader = argparse.FileType('r')(args.schema)
+    else:
+        schema_template = "<schema><import package='%s' file='%s' /></schema>" % (
+            args.schema, args.package_file)
+        from ZConfig._compat import TextIO
+        schema_reader = TextIO(schema_template)
+
+    schema = ZConfig.loader.loadSchemaFile(schema_reader)
 
     print('''<html><body>
     <style>
     dl {margin: 0 0 1em 0;}
     </style>
     ''', file=out)
-    printSchema(schema, out)
+    printSchema(iter(schema) if not args.package else schema.itertypes(), out)
     print('</body></html>', file=out)
 
     return 0

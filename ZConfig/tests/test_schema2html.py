@@ -49,7 +49,7 @@ def run_transform(*args):
         with stdout_replaced(buf):
             schema2html.main(args)
         return buf
-    return schema2html.main(args)
+    return schema2html.main(args) # pragma: no cover
 
 
 
@@ -79,6 +79,9 @@ class TestSchema2HTML(unittest.TestCase):
             res = run_transform(input_file(name))
             self.assertIn('</html>', res.getvalue())
 
+    def test_cover_logging_components(self):
+        res = run_transform('--package', 'ZConfig.components.logger')
+        self.assertIn('eventlog', res.getvalue())
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)

@@ -269,13 +269,18 @@ class SectionInfo(BaseInfo):
 
 
 class AbstractType(object):
-
+    # This isn't actually "abstract" in the Python ABC sense,
+    # it's only abstract from the schema sense. This class is
+    # instantiated, and not expected to be subclassed.
     __slots__ = '_subtypes', 'name', 'description'
 
     def __init__(self, name):
         self._subtypes = {}
         self.name = name
         self.description = None
+
+    def __iter__(self):
+        return iter(sorted(self._subtypes.items()))
 
     def addsubtype(self, type):
         self._subtypes[type.name] = type
@@ -333,6 +338,12 @@ class SectionType(object):
 
     def __getitem__(self, index):
         return self._children[index]
+
+    def __iter__(self):
+        return iter(self._children)
+
+    def itertypes(self):
+        return iter(sorted(self._types.items()))
 
     def _add_child(self, key, info):
         # check naming constraints
