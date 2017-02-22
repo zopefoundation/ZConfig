@@ -24,11 +24,13 @@ from ZConfig.url import urljoin
 from ZConfig._compat import NStringIO as StringIO
 from ZConfig._compat import pathname2url
 
-d = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
-CONFIG_BASE = "file://%s/" % pathname2url(d)
+INPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
+CONFIG_BASE = "file://%s/" % pathname2url(INPUT_DIR)
 
+def input_file(fname):
+    return os.path.abspath(os.path.join(INPUT_DIR, fname))
 
-class TestHelper:
+class TestHelper(object):
     """Utility methods which can be used with the schema support."""
 
     # Not derived from unittest.TestCase; some test runners seem to

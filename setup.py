@@ -1,3 +1,9 @@
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
+
 with open("README.rst") as f:
     README = f.read()
 with open("CHANGES.rst") as f:
@@ -45,7 +51,12 @@ options = dict(
         "ZConfig.tests.library.thing",
         "ZConfig.tests.library.widget",
         ],
-    scripts=["scripts/zconfig", "scripts/zconfig_schema2html"],
+    scripts=["scripts/zconfig_schema2html"],
+    entry_points={
+        'console_scripts': [
+            'zconfig = ZConfig.validator:main',
+        ],
+    },
     include_package_data=True,
     zip_safe=False,
     classifiers=[
@@ -72,12 +83,11 @@ options = dict(
     tests_require=tests_require,
     extras_require={
         'test': tests_require,
+        'docs': [
+            'nti.sphinxcontrib-programoutput',
+        ]
     },
-    )
+)
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
 
 setup(**options)
