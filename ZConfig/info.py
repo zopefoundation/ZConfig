@@ -17,6 +17,7 @@ import copy
 import ZConfig
 
 from abc import abstractmethod
+from collections import OrderedDict
 from functools import total_ordering
 
 from ZConfig._compat import AbstractBaseClass
@@ -137,7 +138,7 @@ class BaseKeyInfo(AbstractBaseClass, BaseInfo):
         assert self.name == "+"
         if self._rawdefaults is None:
             self._rawdefaults = self._default
-        self._default = {}
+        self._default = OrderedDict()
 
 
 class KeyInfo(BaseKeyInfo):
@@ -148,7 +149,7 @@ class KeyInfo(BaseKeyInfo):
         BaseKeyInfo.__init__(self, name, datatype, minOccurs, 1,
                              handler, attribute)
         if self.name == "+":
-            self._default = {}
+            self._default = OrderedDict()
 
     def add_valueinfo(self, vi, key):
         if self.name == "+":
@@ -184,7 +185,7 @@ class MultiKeyInfo(BaseKeyInfo):
         BaseKeyInfo.__init__(self, name, datatype, minOccurs, maxOccurs,
                              handler, attribute)
         if self.name == "+":
-            self._default = {}
+            self._default = OrderedDict()
         else:
             self._default = []
 
@@ -269,13 +270,18 @@ class SectionInfo(BaseInfo):
 
 
 class AbstractType(object):
-
+    # This isn't actually "abstract" in the Python ABC sense,
+    # it's only abstract from the schema sense. This class is
+    # instantiated, and not expected to be subclassed.
     __slots__ = '_subtypes', 'name', 'description'
 
     def __init__(self, name):
-        self._subtypes = {}
+        self._subtypes = OrderedDict()
         self.name = name
         self.description = None
+
+    def __iter__(self):
+        return iter(self._subtypes.items())
 
     def addsubtype(self, type):
         self._subtypes[type.name] = type
@@ -314,8 +320,8 @@ class SectionType(object):
         self.example = None
         self.registry = registry
         self._children = []    # [(key, info), ...]
-        self._attrmap = {}     # {attribute: info, ...}
-        self._keymap = {}      # {key: info, ...}
+        self._attrmap = OrderedDict()     # {attribute: info, ...}
+        self._keymap = OrderedDict()      # {key: info, ...}
         self._types = types
 
     def gettype(self, name):
@@ -333,6 +339,12 @@ class SectionType(object):
 
     def __getitem__(self, index):
         return self._children[index]
+
+    def __iter__(self):
+        return iter(self._children)
+
+    def itertypes(self):
+        return iter(sorted(self._types.items()))
 
     def _add_child(self, key, info):
         # check naming constraints
@@ -367,7 +379,7 @@ class SectionType(object):
             raise ZConfig.ConfigurationError("no key matching " + repr(key))
 
     def getrequiredtypes(self):
-        d = {}
+        d = OrderedDict()
         if self.name:
             d[self.name] = 1
         stack = [self]
@@ -432,7 +444,7 @@ class SchemaType(SectionType):
                  registry):
         SectionType.__init__(self, None, keytype, valuetype, datatype,
                              registry, {})
-        self._components = {}
+        self._components = OrderedDict()
         self.handler = handler
         self.url = url
 
