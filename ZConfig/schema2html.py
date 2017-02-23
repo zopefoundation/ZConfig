@@ -15,6 +15,7 @@ from __future__ import print_function
 
 import argparse
 import functools
+import itertools
 import sys
 import cgi
 
@@ -29,19 +30,6 @@ from ZConfig.info import AbstractType
 def esc(x):
     return cgi.escape(str(x))
 
-def dt(x):
-
-    tn = type(x).__name__
-
-    if isinstance(x, type):
-        return '%s %s' % (tn, x.__module__ + '.' + x.__name__)
-
-    if hasattr(x, '__name__'):
-        return '%s %s' % (tn, x.__name__)
-
-    return tn # pragma: no cover
-
-
 class SchemaPrinter(object):
 
     def __init__(self, schema, stream=None):
@@ -49,13 +37,14 @@ class SchemaPrinter(object):
         stream = stream or sys.stdout
         self.write = functools.partial(print, file=stream)
         self._explained = []
+        self._dt = schema.registry.find_name
+        self._seen_typenames = set()
 
     def _explain(self, st):
         if st.name in self._explained: # pragma: no cover
             return
 
         self._explained.append(st.name)
-
 
         if st.description:
             self.write(st.description)
@@ -64,15 +53,21 @@ class SchemaPrinter(object):
             self.printContents(None, st.getsubtype(sub))
             self.write('</dl>')
 
+    def _iter_schema_items(self):
+        return itertools.chain(self.schema, self.schema.itertypes())
+
     def printSchema(self):
         self.write('<dl>')
-        for child in self.schema:
+        for child in self._iter_schema_items():
             self.printContents(*child)
         self.write('</dl>')
 
     def printContents(self, name, info):
         if isinstance(info, SectionType):
-            self.write('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % dt(info.datatype))
+            if info.name in self._seen_typenames:
+                return
+            self._seen_typenames.add(info.name)
+            self.write('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % self._dt(info.datatype))
             self.write('<dd>')
             if info.description:
                 self.write(info.description)
@@ -91,7 +86,7 @@ class SchemaPrinter(object):
                 self.write('</dd>')
             else:
                 self.write('<dt><b>', info.attribute, info.name, '</b>')
-                self.write('(%s)</dt>' % dt(info.datatype))
+                self.write('(%s)</dt>' % self._dt(info.datatype))
                 self.write('<dd><dl>')
                 for sub in info.sectiontype:
                     self.printContents(*sub)
@@ -104,7 +99,7 @@ class SchemaPrinter(object):
             self._explain(info)
             self.write('</dd>')
         else:
-            self.write('<dt><b>',info.name, '</b>', '(%s)' % dt(info.datatype))
+            self.write('<dt><b>',info.name, '</b>', '(%s)' % self._dt(info.datatype))
             default = info.getdefault()
             if isinstance(default, ValueInfo):
                 self.write('(default: %r)' % esc(default.value))
@@ -114,7 +109,7 @@ class SchemaPrinter(object):
                 self.write('(metadefault: %s)' % info.metadefault)
             self.write('</dt>')
             if info.description:
-                self.write('<dd>',info.description,'</dd>')
+                self.write('<dd>', info.description,'</dd>')
 
 def main(argv=None):
     argv = argv or sys.argv[1:]
@@ -163,7 +158,7 @@ def main(argv=None):
     dl {margin: 0 0 1em 0;}
     </style>
     ''', file=out)
-    SchemaPrinter(iter(schema) if not args.package else schema.itertypes(), out).printSchema()
+    SchemaPrinter(schema, out).printSchema()
     print('</body></html>', file=out)
 
     return 0
