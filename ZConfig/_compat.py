@@ -19,9 +19,11 @@ PY3 = sys.version_info[0] >= 3
 # Native string object IO
 if str is not bytes:
     from io import StringIO as NStringIO
+    string_types = str
 else:
     # Python 2
     from io import BytesIO as NStringIO
+    string_types = str, unicode
 
 NStringIO = NStringIO
 

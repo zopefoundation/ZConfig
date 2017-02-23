@@ -15,7 +15,6 @@ from __future__ import print_function
 
 import argparse
 from contextlib import contextmanager
-import functools
 import itertools
 import sys
 import cgi
@@ -27,6 +26,8 @@ from ZConfig.info import SectionType
 from ZConfig.info import SectionInfo
 from ZConfig.info import ValueInfo
 from ZConfig.info import AbstractType
+
+from ZConfig._compat import string_types
 
 class _VisitorBuilder(object):
 
@@ -44,9 +45,11 @@ _MARKER = object()
 class SchemaFormatter(object):
 
     def __init__(self, schema, stream=None):
-        stream = stream or sys.stdout
-        self.write = functools.partial(print, file=stream)
+        self.stream = stream or sys.stdout
         self._dt = schema.registry.find_name
+
+    def write(self, *args):
+        print(*args, file=self.stream)
 
     def esc(self, x):
         return cgi.escape(str(x))
@@ -60,16 +63,18 @@ class SchemaFormatter(object):
     def item_list(self):
         return self._simple_tag("dl")
 
-    @contextmanager
-    def describing(self, description=_MARKER, after=None):
-        with self._simple_tag("dt"):
-            yield
-
+    def _describing(self, description, after):
         if description is not _MARKER:
             with self.described_as():
                 self.description(description)
                 if after:
                     after()
+
+    @contextmanager
+    def describing(self, description=_MARKER, after=None):
+        with self._simple_tag("dt"):
+            yield
+        self._describing(description, after)
 
     def describing_name(self, concrete_name,
                         description=_MARKER, datatype=None,
@@ -103,6 +108,17 @@ class SchemaFormatter(object):
     def datatype(self, datatype):
         self.write("(%s)" % self._dt(datatype))
 
+    @contextmanager
+    def body(self):
+        self.write('''<html><body>
+        <style>
+        dl {margin: 0 0 1em 0;}
+        </style>
+        ''')
+        yield
+        self.write('</body></html>')
+
+
 class SchemaPrinter(object):
 
     SchemaFormatter = SchemaFormatter
@@ -110,7 +126,6 @@ class SchemaPrinter(object):
     def __init__(self, schema, stream=None):
         self.schema = schema
         stream = stream or sys.stdout
-        self.write = functools.partial(print, file=stream)
         self._explained = set()
         self._seen_typenames = set()
         self.fmt = self.SchemaFormatter(schema, stream)
@@ -139,20 +154,34 @@ class SchemaPrinter(object):
         # that section. By exposing these first, they get documented at the top-level,
         # and each concrete section that uses the abstract type gets a reference
         # to it.
+
         def abstract_sections(base):
             for name, info in base:
-                if isinstance(info, SectionInfo) and info.sectiontype.isabstract():
-                    yield name, info
+                if isinstance(info, SectionInfo):
+                    if info.sectiontype.isabstract():
+                        yield name, info
+
+                    # XXX: This isn't catching everything. Witness the
+                    # relstorage component.
                 elif isinstance(info, SectionType):
                     for x in abstract_sections(info):
                         yield x
         return itertools.chain(abstract_sections(everything()), everything())
 
-
     def printSchema(self):
-        with self.fmt.item_list():
-            for name, info in self._iter_schema_items():
-                self.visit(name, info)
+        # side-effect of building may be printing
+        self.buildSchema()
+
+    def buildSchema(self):
+        seen = set() # prevent duplicates at the top-level
+        # as we find multiple abstract types
+        with self.fmt.body():
+            with self.fmt.item_list():
+                for name, info in self._iter_schema_items():
+                    if info in seen:
+                        continue
+                    seen.add(info)
+                    self.visit(name, info)
 
     TypeVisitor = _VisitorBuilder()
     visitors = TypeVisitor.visitors
@@ -220,6 +249,169 @@ class SchemaPrinter(object):
 
     del TypeVisitor
 
+try:
+    from docutils import nodes
+    import docutils.utils
+    import docutils.frontend
+    import docutils.parsers.rst
+    from docutils.parsers.rst import Directive
+except ImportError: # pragma: no cover
+    RstSchemaPrinter = None
+    RstSchemaFormatter = None
+else:
+    class RstSchemaFormatter(SchemaFormatter):
+
+        settings = None
+
+        def __init__(self, schema, stream=None):
+            super(RstSchemaFormatter, self).__init__(schema, stream)
+            self.document = None
+            self._current_node = None
+            self._nodes = []
+
+        def esc(self, text):
+            return text
+
+        def _parsed(self, text):
+            document = docutils.utils.new_document(
+                "Schema",
+                settings=self.settings or docutils.frontend.OptionParser(
+                    components=(docutils.parsers.rst.Parser,)
+                    ).get_default_values())
+            parser = docutils.parsers.rst.Parser()
+            parser.parse(text, document)
+            return document.children
+
+        def write(self, *texts):
+            for text in texts:
+                if isinstance(text, string_types):
+                    self._current_node += nodes.Text(' ' + text + ' ', text)
+                else:
+                    # Already parsed
+                    self._current_node += text
+
+        def description(self, text):
+            if not text:
+                return
+
+            # Aggressively dedent the text to avoid producing unwanted
+            # definition lists.
+            # XXX: This is probably *too* aggressive.
+            texts = []
+            parts = text.split('\n')
+            for p in parts:
+                p = p.strip()
+                if not p:
+                    texts.append('\n')
+                else:
+                    texts.append(p)
+            text = '\n'.join(texts)
+            self.write(self._parsed(text))
+
+
+        @contextmanager
+        def item_list(self):
+            old_node = self._current_node
+            self._current_node = nodes.definition_list()
+            old_node += self._current_node
+            yield
+            self._current_node = old_node
+
+
+        @contextmanager
+        def describing(self, description=_MARKER, after=None):
+            dl = self._current_node
+            assert isinstance(dl, nodes.definition_list), dl
+            item = nodes.definition_list_item()
+            dl += item
+            term = nodes.term()
+            item += term
+            self._current_node = term
+
+            yield
+
+            # We must now have either a description (so we call
+            # described_as) or they must call described_as
+            # des
+            self._current_node = item
+
+            self._describing(description, after)
+
+
+        @contextmanager
+        def described_as(self):
+            item = self._current_node
+            assert isinstance(item, nodes.definition_list_item), item
+
+            definition = nodes.definition()
+            para = nodes.paragraph()
+            definition += para
+            item += definition
+            self._current_node = para
+
+            yield
+
+            # When this is done, we're back to the list
+            self._current_node = item.parent
+
+        def abstract_name(self, name):
+            self._current_node += nodes.emphasis(text=name, rawsource=name)
+
+        def concrete_name(self, name):
+            self._current_node += nodes.strong(text=name, rawsource=name)
+
+        def concrete_section_name(self, *name):
+            name = ' '.join(name)
+            return self.concrete_name("<" + name + ">")
+
+        @contextmanager
+        def body(self):
+            self.document = self._current_node = docutils.utils.new_document(
+                "Schema",
+                settings=self.settings or docutils.frontend.OptionParser(
+                    components=(docutils.parsers.rst.Parser,)
+                    ).get_default_values())
+            yield
+
+    class RstSchemaPrinter(SchemaPrinter):
+        SchemaFormatter = RstSchemaFormatter
+
+        def printSchema(self):
+            super(RstSchemaPrinter, self).printSchema()
+            print(self.fmt.document.pformat(), file=self.fmt.stream)
+
+
+    class SchemaToRstDirective(Directive):
+        required_arguments = 1
+
+        def run(self): # pragma: no cover
+            schema = _load_schema(self.arguments[0], True, 'component.xml')
+
+            printer = RstSchemaPrinter(schema)
+            try:
+                printer.fmt.settings = self.state.document.settings
+            except AttributeError:
+                pass
+            printer.buildSchema()
+
+            return printer.fmt.document.children
+
+    def setup(app): # pragma: no cover
+        "Sphinx extension entry point to add the zconfig directive."
+        app.add_directive("zconfig", SchemaToRstDirective)
+
+def _load_schema(schema, package, package_file):
+    if not package:
+        schema_reader = argparse.FileType('r')(schema)
+    else:
+        schema_template = "<schema><import package='%s' file='%s' /></schema>" % (
+            schema, package_file)
+        from ZConfig._compat import TextIO
+        schema_reader = TextIO(schema_template)
+
+    schema = ZConfig.loader.loadSchemaFile(schema_reader)
+    return schema
+
 def main(argv=None):
     argv = argv or sys.argv[1:]
 
@@ -248,26 +440,27 @@ def main(argv=None):
         default="component.xml",
         help="When PACKAGE is given, this can specify the file inside it to load.")
 
+    if RstSchemaFormatter:
+        argparser.add_argument(
+            "--format",
+            action="store",
+            choices=('html', 'xml'), # XXX Can we get actual valid RST out?
+            default="HTML",
+            help="What output format to produce"
+        )
+
     args = argparser.parse_args(argv)
 
     out = args.out or sys.stdout
 
-    if not args.package:
-        schema_reader = argparse.FileType('r')(args.schema)
-    else:
-        schema_template = "<schema><import package='%s' file='%s' /></schema>" % (
-            args.schema, args.package_file)
-        from ZConfig._compat import TextIO
-        schema_reader = TextIO(schema_template)
+    schema = _load_schema(args.schema, args.package, args.package_file)
 
-    schema = ZConfig.loader.loadSchemaFile(schema_reader)
+    printer_factory = SchemaPrinter
+    if hasattr(args, 'format') and args.format == 'xml':
+        printer_factory = RstSchemaPrinter
 
-    print('''<html><body>
-    <style>
-    dl {margin: 0 0 1em 0;}
-    </style>
-    ''', file=out)
-    SchemaPrinter(schema, out).printSchema()
-    print('</body></html>', file=out)
+
+    printer_factory(schema, out).printSchema()
+
 
     return 0

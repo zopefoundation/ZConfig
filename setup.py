@@ -25,6 +25,7 @@ def alltests():
     return unittest.TestSuite(suites)
 
 tests_require = [
+    'docutils',
     'zope.testrunner',
 ]
 

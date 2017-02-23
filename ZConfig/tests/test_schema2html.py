@@ -51,7 +51,13 @@ def run_transform(*args):
         return buf
     return schema2html.main(args) # pragma: no cover
 
-
+if schema2html.RstSchemaPrinter:
+    def run_transform_rst(*args):
+        args += ('--format', 'xml')
+        return run_transform(*args)
+else:
+    def run_transform_rst(*args):
+        pass
 
 class TestSchema2HTML(unittest.TestCase):
 
@@ -62,6 +68,7 @@ class TestSchema2HTML(unittest.TestCase):
     def test_schema_only(self):
         res = run_transform(input_file('simple.xml'))
         self.assertIn('</html>', res.getvalue())
+        run_transform_rst(input_file('simple.xml'))
 
     @with_stdin_from_input_file('simple.xml')
     def test_schema_only_redirect(self):
@@ -78,10 +85,12 @@ class TestSchema2HTML(unittest.TestCase):
                      'simplesections.xml',):
             res = run_transform(input_file(name))
             self.assertIn('</html>', res.getvalue())
+            run_transform_rst(input_file(name))
 
     def test_cover_logging_components(self):
         res = run_transform('--package', 'ZConfig.components.logger')
         self.assertIn('eventlog', res.getvalue())
+        run_transform_rst('--package', 'ZConfig.components.logger')
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
