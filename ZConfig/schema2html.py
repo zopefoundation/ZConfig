@@ -14,10 +14,12 @@
 from __future__ import print_function
 
 import argparse
+import functools
 import sys
 import cgi
 
 import ZConfig.loader
+
 
 from ZConfig.info import SectionType
 from ZConfig.info import SectionInfo
@@ -28,6 +30,7 @@ def esc(x):
     return cgi.escape(str(x))
 
 def dt(x):
+
     tn = type(x).__name__
 
     if isinstance(x, type):
@@ -36,81 +39,82 @@ def dt(x):
     if hasattr(x, '__name__'):
         return '%s %s' % (tn, x.__name__)
 
-    return tn
+    return tn # pragma: no cover
 
-class explain(object):
-    done = []
 
-    def __call__(self, st, file=None):
-        if st.name in self.done: # pragma: no cover
+class SchemaPrinter(object):
+
+    def __init__(self, schema, stream=None):
+        self.schema = schema
+        stream = stream or sys.stdout
+        self.write = functools.partial(print, file=stream)
+        self._explained = []
+
+    def _explain(self, st):
+        if st.name in self._explained: # pragma: no cover
             return
 
-        self.done.append(st.name)
+        self._explained.append(st.name)
 
-        out = file or sys.stdout
 
         if st.description:
-            print(st.description, file=out)
+            self.write(st.description)
         for sub in st.getsubtypenames():
-            print('<dl>', file=out)
-            printContents(None, st.getsubtype(sub), file=file)
-            print('</dl>', file=out)
+            self.write('<dl>')
+            self.printContents(None, st.getsubtype(sub))
+            self.write('</dl>')
 
-explain = explain()
+    def printSchema(self):
+        self.write('<dl>')
+        for child in self.schema:
+            self.printContents(*child)
+        self.write('</dl>')
 
-def printSchema(schema, out):
-    print('<dl>', file=out)
-    for child in schema:
-        printContents(*child, file=out)
-    print('</dl>', file=out)
-
-def printContents(name, info, file=None):
-    out = file or sys.stdout
-
-    if isinstance(info, SectionType):
-        print('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % dt(info.datatype), file=out)
-        print('<dd>', file=out)
-        if info.description:
-            print(info.description, file=out)
-        print('<dl>', file=out)
-        for sub in info:
-            printContents(*sub, file=out) # pragma: no cover
-        print('</dl></dd>', file=out)
-    elif isinstance(info, SectionInfo):
-        st = info.sectiontype
-        if st.isabstract():
-            print('<dt><b><i>', st.name, '</i>', info.name, '</b></dt>', file=out)
-            print('<dd>', file=out)
+    def printContents(self, name, info):
+        if isinstance(info, SectionType):
+            self.write('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % dt(info.datatype))
+            self.write('<dd>')
             if info.description:
-                print(info.description, file=out)
-            explain(st, file=out)
-            print('</dd>', file=out)
+                self.write(info.description)
+            self.write('<dl>')
+            for sub in info:
+                self.printContents(*sub) # pragma: no cover
+            self.write('</dl></dd>')
+        elif isinstance(info, SectionInfo):
+            st = info.sectiontype
+            if st.isabstract():
+                self.write('<dt><b><i>', st.name, '</i>', info.name, '</b></dt>')
+                self.write('<dd>')
+                if info.description:
+                    self.write(info.description)
+                self._explain(st)
+                self.write('</dd>')
+            else:
+                self.write('<dt><b>', info.attribute, info.name, '</b>')
+                self.write('(%s)</dt>' % dt(info.datatype))
+                self.write('<dd><dl>')
+                for sub in info.sectiontype:
+                    self.printContents(*sub)
+                self.write('</dl></dd>')
+        elif isinstance(info, AbstractType):
+            self.write('<dt><b><i>', info.name, '</i></b>')
+            self.write('<dd>')
+            if info.description:
+                self.write(info.description) # pragma: no cover
+            self._explain(info)
+            self.write('</dd>')
         else:
-            print('<dt><b>', info.attribute, info.name, '</b>', file=out)
-            print('(%s)</dt>' % dt(info.datatype), file=out)
-            print('<dd><dl>', file=out)
-            for sub in info.sectiontype:
-                printContents(*sub, file=out)
-            print('</dl></dd>', file=out)
-    elif isinstance(info, AbstractType):
-        print('<dt><b><i>', info.name, '</i></b>', file=out)
-        print('<dd>', file=out)
-        if info.description:
-            print(info.description, file=out) # pragma: no cover
-        explain(info, file=out)
-        print('</dd>', file=out)
-    else:
-        print('<dt><b>',info.name, '</b>', '(%s)' % dt(info.datatype), file=out)
-        default = info.getdefault()
-        if isinstance(default, ValueInfo):
-            print('(default: %r)' % esc(default.value), file=out)
-        elif default is not None:
-            print('(default: %r)' % esc(default), file=out)
-        if info.metadefault:
-            print('(metadefault: %s)' % info.metadefault, file=out)
-        print('</dt>', file=out)
-        if info.description:
-            print('<dd>',info.description,'</dd>', file=out)
+            self.write('<dt><b>',info.name, '</b>', '(%s)' % dt(info.datatype))
+            default = info.getdefault()
+            if isinstance(default, ValueInfo):
+                self.write('(default: %r)' % esc(default.value))
+            elif default is not None:
+                self.write('(default: %r)' % esc(default))
+            if info.metadefault:
+                self.write('(metadefault: %s)' % info.metadefault)
+            self.write('</dt>')
+            if info.description:
+                self.write('<dd>',info.description,'</dd>')
 
 def main(argv=None):
     argv = argv or sys.argv[1:]
@@ -159,7 +163,7 @@ def main(argv=None):
     dl {margin: 0 0 1em 0;}
     </style>
     ''', file=out)
-    printSchema(iter(schema) if not args.package else schema.itertypes(), out)
+    SchemaPrinter(iter(schema) if not args.package else schema.itertypes(), out).printSchema()
     print('</body></html>', file=out)
 
     return 0
