@@ -30,6 +30,17 @@ from ZConfig.info import AbstractType
 def esc(x):
     return cgi.escape(str(x))
 
+class _VisitorBuilder(object):
+
+    def __init__(self):
+        self.visitors = []
+
+    def __call__(self, Type):
+        def dec(func):
+            self.visitors.append((Type, func))
+            return func
+        return dec
+
 class SchemaPrinter(object):
 
     def __init__(self, schema, stream=None):
@@ -50,66 +61,86 @@ class SchemaPrinter(object):
             self.write(st.description)
         for sub in st.getsubtypenames():
             self.write('<dl>')
-            self.printContents(None, st.getsubtype(sub))
+            self.visit(None, st.getsubtype(sub))
             self.write('</dl>')
 
     def _iter_schema_items(self):
-        return itertools.chain(self.schema, self.schema.itertypes())
+        return itertools.chain(self.schema.itertypes(),
+                               self.schema)
 
     def printSchema(self):
         self.write('<dl>')
-        for child in self._iter_schema_items():
-            self.printContents(*child)
+        for name, info in self._iter_schema_items():
+            self.visit(name, info)
         self.write('</dl>')
 
-    def printContents(self, name, info):
-        if isinstance(info, SectionType):
-            if info.name in self._seen_typenames:
-                return
+    TypeVisitor = _VisitorBuilder()
+    visitors = TypeVisitor.visitors
+
+    def visit(self, name, info):
+        for t, f in self.visitors:
+            if isinstance(info, t):
+                f(self, name, info)
+                break
+        else:
+            self._visit_default(name, info)
+
+    @TypeVisitor(SectionType)
+    def _visit_SectionType(self, name, info):
+        self.write('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % self._dt(info.datatype))
+        self.write('<dd>')
+        if info.description:
+            self.write(info.description)
+        if info.name not in self._seen_typenames:
             self._seen_typenames.add(info.name)
-            self.write('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % self._dt(info.datatype))
+            self.write('<dl>')
+            for sub in info:
+                self.visit(*sub) # pragma: no cover
+            self.write('</dl>')
+        self.write('</dd>')
+
+    @TypeVisitor(SectionInfo)
+    def _visit_SectionInfo(self, name, info):
+        st = info.sectiontype
+        if st.isabstract():
+            self.write('<dt><b><i>', st.name, '</i>', info.name, '</b></dt>')
             self.write('<dd>')
             if info.description:
                 self.write(info.description)
-            self.write('<dl>')
-            for sub in info:
-                self.printContents(*sub) # pragma: no cover
-            self.write('</dl></dd>')
-        elif isinstance(info, SectionInfo):
-            st = info.sectiontype
-            if st.isabstract():
-                self.write('<dt><b><i>', st.name, '</i>', info.name, '</b></dt>')
-                self.write('<dd>')
-                if info.description:
-                    self.write(info.description)
-                self._explain(st)
-                self.write('</dd>')
-            else:
-                self.write('<dt><b>', info.attribute, info.name, '</b>')
-                self.write('(%s)</dt>' % self._dt(info.datatype))
-                self.write('<dd><dl>')
-                for sub in info.sectiontype:
-                    self.printContents(*sub)
-                self.write('</dl></dd>')
-        elif isinstance(info, AbstractType):
-            self.write('<dt><b><i>', info.name, '</i></b>')
-            self.write('<dd>')
-            if info.description:
-                self.write(info.description) # pragma: no cover
-            self._explain(info)
+            self._explain(st)
             self.write('</dd>')
         else:
-            self.write('<dt><b>',info.name, '</b>', '(%s)' % self._dt(info.datatype))
-            default = info.getdefault()
-            if isinstance(default, ValueInfo):
-                self.write('(default: %r)' % esc(default.value))
-            elif default is not None:
-                self.write('(default: %r)' % esc(default))
-            if info.metadefault:
-                self.write('(metadefault: %s)' % info.metadefault)
-            self.write('</dt>')
-            if info.description:
-                self.write('<dd>', info.description,'</dd>')
+            self.write('<dt><b>', info.attribute, info.name, '</b>')
+            self.write('(%s)</dt>' % self._dt(info.datatype))
+            self.write('<dd><dl>')
+            for sub in info.sectiontype:
+                self.visit(*sub)
+            self.write('</dl></dd>')
+
+    @TypeVisitor(AbstractType)
+    def _visit_AbstractType(self, name, info):
+        self.write('<dt><b><i>', info.name, '</i></b>')
+        self.write('<dd>')
+        if info.description:
+            self.write(info.description) # pragma: no cover
+        self._explain(info)
+        self.write('</dd>')
+
+    def _visit_default(self, name, info):
+        # KeyInfo or MultiKeyInfo
+        self.write('<dt><b>',info.name, '</b>', '(%s)' % self._dt(info.datatype))
+        default = info.getdefault()
+        if isinstance(default, ValueInfo):
+            self.write('(default: %r)' % esc(default.value))
+        elif default is not None:
+            self.write('(default: %r)' % esc(default))
+        if info.metadefault:
+            self.write('(metadefault: %s)' % info.metadefault)
+        self.write('</dt>')
+        if info.description:
+            self.write('<dd>', info.description,'</dd>')
+
+    del TypeVisitor
 
 def main(argv=None):
     argv = argv or sys.argv[1:]
