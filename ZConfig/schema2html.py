@@ -41,13 +41,14 @@ class _VisitorBuilder(object):
             return func
         return dec
 
+
 class SchemaPrinter(object):
 
     def __init__(self, schema, stream=None):
         self.schema = schema
         stream = stream or sys.stdout
         self.write = functools.partial(print, file=stream)
-        self._explained = []
+        self._explained = set()
         self._dt = schema.registry.find_name
         self._seen_typenames = set()
 
@@ -55,7 +56,7 @@ class SchemaPrinter(object):
         if st.name in self._explained: # pragma: no cover
             return
 
-        self._explained.append(st.name)
+        self._explained.add(st.name)
 
         if st.description:
             self.write(st.description)
@@ -65,8 +66,26 @@ class SchemaPrinter(object):
             self.write('</dl>')
 
     def _iter_schema_items(self):
-        return itertools.chain(self.schema.itertypes(),
-                               self.schema)
+        def everything():
+            return itertools.chain(self.schema.itertypes(),
+                                   self.schema)
+        # The abstract types tend to be the most important. Since
+        # we only document a concrete type the first time we find it,
+        # and we can find extensions of abstract types beneath
+        # the abstract type which is itself buried under a concrete section,
+        # all the different permutations would be only documented once under
+        # that section. By exposing these first, they get documented at the top-level,
+        # and each concrete section that uses the abstract type gets a reference
+        # to it.
+        def abstract_sections(base):
+            for name, info in base:
+                if isinstance(info, SectionInfo) and info.sectiontype.isabstract():
+                    yield name, info
+                elif isinstance(info, SectionType):
+                    for x in abstract_sections(info):
+                        yield x
+        return itertools.chain(abstract_sections(everything()), everything())
+
 
     def printSchema(self):
         self.write('<dl>')
@@ -87,16 +106,18 @@ class SchemaPrinter(object):
 
     @TypeVisitor(SectionType)
     def _visit_SectionType(self, name, info):
+        if info.name in self._seen_typenames:
+            return
+        self._seen_typenames.add(info.name)
         self.write('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % self._dt(info.datatype))
         self.write('<dd>')
         if info.description:
             self.write(info.description)
-        if info.name not in self._seen_typenames:
-            self._seen_typenames.add(info.name)
-            self.write('<dl>')
-            for sub in info:
-                self.visit(*sub) # pragma: no cover
-            self.write('</dl>')
+
+        self.write('<dl>')
+        for sub in info:
+            self.visit(*sub) # pragma: no cover
+        self.write('</dl>')
         self.write('</dd>')
 
     @TypeVisitor(SectionInfo)
