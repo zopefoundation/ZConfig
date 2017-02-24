@@ -15,7 +15,16 @@ from __future__ import absolute_import
 
 import contextlib
 import sys
+import textwrap
 import unittest
+
+import docutils
+import docutils.utils
+import docutils.frontend
+import docutils.parsers.rst
+import docutils.parsers.rst.directives
+
+
 
 try:
     # Note that we're purposely using the old
@@ -28,6 +37,9 @@ except ImportError:
 
 
 from ZConfig import schema2html
+
+from ZConfig.sphinx import SchemaToRstDirective
+docutils.parsers.rst.directives.register_directive("zconfig", SchemaToRstDirective)
 
 from .support import input_file
 from .support import with_stdin_from_input_file
@@ -91,6 +103,29 @@ class TestSchema2HTML(unittest.TestCase):
         res = run_transform('--package', 'ZConfig.components.logger')
         self.assertIn('eventlog', res.getvalue())
         run_transform_rst('--package', 'ZConfig.components.logger')
+
+class TestRst(unittest.TestCase):
+
+    def test_parse_package(self):
+        document = docutils.utils.new_document(
+            "Schema",
+            settings=docutils.frontend.OptionParser(
+                    components=(docutils.parsers.rst.Parser,)
+                    ).get_default_values())
+
+        parser = docutils.parsers.rst.Parser()
+        text = """
+        Document
+        ========
+        .. zconfig:: ZConfig.components.logger
+
+        """
+        text = textwrap.dedent(text)
+        parser.parse(text, document)
+        astext = document.astext()
+        # Check that it produced output
+        self.assertIn("SMTPHandler", astext)
+
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)

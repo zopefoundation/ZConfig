@@ -43,6 +43,8 @@ else:
             self.document = None
             self._current_node = None
             self._nodes = []
+            self.settings = docutils.frontend.OptionParser(
+                components=(docutils.parsers.rst.Parser,)).get_default_values()
 
         def esc(self, text):
             return text
@@ -50,9 +52,9 @@ else:
         def _parsed(self, text):
             document = docutils.utils.new_document(
                 "Schema",
-                settings=self.settings or docutils.frontend.OptionParser(
-                    components=(docutils.parsers.rst.Parser,)
-                    ).get_default_values())
+                settings=self.settings)
+
+
             parser = docutils.parsers.rst.Parser()
             parser.parse(text, document)
             return document.children
@@ -144,9 +146,7 @@ else:
         def body(self):
             self.document = self._current_node = docutils.utils.new_document(
                 "Schema",
-                settings=self.settings or docutils.frontend.OptionParser(
-                    components=(docutils.parsers.rst.Parser,)
-                    ).get_default_values())
+                settings=self.settings)
             yield
 
     class RstSchemaPrinter(AbstractSchemaPrinter):
@@ -160,14 +160,12 @@ else:
     class SchemaToRstDirective(Directive):
         required_arguments = 1
 
-        def run(self): # pragma: no cover
+        def run(self):
             schema = load_schema(self.arguments[0], True, 'component.xml')
 
             printer = RstSchemaPrinter(schema)
-            try:
-                printer.fmt.settings = self.state.document.settings
-            except AttributeError:
-                pass
+            printer.fmt.settings = self.state.document.settings
+
             printer.buildSchema()
 
             return printer.fmt.document.children
