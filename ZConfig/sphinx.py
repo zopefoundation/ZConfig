@@ -159,9 +159,13 @@ else:
 
     class SchemaToRstDirective(Directive):
         required_arguments = 1
-
+        optional_arguments = 1
+        option_spec = {
+            'file': str,
+        }
         def run(self):
-            schema = load_schema(self.arguments[0], True, 'component.xml')
+            schema = load_schema(self.arguments[0],
+                                 True, self.options.get('file'))
 
             printer = RstSchemaPrinter(schema)
             printer.fmt.settings = self.state.document.settings

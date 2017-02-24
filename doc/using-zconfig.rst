@@ -251,3 +251,4 @@ Configuring Logging
 ===================
 
 .. zconfig:: ZConfig.components.logger
+    :file: component.xml

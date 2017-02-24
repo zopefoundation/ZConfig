@@ -106,7 +106,7 @@ class TestSchema2HTML(unittest.TestCase):
 
 class TestRst(unittest.TestCase):
 
-    def test_parse_package(self):
+    def _parse(self, text):
         document = docutils.utils.new_document(
             "Schema",
             settings=docutils.frontend.OptionParser(
@@ -114,17 +114,36 @@ class TestRst(unittest.TestCase):
                     ).get_default_values())
 
         parser = docutils.parsers.rst.Parser()
+        text = textwrap.dedent(text)
+        parser.parse(text, document)
+        return document
+
+    def test_parse_package(self):
         text = """
         Document
         ========
         .. zconfig:: ZConfig.components.logger
 
         """
-        text = textwrap.dedent(text)
-        parser.parse(text, document)
-        astext = document.astext()
+        document = self._parse(text)
+        doc_text = document.astext()
         # Check that it produced output
-        self.assertIn("SMTPHandler", astext)
+        self.assertIn("SMTPHandler", doc_text)
+
+    def test_parse_package_file(self):
+        text = """
+        Document
+        ========
+        .. zconfig:: ZConfig.components.logger
+            :file: base-logger.xml
+
+        """
+        document = self._parse(text)
+        doc_text = document.astext()
+        # Check that it produced output, limited to
+        # just that one file.
+        self.assertNotIn("SMTPHandler", doc_text)
+        self.assertIn("base-logger", doc_text)
 
 
 def test_suite():

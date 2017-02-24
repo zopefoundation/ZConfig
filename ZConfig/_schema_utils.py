@@ -249,7 +249,7 @@ def load_schema(schema, package, package_file):
         schema_reader = argparse.FileType('r')(schema)
     else:
         schema_template = "<schema><import package='%s' file='%s' /></schema>" % (
-            schema, package_file)
+            schema, package_file or 'component.xml')
         from ZConfig._compat import TextIO
         schema_reader = TextIO(schema_template)
 
