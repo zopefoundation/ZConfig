@@ -103,6 +103,12 @@ def main(argv=None):
         default="component.xml",
         help="When PACKAGE is given, this can specify the file inside it to load.")
 
+    argparser.add_argument(
+        "--members",
+        action="store",
+        nargs="*",
+        help="Only output sections and types in this list (and reachable from it)")
+
     if RstSchemaPrinter:
         argparser.add_argument(
             "--format",
@@ -123,7 +129,7 @@ def main(argv=None):
         printer_factory = RstSchemaPrinter
 
 
-    printer_factory(schema, out).printSchema()
+    printer_factory(schema, out, allowed_names=args.members).printSchema()
 
 
     return 0

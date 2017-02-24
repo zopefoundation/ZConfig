@@ -15,10 +15,9 @@ from __future__ import print_function
 
 from abc import abstractmethod
 import argparse
-from contextlib import contextmanager
 import itertools
 import sys
-import cgi
+
 
 import ZConfig.loader
 
@@ -114,12 +113,22 @@ class AbstractSchemaFormatter(AbstractBaseClass):
 class AbstractSchemaPrinter(AbstractBaseClass):
 
 
-    def __init__(self, schema, stream=None):
+    def __init__(self, schema, stream=None, allowed_names=()):
         self.schema = schema
         stream = stream or sys.stdout
         self._explained = set()
         self._seen_typenames = set()
         self.fmt = self._schema_formatter(schema, stream)
+
+        if allowed_names:
+            iter_all = self._iter_schema_items
+            allowed_names = {x.lower() for x in allowed_names}
+            def filtered():
+                for name, info in iter_all():
+                    if name and name.lower() in allowed_names:
+                        yield name, info
+
+            self._iter_schema_items = filtered
 
     @abstractmethod
     def _schema_formatter(self, schema, stream):

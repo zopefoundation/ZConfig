@@ -162,12 +162,17 @@ else:
         optional_arguments = 1
         option_spec = {
             'file': str,
+            'members': str
         }
         def run(self):
             schema = load_schema(self.arguments[0],
                                  True, self.options.get('file'))
 
-            printer = RstSchemaPrinter(schema)
+            members = ()
+            if 'members' in self.options:
+                members = self.options['members'].split()
+
+            printer = RstSchemaPrinter(schema, allowed_names=members)
             printer.fmt.settings = self.state.document.settings
 
             printer.buildSchema()

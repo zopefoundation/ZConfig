@@ -144,6 +144,25 @@ class TestRst(unittest.TestCase):
         # just that one file.
         self.assertNotIn("SMTPHandler", doc_text)
         self.assertIn("base-logger", doc_text)
+        self.assertIn("Base definition", doc_text)
+
+    def test_parse_package_limited_names(self):
+        text = """
+        Document
+        ========
+        .. zconfig:: ZConfig.components.logger
+            :members: syslog logfile
+        """
+        document = self._parse(text)
+        doc_text = document.astext()
+
+        # Check that it produced output, limited to
+        # just that one part of the tree
+        self.assertNotIn("SMTPHandler", doc_text)
+        self.assertIn("syslog", doc_text)
+        self.assertIn("SyslogHandlerFactory", doc_text)
+        self.assertIn("FileHandlerFactory", doc_text)
+
 
 
 def test_suite():
