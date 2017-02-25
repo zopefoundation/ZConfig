@@ -253,4 +253,4 @@ Configuring Logging
 Configuring handlers:
 
 .. zconfig:: ZConfig.components.logger
-    :members: ZConfig.logger.handler
+    :members: ZConfig.logger.base-logger

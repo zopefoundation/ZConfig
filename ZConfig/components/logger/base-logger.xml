@@ -16,7 +16,7 @@
         Verbosity setting for the logger.  Values must be a name of
         a level, or an integer in the range [0..50].  The names of the
         levels, in order of increasing verbosity (names on the same
-        line are equivalent):
+        line are equivalent)::
 
             critical, fatal
             error

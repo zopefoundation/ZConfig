@@ -40,6 +40,7 @@ from ZConfig import schema2html
 
 from ZConfig.sphinx import SchemaToRstDirective
 docutils.parsers.rst.directives.register_directive("zconfig", SchemaToRstDirective)
+from ZConfig.sphinx import RstSchemaFormatter
 
 from .support import input_file
 from .support import with_stdin_from_input_file
@@ -164,6 +165,27 @@ class TestRst(unittest.TestCase):
         self.assertIn("FileHandlerFactory", doc_text)
 
 
+    def test_description_dedent(self):
+        text = """No leading whitespace on this line.
+        But this line has whitespace.
+        As does this one.
+        """
+        written = []
+        class FUT(RstSchemaFormatter):
+            def __init__(self):
+                pass
+            def _parsed(self, text):
+                return text
+            def write(self, *texts):
+                written.extend(texts)
+        fut = FUT()
+        fut.description(text)
+
+        dedented = ("""No leading whitespace on this line.\n"""
+        """But this line has whitespace.\n"""
+        """As does this one.\n""")
+
+        self.assertEqual(written[0], dedented)
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)

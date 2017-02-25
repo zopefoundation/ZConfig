@@ -15,7 +15,7 @@ from __future__ import print_function, absolute_import
 
 
 from contextlib import contextmanager
-
+import textwrap
 
 try:
     from docutils import nodes
@@ -71,18 +71,14 @@ else:
             if not text:
                 return
 
-            # Aggressively dedent the text to avoid producing unwanted
-            # definition lists.
-            # XXX: This is probably *too* aggressive.
-            texts = []
-            parts = text.split('\n')
-            for p in parts:
-                p = p.strip()
-                if not p:
-                    texts.append('\n')
-                else:
-                    texts.append(p)
-            text = '\n'.join(texts)
+            # dedent the text to avoid producing unwanted
+            # definition lists. The XML parser strips leading whitespace from
+            # the first line, but preserves it for subsequent lines, so for dedent
+            # to work we have to ignore that first line.
+            texts = text.split("\n")
+            if len(texts) > 1:
+                trail = textwrap.dedent('\n'.join(texts[1:]))
+                text = texts[0] + '\n' + trail
             self.write(self._parsed(text))
 
 
