@@ -17,7 +17,7 @@ from abc import abstractmethod
 import argparse
 import itertools
 import sys
-
+import textwrap
 
 import ZConfig.loader
 
@@ -56,6 +56,17 @@ class AbstractSchemaFormatter(AbstractBaseClass):
     def esc(self, x):
         "Escape blocks of text if needed"
 
+    def _dedent(self, text):
+        # dedent the text to avoid producing unwanted
+        # definition lists. The XML parser strips leading whitespace from
+        # the first line, but preserves it for subsequent lines, so for dedent
+        # to work we have to ignore that first line.
+        texts = text.split("\n")
+        if len(texts) > 1:
+            trail = textwrap.dedent('\n'.join(texts[1:]))
+            text = texts[0] + '\n' + trail
+        return text
+
     @abstractmethod
     def item_list(self):
         "Context manager for listing description items"
@@ -85,6 +96,8 @@ class AbstractSchemaFormatter(AbstractBaseClass):
     def description(self, description):
         if description:
             self.write(self.esc(description))
+
+    example = description
 
     @abstractmethod
     def described_as(self):
@@ -141,6 +154,8 @@ class AbstractSchemaPrinter(AbstractBaseClass):
         self._explained.add(st.name)
 
         self.fmt.description(st.description)
+        self.fmt.example(getattr(st, 'example', None))
+
         for sub in st.getsubtypenames():
             with self.fmt.item_list():
                 self.visit(None, st.getsubtype(sub))
@@ -211,6 +226,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
 
         with self.fmt.described_as():
             self.fmt.description(info.description)
+            self.fmt.example(info.example)
 
             with self.fmt.item_list():
                 for sub in info:

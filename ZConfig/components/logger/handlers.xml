@@ -29,6 +29,13 @@
                datatype=".FileHandlerFactory"
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
+	<example><![CDATA[
+        <logfile>
+            path STDOUT
+            format %(name)s %(message)s
+        </logfile>
+    ]]>
+    </example>
     <key name="path" required="yes"/>
     <key name="old-files" required="no" default="0" datatype="integer"/>
     <key name="max-size" required="no" default="0" datatype="byte-size"/>

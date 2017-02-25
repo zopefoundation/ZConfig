@@ -130,6 +130,7 @@ class TestRst(unittest.TestCase):
         doc_text = document.astext()
         # Check that it produced output
         self.assertIn("SMTPHandler", doc_text)
+        self.assertIn("Example:", doc_text)
 
     def test_parse_package_file(self):
         text = """
@@ -146,6 +147,7 @@ class TestRst(unittest.TestCase):
         self.assertNotIn("SMTPHandler", doc_text)
         self.assertIn("base-logger", doc_text)
         self.assertIn("Base definition", doc_text)
+        self.assertIn("Example:", doc_text)
 
     def test_parse_package_limited_names(self):
         text = """
@@ -174,7 +176,7 @@ class TestRst(unittest.TestCase):
         class FUT(RstSchemaFormatter):
             def __init__(self):
                 pass
-            def _parsed(self, text):
+            def _parsed(self, text, _):
                 return text
             def write(self, *texts):
                 written.extend(texts)

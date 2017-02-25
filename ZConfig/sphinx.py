@@ -49,9 +49,9 @@ else:
         def esc(self, text):
             return text
 
-        def _parsed(self, text):
+        def _parsed(self, text, name='Schema'):
             document = docutils.utils.new_document(
-                "Schema",
+                name,
                 settings=self.settings)
 
 
@@ -71,16 +71,15 @@ else:
             if not text:
                 return
 
-            # dedent the text to avoid producing unwanted
-            # definition lists. The XML parser strips leading whitespace from
-            # the first line, but preserves it for subsequent lines, so for dedent
-            # to work we have to ignore that first line.
-            texts = text.split("\n")
-            if len(texts) > 1:
-                trail = textwrap.dedent('\n'.join(texts[1:]))
-                text = texts[0] + '\n' + trail
-            self.write(self._parsed(text))
+            self.write(self._parsed(self._dedent(text), "description"))
 
+        def example(self, text):
+            if not text:
+                return
+
+            dedented = self._dedent(text)
+            example = "Example::\n\n\t" + '\n\t'.join(dedented.split('\n'))
+            self.write(self._parsed(example, "example"))
 
         @contextmanager
         def item_list(self):

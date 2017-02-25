@@ -61,6 +61,16 @@ class HtmlSchemaFormatter(AbstractSchemaFormatter):
     def datatype(self, datatype):
         self.write("(%s)" % self._dt(datatype))
 
+    def example(self, text):
+        if not text:
+            return
+
+        with self._simple_tag("p"):
+            with self._simple_tag("i"):
+                self.write("Example:")
+            with self._simple_tag("pre"):
+                self.write(self.esc(self._dedent(text)))
+
     @contextmanager
     def body(self):
         self.write('''<html><body>
