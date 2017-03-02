@@ -15,7 +15,6 @@ from __future__ import print_function, absolute_import
 
 
 from contextlib import contextmanager
-import textwrap
 
 try:
     from docutils import nodes
@@ -154,10 +153,11 @@ else:
 
     class SchemaToRstDirective(Directive):
         required_arguments = 1
-        optional_arguments = 1
+        optional_arguments = 2
         option_spec = {
             'file': str,
-            'members': str
+            'members': str,
+            'excluded-members': str,
         }
         def run(self):
             schema = load_schema(self.arguments[0],
@@ -167,7 +167,11 @@ else:
             if 'members' in self.options:
                 members = self.options['members'].split()
 
-            printer = RstSchemaPrinter(schema, allowed_names=members)
+            excluded_members = ()
+            if 'excluded-members' in self.options:
+                excluded_members = self.options['excluded-members'].split()
+
+            printer = RstSchemaPrinter(schema, allowed_names=members, excluded_names=excluded_members)
             printer.fmt.settings = self.state.document.settings
 
             printer.buildSchema()

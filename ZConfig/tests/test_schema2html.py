@@ -166,6 +166,27 @@ class TestRst(unittest.TestCase):
         self.assertIn("SyslogHandlerFactory", doc_text)
         self.assertIn("FileHandlerFactory", doc_text)
 
+    def test_parse_package_excluded_names(self):
+        text = """
+        Document
+        ========
+        .. zconfig:: ZConfig.components.logger
+            :members: ZConfig.logger.base-logger
+            :excluded-members: ZConfig.logger.handler
+        """
+        document = self._parse(text)
+        doc_text = document.astext()
+
+        # Check that it produced output, limited to
+        # just that one part of the tree
+        # In this case, the root base-logger, but the handlers subtree
+        # was excluded.
+        self.assertIn("zconfig.logger.base-logger", doc_text)
+        self.assertNotIn("SMTPHandler", doc_text)
+        self.assertNotIn("syslog", doc_text)
+        self.assertNotIn("SyslogHandlerFactory", doc_text)
+        self.assertNotIn("FileHandlerFactory", doc_text)
+
 
     def test_description_dedent(self):
         text = """No leading whitespace on this line.

@@ -250,7 +250,13 @@ For example, the value for ``key`` will evaluate to ``value``::
 Configuring Logging
 ===================
 
-Configuring handlers:
+Configuring loggers:
 
 .. zconfig:: ZConfig.components.logger
     :members: ZConfig.logger.base-logger
+    :excluded-members: zconfig.logger.handler
+
+Configuring handlers:
+
+.. zconfig:: ZConfig.components.logger
+    :members: zconfig.logger.handler

@@ -19,6 +19,14 @@ import itertools
 import sys
 import textwrap
 
+try:
+    from itertools import ifilterfalse
+    from itertools import ifilter
+except ImportError:
+    # Py3
+    from itertools import filterfalse as ifilterfalse
+    ifilter = filter
+
 import ZConfig.loader
 
 from ZConfig._compat import AbstractBaseClass
@@ -126,26 +134,42 @@ class AbstractSchemaFormatter(AbstractBaseClass):
 class AbstractSchemaPrinter(AbstractBaseClass):
 
 
-    def __init__(self, schema, stream=None, allowed_names=()):
+    def __init__(self, schema, stream=None, allowed_names=(), excluded_names=()):
         self.schema = schema
         stream = stream or sys.stdout
         self._explained = set()
         self._seen_typenames = set()
         self.fmt = self._schema_formatter(schema, stream)
 
-        if allowed_names:
-            iter_all = self._iter_schema_items
-            allowed_names = {x.lower() for x in allowed_names}
-            def filtered():
-                for name, info in iter_all():
-                    if name and name.lower() in allowed_names:
-                        yield name, info
 
-            self._iter_schema_items = filtered
+        def _make_predicate(names):
+            names = {x.lower() for x in names}
+            def predicate(name_info):
+                name, _ = name_info
+                return name and name.lower() in names
+            return predicate
+
+        def _make_filter(names, filt):
+            iter_all = self._iter_schema_items
+            pred = _make_predicate(names)
+            def it():
+                return filt(pred, iter_all())
+            return it
+
+        if allowed_names:
+            self._iter_schema_items = _make_filter(allowed_names, ifilter)
+
+        if excluded_names:
+            excluded_names = {x.lower() for x in excluded_names}
+            self._iter_schema_items = _make_filter(excluded_names, ifilterfalse)
+            self._included = lambda st: st.name not in excluded_names
 
     @abstractmethod
     def _schema_formatter(self, schema, stream):
         "Return a formatter"
+
+    def _included(self, st):
+        return True
 
     def _explain(self, st):
         if st.name in self._explained: # pragma: no cover
@@ -154,6 +178,9 @@ class AbstractSchemaPrinter(AbstractBaseClass):
         self._explained.add(st.name)
 
         self.fmt.description(st.description)
+        if not self._included(st):
+            return
+
         self.fmt.example(getattr(st, 'example', None))
 
         for sub in st.getsubtypenames():
