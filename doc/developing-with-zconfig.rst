@@ -10,3 +10,4 @@
    standard-datatypes
    standard-components
    writing-components
+   documenting-components

@@ -20,6 +20,10 @@ Change History for ZConfig
 - Scripts ``zconfig`` (for schema validation) and
   ``zconfig_schema2html`` are ported to Python 3.
 
+- A new ``ZConfig.sphinx`` Sphinx extension facilitates automatically
+  documenting ZConfig components using their description and examples
+  in Sphinx documentation.
+
 3.1.0 (2015-10-17)
 ------------------
 

@@ -35,6 +35,7 @@ from ZConfig.datatypes import null_conversion
 from ZConfig.info import SectionType
 from ZConfig.info import SectionInfo
 from ZConfig.info import ValueInfo
+from ZConfig.info import MultiKeyInfo
 from ZConfig.info import AbstractType
 
 
@@ -290,7 +291,10 @@ class AbstractSchemaPrinter(AbstractBaseClass):
         if isinstance(default, ValueInfo):
             default = default.value
 
-        self.fmt.describing_name(info.name, info.description, info.datatype,
+        name = info.name
+        if isinstance(info, MultiKeyInfo):
+            name = name + " (*)"
+        self.fmt.describing_name(name, info.description, info.datatype,
                                  default=default, metadefault=info.metadefault)
 
     del TypeVisitor

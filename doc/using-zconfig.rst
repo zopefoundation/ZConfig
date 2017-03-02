@@ -246,17 +246,3 @@ For example, the value for ``key`` will evaluate to ``value``::
 
   %define name value
   key $name
-
-Configuring Logging
-===================
-
-Configuring loggers:
-
-.. zconfig:: ZConfig.components.logger
-    :members: ZConfig.logger.base-logger
-    :excluded-members: zconfig.logger.handler
-
-Configuring handlers:
-
-.. zconfig:: ZConfig.components.logger
-    :members: zconfig.logger.handler
