@@ -11,6 +11,9 @@ Reading Configurations
 For information on using ZConfig configuration documents in Python,
 see :mod:`ZConfig` and especially the example at :ref:`basic-usage`.
 
+For information about configuring the :mod:`logging` framework, see
+:doc:`using-logging`.
+
 .. _syntax:
 
 Writing Configurations
@@ -95,8 +98,9 @@ The terminator looks like this:
 
 
 The configuration data in a non-empty section consists of a sequence
-of one or more key-value pairs and sections.  For example::
+of one or more key-value pairs and sections.  For example:
 
+.. code-block:: xml
 
   <my-section>
     key-1 value-1
@@ -164,7 +168,9 @@ the same way Zope 2 does.  There are some parameters which configure
 the general behavior of the logging mechanism, and an arbitrary number
 of **log handlers** may be specified to control how the log
 messages are handled.  Several log handlers are provided by the
-application.  Here is an example logging configuration::
+application.  Here is an example logging configuration:
+
+.. code-block:: xml
 
 
   <eventlog>
