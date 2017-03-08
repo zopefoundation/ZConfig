@@ -48,11 +48,55 @@ supports comments and substitutions.
 It can contain multiple ``<logger>`` elements,
 each of which can have any number of :ref:`handler elements <logging-handlers>`.
 
-
 .. zconfig:: ZConfig.components.logger
     :file: logger.xml
     :members: logger
 
+.. highlight:: xml
+
+Examples
+--------
+
+Here's the configuration we looked at above. It configures the root
+(unnamed) logger with one handler (``<logfile>``), operating at the INFO level::
+
+  <logger>
+    level INFO
+    <logfile>
+       path STDOUT
+       format %(levelname)s %(name)s %(message)s
+    </logfile>
+  </logger>
+
+We can configure a different logger in the hierarchy to use the DEBUG
+level at the same time as we configure the root logger. We're not
+specifying a handler, but the default ``propagate`` value will let the
+lower level logger use the root logger's handler::
+
+  <logger>
+    level INFO
+    <logfile>
+       path STDOUT
+       format %(levelname)s %(name)s %(message)s
+    </logfile>
+  </logger>
+  <logger>
+    name my.package
+    level DEBUG
+  </logger>
+
+If we use that configuration, we can expect this behaviour:
+
+.. code-block:: pycon
+
+
+    >>> from logging import getLogger
+    >>> logger = getLogger()
+    >>> logger.info('An info message')
+    INFO root An info message
+    >>> logger.debug('A debug message')
+    >>> getLogger('my.package').debug('A debug message')
+    DEBUG my.package A debug message
 
 .. _logging-handlers:
 
@@ -61,7 +105,6 @@ Log Handlers
 
 Many of Python's built-in log handlers can be configured with ZConfig.
 
-.. highlight:: xml
 
 Files
 -----
