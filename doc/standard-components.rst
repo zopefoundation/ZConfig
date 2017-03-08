@@ -270,19 +270,11 @@ Configuring the email logger
 ----------------------------
 
 ZConfig has support for Python's :class:`logging.handlers.SMTPHandler`
-via the ``<email-notifier>`` handler::
+via the ``<email-notifier>`` handler.
 
-
-  <eventlog>
-    <email-notifier>
-      to sysadmin@example.com
-      to john@example.com
-      from zlog-user@example.com
-      level fatal
-      smtp-username john
-      smtp-password johnpw
-    </email-notifier>
-  </eventlog>
+.. zconfig:: ZConfig.components.logger
+     :file: handlers.xml
+     :members: email-notifier
 
 
 For details about the :class:`~logging.handlers.SMTPHandler` see the

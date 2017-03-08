@@ -452,6 +452,17 @@ class Registry(object):
         self._other = {}
         self._basic_key = None
 
+    def find_name(self, conversion):
+        """Return the best name for *conversion*, which must have been returned
+        from *get* on this object."""
+        for dct in self._other, self._stock:
+            for k, v in dct.items():
+                if v is conversion:
+                    return k
+
+        # If they followed the rules, we shouldn't get here.
+        return str(conversion) # pragma: no cover
+
     def get(self, name):
         """Return the type conversion routine for *name*.
 

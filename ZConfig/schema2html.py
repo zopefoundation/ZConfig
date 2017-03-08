@@ -14,103 +14,76 @@
 from __future__ import print_function
 
 import argparse
-import sys
+from contextlib import contextmanager
 import cgi
+import sys
 
-import ZConfig.loader
+from ZConfig._schema_utils import AbstractSchemaPrinter
+from ZConfig._schema_utils import AbstractSchemaFormatter
+from ZConfig._schema_utils import MARKER
+from ZConfig._schema_utils import load_schema
+from ZConfig.sphinx import RstSchemaPrinter
 
-from ZConfig.info import SectionType
-from ZConfig.info import SectionInfo
-from ZConfig.info import ValueInfo
-from ZConfig.info import AbstractType
+class HtmlSchemaFormatter(AbstractSchemaFormatter):
 
-def esc(x):
-    return cgi.escape(str(x))
+    def esc(self, x):
+        return cgi.escape(str(x))
 
-def dt(x):
-    tn = type(x).__name__
+    @contextmanager
+    def _simple_tag(self, tag):
+        self.write("<%s>" % tag)
+        yield
+        self.write("</%s>" % tag)
 
-    if isinstance(x, type):
-        return '%s %s' % (tn, x.__module__ + '.' + x.__name__)
+    def item_list(self):
+        return self._simple_tag("dl")
 
-    if hasattr(x, '__name__'):
-        return '%s %s' % (tn, x.__name__)
+    @contextmanager
+    def describing(self, description=MARKER, after=None):
+        with self._simple_tag("dt"):
+            yield
+        self._describing(description, after)
 
-    return tn
+    def described_as(self):
+        return self._simple_tag("dd")
 
-class explain(object):
-    done = []
+    def abstract_name(self, name):
+        self.write("<b><i>", name, "</b></i>")
 
-    def __call__(self, st, file=None):
-        if st.name in self.done: # pragma: no cover
+    def concrete_name(self, *name):
+        self.write("<b>", *name)
+        self.write("</b>")
+
+    def concrete_section_name(self, *name):
+        name = ' '.join(name)
+        self.write("<b>", self.esc("<%s>" % name), "</b>")
+
+    def datatype(self, datatype):
+        self.write("(%s)" % self._dt(datatype))
+
+    def example(self, text):
+        if not text:
             return
 
-        self.done.append(st.name)
+        with self._simple_tag("p"):
+            with self._simple_tag("i"):
+                self.write("Example:")
+            with self._simple_tag("pre"):
+                self.write(self.esc(self._dedent(text)))
 
-        out = file or sys.stdout
+    @contextmanager
+    def body(self):
+        self.write('''<html><body>
+        <style>
+        dl {margin: 0 0 1em 0;}
+        </style>
+        ''')
+        yield
+        self.write('</body></html>')
 
-        if st.description:
-            print(st.description, file=out)
-        for sub in st.getsubtypenames():
-            print('<dl>', file=out)
-            printContents(None, st.getsubtype(sub), file=file)
-            print('</dl>', file=out)
+class HtmlSchemaPrinter(AbstractSchemaPrinter):
 
-explain = explain()
-
-def printSchema(schema, out):
-    print('<dl>', file=out)
-    for child in schema:
-        printContents(*child, file=out)
-    print('</dl>', file=out)
-
-def printContents(name, info, file=None):
-    out = file or sys.stdout
-
-    if isinstance(info, SectionType):
-        print('<dt><b><i>', info.name, '</i></b> (%s)</dt>' % dt(info.datatype), file=out)
-        print('<dd>', file=out)
-        if info.description:
-            print(info.description, file=out)
-        print('<dl>', file=out)
-        for sub in info:
-            printContents(*sub, file=out) # pragma: no cover
-        print('</dl></dd>', file=out)
-    elif isinstance(info, SectionInfo):
-        st = info.sectiontype
-        if st.isabstract():
-            print('<dt><b><i>', st.name, '</i>', info.name, '</b></dt>', file=out)
-            print('<dd>', file=out)
-            if info.description:
-                print(info.description, file=out)
-            explain(st, file=out)
-            print('</dd>', file=out)
-        else:
-            print('<dt><b>', info.attribute, info.name, '</b>', file=out)
-            print('(%s)</dt>' % dt(info.datatype), file=out)
-            print('<dd><dl>', file=out)
-            for sub in info.sectiontype:
-                printContents(*sub, file=out)
-            print('</dl></dd>', file=out)
-    elif isinstance(info, AbstractType):
-        print('<dt><b><i>', info.name, '</i></b>', file=out)
-        print('<dd>', file=out)
-        if info.description:
-            print(info.description, file=out) # pragma: no cover
-        explain(info, file=out)
-        print('</dd>', file=out)
-    else:
-        print('<dt><b>',info.name, '</b>', '(%s)' % dt(info.datatype), file=out)
-        default = info.getdefault()
-        if isinstance(default, ValueInfo):
-            print('(default: %r)' % esc(default.value), file=out)
-        elif default is not None:
-            print('(default: %r)' % esc(default), file=out)
-        if info.metadefault:
-            print('(metadefault: %s)' % info.metadefault, file=out)
-        print('</dt>', file=out)
-        if info.description:
-            print('<dd>',info.description,'</dd>', file=out)
+    _schema_formatter = HtmlSchemaFormatter
 
 def main(argv=None):
     argv = argv or sys.argv[1:]
@@ -140,26 +113,36 @@ def main(argv=None):
         default="component.xml",
         help="When PACKAGE is given, this can specify the file inside it to load.")
 
+    argparser.add_argument(
+        "--members",
+        action="store",
+        nargs="*",
+        help="Only output sections and types in this list (and reachable from it)")
+
+    if RstSchemaPrinter:
+        argparser.add_argument(
+            "--format",
+            action="store",
+            choices=('html', 'xml'), # XXX Can we get actual valid RST out?
+            default="HTML",
+            help="What output format to produce"
+        )
+
     args = argparser.parse_args(argv)
 
     out = args.out or sys.stdout
 
-    if not args.package:
-        schema_reader = argparse.FileType('r')(args.schema)
-    else:
-        schema_template = "<schema><import package='%s' file='%s' /></schema>" % (
-            args.schema, args.package_file)
-        from ZConfig._compat import TextIO
-        schema_reader = TextIO(schema_template)
+    schema = load_schema(args.schema, args.package, args.package_file)
 
-    schema = ZConfig.loader.loadSchemaFile(schema_reader)
+    printer_factory = HtmlSchemaPrinter
+    if hasattr(args, 'format') and args.format == 'xml':
+        printer_factory = RstSchemaPrinter
 
-    print('''<html><body>
-    <style>
-    dl {margin: 0 0 1em 0;}
-    </style>
-    ''', file=out)
-    printSchema(iter(schema) if not args.package else schema.itertypes(), out)
-    print('</body></html>', file=out)
+
+    printer_factory(schema, out, allowed_names=args.members).printSchema()
+
 
     return 0
+
+if __name__ == '__main__':
+    main()

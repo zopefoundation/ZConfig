@@ -41,7 +41,7 @@ Python class.
 
 The example component we build here will be in the :mod:`noise`
 package, but any package will do.  Components loadable using
-``%import`` must be contained in the 'component.xml' file;
+``%import`` must be contained in the ``component.xml`` file;
 alternate filenames may not be selected by the ``%import``
 construct.
 

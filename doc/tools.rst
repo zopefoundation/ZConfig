@@ -19,6 +19,9 @@ Documenting Schemas
 ===================
 
 ZConfig also installs a tool called ``zconfig_schema2html`` that can
-print schemas in a simple HTML format:
+print schemas in a simple HTML format.
 
-  .. program-output:: zconfig_schema2html --help
+.. hint:: To document components in reStructuredText, e.g., with
+		 Sphinx, see :ref:`documenting-components`.
+
+.. program-output:: zconfig_schema2html --help
