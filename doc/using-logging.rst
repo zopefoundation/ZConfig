@@ -8,35 +8,32 @@ framework. ZConfig provides one simple convenience function to do this:
 .. autofunction:: ZConfig.configureLoggers
 
 
-This function takes the configuration text::
+Suppose we have the following logging configuration in a file called ``simple-root-config.conf``:
+
+.. literalinclude:: simple-root-config.conf
+   :language: xml
+
+We can load this file and pass its contents to ``configureLoggers``::
 
     >>> from ZConfig import configureLoggers
-    >>> configureLoggers('''
-    ... <logger>
-    ...    level INFO
-    ...    <logfile>
-    ...       PATH STDOUT
-    ...       format %(levelname)s %(name)s %(message)s
-    ...    </logfile>
-    ... </logger>
-    ... ''')
+    >>> with open('simple-root-config.conf') as f:
+    ...   configureLoggers(f.read())
 
 When this returns, the root logger is configured to output messages
 logged at INFO or above to the console, as we can see in the following
 example::
 
     >>> from logging import getLogger
-    >>> logger = getLogger()
-    >>> logger.info('An info message')
+    >>> getLogger().info('An info message')
     INFO root An info message
-    >>> logger.debug('A debug message')
+    >>> getLogger().debug('A debug message')
 
 A more common configuration would see STDOUT replaced with a path to
 the file into which log entries would be written.
 
-You can read the logging configuration from a file and pass it to
-:func:`~.configureLoggers`. Any type of Python string (bytes or
-unicode) is acceptable.
+Although loading configuration from a file is common, we could of
+course also pass a string literal to :func:`~.configureLoggers`. Any
+type of Python string (bytes or unicode) is acceptable.
 
 
 Configuration Format
@@ -58,43 +55,33 @@ Examples
 --------
 
 Here's the configuration we looked at above. It configures the root
-(unnamed) logger with one handler (``<logfile>``), operating at the INFO level::
+(unnamed) logger with one handler (``<logfile>``), operating at the INFO level:
 
-  <logger>
-    level INFO
-    <logfile>
-       path STDOUT
-       format %(levelname)s %(name)s %(message)s
-    </logfile>
-  </logger>
+.. literalinclude:: simple-root-config.conf
+   :language: xml
 
 We can configure a different logger in the hierarchy to use the DEBUG
 level at the same time as we configure the root logger. We're not
-specifying a handler, but the default ``propagate`` value will let the
-lower level logger use the root logger's handler::
+specifying a handler for it, but the default ``propagate`` value will
+let the lower level logger use the root logger's handler:
 
-  <logger>
-    level INFO
-    <logfile>
-       path STDOUT
-       format %(levelname)s %(name)s %(message)s
-    </logfile>
-  </logger>
-  <logger>
-    name my.package
-    level DEBUG
-  </logger>
+.. literalinclude:: root-and-child-config.conf
+   :language: xml
 
-If we use that configuration, we can expect this behaviour:
+
+If we load that configuration from ``root-and-child-config.conf``, we
+can expect this behaviour:
+
+..
+  >>> tearDown(None)
 
 .. code-block:: pycon
 
-
-    >>> from logging import getLogger
-    >>> logger = getLogger()
-    >>> logger.info('An info message')
+    >>> with open('root-and-child-config.conf') as f:
+    ...     configureLoggers(f.read())
+    >>> getLogger().info('An info message')
     INFO root An info message
-    >>> logger.debug('A debug message')
+    >>> getLogger().debug('A debug message')
     >>> getLogger('my.package').debug('A debug message')
     DEBUG my.package A debug message
 

@@ -12,6 +12,9 @@
 #
 ##############################################################################
 import doctest
+import os
+import os.path
+import unittest
 import logging
 
 
@@ -19,7 +22,6 @@ options = doctest.REPORT_NDIFF | doctest.ELLIPSIS
 
 old = {}
 def setUp(test):
-    global old
     logger = logging.getLogger()
     old['level'] = logger.level
     old['handlers'] = logger.handlers[:]
@@ -29,9 +31,33 @@ def tearDown(test):
     logger.level = old['level']
     logger.handlers = old['handlers']
 
+def docSetUp(test):
+    old['pwd'] = os.getcwd()
+    doc_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        '..',
+        '..',
+        'doc')
+    os.chdir(doc_path)
+    setUp(test)
+
+def docTearDown(test):
+    os.chdir(old['pwd'])
+    tearDown(test)
+
 def test_suite():
-    return doctest.DocFileSuite(
-        '../../README.rst',
-        optionflags=options,
-        setUp=setUp, tearDown=tearDown,
-        )
+    return unittest.TestSuite([
+        doctest.DocFileSuite(
+            '../../README.rst',
+            optionflags=options,
+            setUp=setUp, tearDown=tearDown,
+        ),
+        doctest.DocFileSuite(
+            '../../doc/using-logging.rst',
+            optionflags=options, globs=globals(),
+            setUp=docSetUp, tearDown=docTearDown,
+        ),
+    ])
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='test_suite')
