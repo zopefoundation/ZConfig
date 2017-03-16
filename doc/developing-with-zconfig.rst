@@ -9,5 +9,6 @@
    writing-schema
    standard-datatypes
    standard-components
+   logging-components
    writing-components
    documenting-components

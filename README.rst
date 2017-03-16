@@ -23,6 +23,23 @@ the file LICENSE.txt in the distribution for the full license text.
 
 Reference documentation is available at https://zconfig.readthedocs.io.
 
+Information on the latest released version of the ZConfig package is
+available at
+
+  https://pypi.python.org/pypi/ZConfig/
+
+You may either create an RPM and install this, or install directly from
+the source distribution.
+
+There is a mailing list for discussions and questions about ZConfig;
+more information on the list is available at
+
+  http://mail.zope.org/mailman/listinfo/zconfig/
+
+
+Configuring Logging
+-------------------
+
 One common use of ZConfig is to configure the Python logging
 framework. This is extremely simple to do as the following example
 demonstrates:
@@ -50,21 +67,7 @@ or above to the console, as we can see in the following example:
 A more common configuration would see STDOUT replaced with a path to
 the file into which log entries would be written.
 
-For more information, see section 5.2 on the ZConfig documentation and
-the examples in ZConfig/components/logger/tests.
-
-Information on the latest released version of the ZConfig package is
-available at
-
-  https://pypi.python.org/pypi/ZConfig/
-
-You may either create an RPM and install this, or install directly from
-the source distribution.
-
-There is a mailing list for discussions and questions about ZConfig;
-more information on the list is available at
-
-  http://mail.zope.org/mailman/listinfo/zconfig/
+For more information, see the `the documentation <https://zconfig.readthedocs.io>`_.
 
 
 Installing from the source distribution

@@ -18,7 +18,8 @@ ZODB, and is easily used by other projects. ZConfig only relies on the
 Python standard library.
 
 For information on reading and writing configuration documents, see
-:doc:`using-zconfig`.
+:doc:`using-zconfig`. For the extremely common usage of configuring
+the Python :mod:`logging` framework, see :doc:`using-logging`.
 
 For information on using ZConfig to create custom configurations for
 you projects, see :doc:`developing-with-zconfig`.
@@ -30,6 +31,7 @@ Development of ZConfig is hosted on `GitHub <https://github.com/zopefoundation/Z
    :caption: Contents:
 
    using-zconfig
+   using-logging
    developing-with-zconfig
    zconfig
    tools
