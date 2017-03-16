@@ -12,6 +12,9 @@
 #
 ##############################################################################
 import doctest
+import manuel.capture
+import manuel.doctest
+import manuel.testing
 import os
 import os.path
 import unittest
@@ -32,6 +35,14 @@ def tearDown(test):
     logger.handlers = old['handlers']
 
 def docSetUp(test):
+    # Python 2 makes __path__ and __file__ relative in some
+    # cases (such as when we're executing with the 'ZConfig'
+    # directory on sys.path as CWD). This breaks finding
+    # schema components when we change directories.
+    import ZConfig.components.logger as logger
+    logger.__file__ = os.path.abspath(logger.__file__)
+    logger.__path__ = [os.path.abspath(x) for x in logger.__path__]
+
     old['pwd'] = os.getcwd()
     doc_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -44,17 +55,21 @@ def docSetUp(test):
 def docTearDown(test):
     os.chdir(old['pwd'])
     tearDown(test)
+    old.clear()
 
 def test_suite():
+    plugins = manuel.doctest.Manuel(optionflags=options)
+    plugins += manuel.capture.Manuel()
     return unittest.TestSuite([
-        doctest.DocFileSuite(
+        manuel.testing.TestSuite(
+            plugins,
             '../../README.rst',
-            optionflags=options,
             setUp=setUp, tearDown=tearDown,
         ),
-        doctest.DocFileSuite(
+        manuel.testing.TestSuite(
+            plugins,
             '../../doc/using-logging.rst',
-            optionflags=options, globs=globals(),
+            globs={'resetLoggers': lambda: tearDown(None)},
             setUp=docSetUp, tearDown=docTearDown,
         ),
     ])

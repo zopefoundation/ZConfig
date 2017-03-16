@@ -7,26 +7,33 @@ framework. ZConfig provides one simple convenience function to do this:
 
 .. autofunction:: ZConfig.configureLoggers
 
-
 Suppose we have the following logging configuration in a file called ``simple-root-config.conf``:
 
 .. literalinclude:: simple-root-config.conf
    :language: xml
 
-We can load this file and pass its contents to ``configureLoggers``::
+We can load this file and pass its contents to ``configureLoggers``:
 
-    >>> from ZConfig import configureLoggers
-    >>> with open('simple-root-config.conf') as f:
-    ...   configureLoggers(f.read())
+.. code-block:: python
+
+    from ZConfig import configureLoggers
+    with open('simple-root-config.conf') as f:
+        configureLoggers(f.read())
+
+.. -> src
+  >>> import six
+  >>> six.exec_(src)
 
 When this returns, the root logger is configured to output messages
 logged at INFO or above to the console, as we can see in the following
-example::
+example:
+
+.. code-block:: pycon
 
     >>> from logging import getLogger
-    >>> getLogger().info('An info message')
-    INFO root An info message
-    >>> getLogger().debug('A debug message')
+    >>> getLogger().info('We see an info message')
+    INFO root We see an info message
+    >>> getLogger().debug('We do not see a debug message')
 
 A more common configuration would see STDOUT replaced with a path to
 the file into which log entries would be written.
@@ -73,17 +80,17 @@ If we load that configuration from ``root-and-child-config.conf``, we
 can expect this behaviour:
 
 ..
-  >>> tearDown(None)
+  >>> resetLoggers()
 
 .. code-block:: pycon
 
     >>> with open('root-and-child-config.conf') as f:
     ...     configureLoggers(f.read())
-    >>> getLogger().info('An info message')
-    INFO root An info message
-    >>> getLogger().debug('A debug message')
-    >>> getLogger('my.package').debug('A debug message')
-    DEBUG my.package A debug message
+    >>> getLogger().info('Here is another info message')
+    INFO root Here is another info message
+    >>> getLogger().debug('This debug message is hidden')
+    >>> getLogger('my.package').debug('The debug message for my.package shows')
+    DEBUG my.package The debug message for my.package shows
 
 .. _logging-handlers:
 
