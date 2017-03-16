@@ -26,6 +26,7 @@ def alltests():
 
 tests_require = [
     'docutils',
+    'manuel',
     'zope.testrunner',
 ]
 

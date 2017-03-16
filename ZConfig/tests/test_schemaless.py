@@ -17,7 +17,8 @@ Test driver for ZConfig.schemaless.
 """
 __docformat__ = "reStructuredText"
 
-import doctest
+import manuel.doctest
+import manuel.testing
 import unittest
 
 from ZConfig.schemaless import Section
@@ -32,7 +33,9 @@ class TestSection(unittest.TestCase):
 def test_suite():
     return unittest.TestSuite([
         unittest.defaultTestLoader.loadTestsFromName(__name__),
-        doctest.DocFileSuite("schemaless.txt", package="ZConfig")
+        manuel.testing.TestSuite(
+            manuel.doctest.Manuel(),
+            '../schemaless.txt'),
     ])
 
 if __name__ == '__main__':
