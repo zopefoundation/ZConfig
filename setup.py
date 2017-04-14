@@ -86,7 +86,7 @@ options = dict(
     extras_require={
         'test': tests_require,
         'docs': [
-            'nti.sphinxcontrib-programoutput',
+            'sphinxcontrib-programoutput',
         ]
     },
 )
