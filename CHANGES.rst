@@ -20,9 +20,11 @@ Change History for ZConfig
 - Scripts ``zconfig`` (for schema validation) and
   ``zconfig_schema2html`` are ported to Python 3.
 
-- A new ``ZConfig.sphinx`` Sphinx extension facilitates automatically
-  documenting ZConfig components using their description and examples
-  in Sphinx documentation.
+- A new ``ZConfig.sphinx`` `Sphinx extension
+  <https://zconfig.readthedocs.io/en/latest/documenting-components.html#documenting-components>`_
+  facilitates automatically documenting ZConfig components using their
+  description and examples in Sphinx documentation. See
+  https://github.com/zopefoundation/ZConfig/pull/25.
 
 - Simplify internal schema processing of max and min occurrence
   values. See https://github.com/zopefoundation/ZConfig/issues/15.

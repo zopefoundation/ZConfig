@@ -37,6 +37,7 @@ options = dict(
     author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
     description="Structured Configuration Library",
+    keywords='configuration structured simple flexible typed hierarchy logging',
     long_description=README + "\n\n" + CHANGES,
     license="ZPL 2.1",
     url="https://github.com/zopefoundation/ZConfig/",
@@ -79,7 +80,7 @@ options = dict(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Operating System :: OS Independent',
         'Topic :: Software Development',
-        ],
+    ],
     # Support for 'setup.py test' when setuptools is available:
     test_suite='__main__.alltests',
     tests_require=tests_require,
