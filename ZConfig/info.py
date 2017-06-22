@@ -254,7 +254,7 @@ class SectionInfo(BaseInfo):
         if name == "*" or name == "+":
             return False
         elif self.name == "+":
-            return name and True or False
+            return True if name else False
         elif self.name == "*":
             return True
         else:
@@ -282,8 +282,8 @@ class AbstractType(object):
     def __iter__(self):
         return iter(self._subtypes.items())
 
-    def addsubtype(self, type):
-        self._subtypes[type.name] = type
+    def addsubtype(self, type_):
+        self._subtypes[type_.name] = type_
 
     def getsubtype(self, name):
         try:
@@ -392,7 +392,7 @@ class SectionType(object):
                         stack.append(t)
         return list(d.keys())
 
-    def getsectioninfo(self, type, name):
+    def getsectioninfo(self, type_, name):
         for key, info in self._children:
             if key:
                 if key == name:
@@ -402,29 +402,29 @@ class SectionType(object):
                     st = info.sectiontype
                     if st.isabstract():
                         try:
-                            st = st.getsubtype(type)
+                            st = st.getsubtype(type_)
                         except ZConfig.ConfigurationError: # pragma: no cover
                             raise ZConfig.ConfigurationError(
                                 "section type %s not allowed for name %s"
-                                % (repr(type), repr(key)))
-                    if not st.name == type:
+                                % (repr(type_), repr(key)))
+                    if st.name != type_:
                         raise ZConfig.ConfigurationError(
                             "name %s must be used for a %s section"
                             % (repr(name), repr(st.name)))
                     return info
             # else must be a sectiontype or an abstracttype:
-            elif info.sectiontype.name == type:
+            elif info.sectiontype.name == type_:
                 if not (name or info.allowUnnamed()):
                     raise ZConfig.ConfigurationError(
-                        repr(type) + " sections must be named")
+                        repr(type_) + " sections must be named")
                 return info
             elif info.sectiontype.isabstract():
                 st = info.sectiontype
-                if st.name == type: # pragma: no cover
+                if st.name == type_: # pragma: no cover
                     raise ZConfig.ConfigurationError(
                         "cannot define section with an abstract type")
                 try:
-                    st = st.getsubtype(type)
+                    st = st.getsubtype(type_)
                 except ZConfig.ConfigurationError: # pragma: no cover
                     # not this one; maybe a different one
                     pass
@@ -432,7 +432,7 @@ class SectionType(object):
                     return info
         raise ZConfig.ConfigurationError(
             "no matching section defined for type='%s', name='%s'" % (
-            type, name))
+            type_, name))
 
     def isabstract(self):
         return False

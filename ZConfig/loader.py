@@ -294,8 +294,8 @@ def openPackageResource(package, path):
         loader = pkg.__loader__
     except AttributeError:
         relpath = os.path.join(*path.split("/"))
-        for dir in pkg.__path__:
-            filename = os.path.join(dir, relpath)
+        for dirname in pkg.__path__:
+            filename = os.path.join(dirname, relpath)
             if os.path.exists(filename):
                 break
         else:
@@ -308,8 +308,8 @@ def openPackageResource(package, path):
         return urllib2.urlopen(url)
     else:
         v, tb = (None, None)
-        for dir in pkg.__path__:
-            loadpath = os.path.join(dir, path)
+        for dirname in pkg.__path__:
+            loadpath = os.path.join(dirname, path)
             try:
                 return StringIO(
                     loader.get_data(loadpath).decode('utf-8'))
@@ -333,12 +333,10 @@ def openPackageResource(package, path):
                                           path=pkg.__path__)
 
 
-def _url_from_file(file):
-    name = getattr(file, "name", None)
+def _url_from_file(file_or_path):
+    name = getattr(file_or_path, "name", None)
     if name and name[0] != "<" and name[-1] != ">":
         return "file://" + pathname2url(os.path.abspath(name))
-    else:
-        return None
 
 
 class SchemaLoader(BaseLoader):
@@ -367,7 +365,7 @@ class SchemaLoader(BaseLoader):
 
     # schema parser support API
 
-    def schemaComponentSource(self, package, file):
+    def schemaComponentSource(self, package, filename):
         parts = package.split(".")
         if not parts: # pragma: no cover. can we even get here?
             raise ZConfig.SchemaError(
@@ -376,20 +374,20 @@ class SchemaLoader(BaseLoader):
             # '' somewhere in the package spec; still illegal
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + repr(package))
-        file = file or "component.xml"
+        filename = filename or "component.xml"
         try:
             __import__(package)
         except ImportError as e:
             raise ZConfig.SchemaResourceError(
                 "could not load package %s: %s" % (package, str(e)),
-                filename=file,
+                filename=filename,
                 package=package)
         pkg = sys.modules[package]
         if not hasattr(pkg, "__path__"):
             raise ZConfig.SchemaResourceError(
                 "import name does not refer to a package",
-                filename=file, package=package)
-        return "package:%s:%s" % (package, file)
+                filename=filename, package=package)
+        return "package:%s:%s" % (package, filename)
 
 
 class ConfigLoader(BaseLoader):
@@ -421,17 +419,17 @@ class ConfigLoader(BaseLoader):
 
     # config parser support API
 
-    def startSection(self, parent, type, name):
-        t = self.schema.gettype(type)
+    def startSection(self, parent, type_, name):
+        t = self.schema.gettype(type_)
         if t.isabstract():
             raise ZConfig.ConfigurationError(
                 "concrete sections cannot match abstract section types;"
-                " found abstract type " + repr(type))
+                " found abstract type " + repr(type_))
         return parent.createChildMatcher(t, name)
 
-    def endSection(self, parent, type, name, matcher):
+    def endSection(self, parent, type_, name, matcher):
         sectvalue = matcher.finish()
-        parent.addSection(type, name, sectvalue)
+        parent.addSection(type_, name, sectvalue)
 
     def importSchemaComponent(self, pkgname):
         schema = self.schema
@@ -466,7 +464,7 @@ class ConfigLoader(BaseLoader):
         parser.parse(matcher)
 
 
-class CompositeHandler:
+class CompositeHandler(object):
 
     def __init__(self, handlers, schema):
         self._handlers = handlers
@@ -509,6 +507,8 @@ class Resource(object):
 
     All other attributes are delegated to *file*.
     """
+
+    closed = False
 
     def __init__(self, file, url):
         self.file = file

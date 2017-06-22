@@ -27,6 +27,12 @@ Change History for ZConfig
 - Simplify internal schema processing of max and min occurrence
   values. See https://github.com/zopefoundation/ZConfig/issues/15.
 
+- Almost all uses of ``type`` as a parameter name have been replaced
+  with ``type_`` to avoid shadowing a builtin. These were typically
+  not public APIs and weren't expected to be called with keyword
+  arguments so there should not be any user-visible changes. See
+  https://github.com/zopefoundation/ZConfig/issues/17
+
 3.1.0 (2015-10-17)
 ------------------
 

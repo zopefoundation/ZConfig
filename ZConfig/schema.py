@@ -41,8 +41,7 @@ def _srepr(ob):
     if isinstance(ob, type(BLANK)) and sys.version_info[0] < 3:
         # drop the leading "u" from a unicode repr
         return repr(ob)[1:]
-    else:
-        return repr(ob)
+    return repr(ob)
 
 
 class BaseParser(xml.sax.ContentHandler):
@@ -149,15 +148,13 @@ class BaseParser(xml.sax.ContentHandler):
             return (self._locator.getLineNumber(),
                     self._locator.getColumnNumber(),
                     (self._locator.getSystemId() or self._url))
-        else: # pragma: no cover
-            return None, None, self._url
+        return None, None, self._url # pragma: no cover
 
     def get_handler(self, attrs):
         v = attrs.get("handler")
         if v is None:
             return v
-        else:
-            return self.basic_key(v)
+        return self.basic_key(v)
 
     def push_prefix(self, attrs):
         name = attrs.get("prefix")
@@ -188,8 +185,7 @@ class BaseParser(xml.sax.ContentHandler):
         name = str(name)
         if name.startswith("."):
             return self._prefixes[-1] + name
-        else:
-            return name
+        return name
 
     def get_datatype(self, attrs, attrkey, default, base=None):
         if attrkey in attrs:
@@ -224,27 +220,27 @@ class BaseParser(xml.sax.ContentHandler):
 
     def get_ordinality(self, attrs):
         # used by start_multi*()
-        min, max = 0, info.Unbounded
+        minOccurs, maxOccurs = 0, info.Unbounded
         if self.get_required(attrs):
-            min = 1
-        return min, max
+            minOccurs = 1
+        return minOccurs, maxOccurs
 
     def get_sectiontype(self, attrs):
-        type = attrs.get("type")
-        if not type:
+        type_name = attrs.get("type")
+        if not type_name:
             self.error("section must specify type")
-        return self._schema.gettype(type)
+        return self._schema.gettype(type_name)
 
     def get_key_info(self, attrs, element):
-        any, name, attribute = self.get_name_info(attrs, element)
-        if any == '*':
+        any_name, name, attribute = self.get_name_info(attrs, element)
+        if any_name == '*':
             self.error(element + " may not specify '*' for name")
-        if not name and any != '+': # pragma: no cover
+        if not name and any_name != '+': # pragma: no cover
             # Can we even get here?
             self.error(element + " name may not be omitted or empty")
         datatype = self.get_datatype(attrs, "datatype", "string")
         handler = self.get_handler(attrs)
-        return name or any, datatype, handler, attribute
+        return name or any_name, datatype, handler, attribute
 
     def get_name_info(self, attrs, element, default=None):
         name = attrs.get("name", default)
@@ -297,13 +293,13 @@ class BaseParser(xml.sax.ContentHandler):
     def start_import(self, attrs):
         src = attrs.get("src", "").strip()
         pkg = attrs.get("package", "").strip()
-        file = attrs.get("file", "").strip()
+        filename = attrs.get("file", "").strip()
         if not (src or pkg):
             self.error("import must specify either src or package")
         if src and pkg:
             self.error("import may only specify one of src or package")
         if src:
-            if file:
+            if filename:
                 self.error("import may not specify file and src")
             src = url.urljoin(self._url, src)
             src, fragment = url.urldefrag(src)
@@ -314,10 +310,10 @@ class BaseParser(xml.sax.ContentHandler):
             for n in schema.gettypenames():
                 self._schema.addtype(schema.gettype(n))
         else:
-            if os.path.dirname(file):
+            if os.path.dirname(filename):
                 self.error("file may not include a directory part")
             pkg = self.get_classname(pkg)
-            src = self._loader.schemaComponentSource(pkg, file)
+            src = self._loader.schemaComponentSource(pkg, filename)
             if not self._schema.hasComponent(src):
                 self._schema.addComponent(src)
                 self.loadComponent(src)
@@ -367,14 +363,14 @@ class BaseParser(xml.sax.ContentHandler):
     def start_section(self, attrs):
         sectiontype = self.get_sectiontype(attrs)
         handler = self.get_handler(attrs)
-        min = 1 if self.get_required(attrs) else 0
-        any, name, attribute = self.get_name_info(attrs, "section", "*")
-        if any and not attribute: # pragma: no cover
+        minOccurs = 1 if self.get_required(attrs) else 0
+        any_name, name, attribute = self.get_name_info(attrs, "section", "*")
+        if any_name and not attribute: # pragma: no cover
             # It seems like this is handled by get_name_info.
             self.error(
                 "attribute must be specified if section name is '*' or '+'")
-        section = info.SectionInfo(any or name, sectiontype,
-                                   min, 1, handler, attribute)
+        section = info.SectionInfo(any_name or name, sectiontype,
+                                   minOccurs, 1, handler, attribute)
         self._stack[-1].addsection(name, section)
         self._stack.append(section)
 
@@ -383,13 +379,13 @@ class BaseParser(xml.sax.ContentHandler):
 
     def start_multisection(self, attrs):
         sectiontype = self.get_sectiontype(attrs)
-        min, max = self.get_ordinality(attrs)
-        any, name, attribute = self.get_name_info(attrs, "multisection", "*")
-        if any not in ("*", "+"):
+        minOccurs, maxOccurs = self.get_ordinality(attrs)
+        any_name, name, attribute = self.get_name_info(attrs, "multisection", "*")
+        if any_name not in ("*", "+"):
             self.error("multisection must specify '*' or '+' for the name")
         handler = self.get_handler(attrs)
-        section = info.SectionInfo(any or name, sectiontype,
-                                   min, max, handler, attribute)
+        section = info.SectionInfo(any_name or name, sectiontype,
+                                   minOccurs, maxOccurs, handler, attribute)
         self._stack[-1].addsection(name, section)
         self._stack.append(section)
 
@@ -410,10 +406,10 @@ class BaseParser(xml.sax.ContentHandler):
 
     def start_key(self, attrs):
         name, datatype, handler, attribute = self.get_key_info(attrs, "key")
-        min = 1 if self.get_required(attrs) else 0
-        key = info.KeyInfo(name, datatype, min, handler, attribute)
+        minOccurs = 1 if self.get_required(attrs) else 0
+        key = info.KeyInfo(name, datatype, minOccurs, handler, attribute)
         if "default" in attrs:
-            if min:
+            if minOccurs:
                 self.error("required key cannot have a default value")
             key.adddefault(str(attrs["default"]).strip(),
                            self.get_position())
@@ -434,8 +430,8 @@ class BaseParser(xml.sax.ContentHandler):
                        " 'default' elements")
         name, datatype, handler, attribute = self.get_key_info(attrs,
                                                                "multikey")
-        min, max = self.get_ordinality(attrs)
-        key = info.MultiKeyInfo(name, datatype, min, max, handler, attribute)
+        minOccurs, maxOccurs = self.get_ordinality(attrs)
+        key = info.MultiKeyInfo(name, datatype, minOccurs, maxOccurs, handler, attribute)
         self._stack[-1].addkey(key)
         self._stack.append(key)
 
