@@ -64,13 +64,15 @@ class BaseInfo(object):
 
     def __init__(self, name, datatype, minOccurs, maxOccurs, handler,
                  attribute):
-        if maxOccurs is not None:
-            if maxOccurs < 1:
-                raise ZConfig.SchemaError(
-                    "maxOccurs must be at least 1")
-            if minOccurs is not None and minOccurs > maxOccurs:
-                raise ZConfig.SchemaError(
-                    "minOccurs cannot be more than maxOccurs")
+        assert maxOccurs is not None, "Use Unbounded for an upper bound, not None"
+        assert minOccurs is not None, "Use 0 for a lower bound, not None"
+
+        if maxOccurs < 1:
+            raise ZConfig.SchemaError(
+                "maxOccurs must be at least 1")
+        if minOccurs > maxOccurs:
+            raise ZConfig.SchemaError(
+                "minOccurs cannot be more than maxOccurs")
         self.name = name
         self.datatype = datatype
         self.minOccurs = minOccurs
@@ -98,7 +100,6 @@ class BaseKeyInfo(AbstractBaseClass, BaseInfo):
 
     def __init__(self, name, datatype, minOccurs, maxOccurs, handler,
                  attribute):
-        assert minOccurs is not None
         BaseInfo.__init__(self, name, datatype, minOccurs, maxOccurs,
                           handler, attribute)
         self._finished = False
@@ -221,8 +222,6 @@ class SectionInfo(BaseInfo):
         # handler     - handler name called when value(s) must take effect,
         #               or None
         # attribute   - name of the attribute on the SectionValue object
-        assert maxOccurs is not None
-        # because we compare it to 1 which is a Py3 error
         if maxOccurs > 1:
             if name not in ('*', '+'):
                 raise ZConfig.SchemaError(

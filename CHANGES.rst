@@ -24,6 +24,9 @@ Change History for ZConfig
   documenting ZConfig components using their description and examples
   in Sphinx documentation.
 
+- Simplify internal schema processing of max and min occurrence
+  values. See https://github.com/zopefoundation/ZConfig/issues/15.
+
 3.1.0 (2015-10-17)
 ------------------
 

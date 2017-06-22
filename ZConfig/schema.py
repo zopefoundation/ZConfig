@@ -367,7 +367,7 @@ class BaseParser(xml.sax.ContentHandler):
     def start_section(self, attrs):
         sectiontype = self.get_sectiontype(attrs)
         handler = self.get_handler(attrs)
-        min = self.get_required(attrs) and 1 or 0
+        min = 1 if self.get_required(attrs) else 0
         any, name, attribute = self.get_name_info(attrs, "section", "*")
         if any and not attribute: # pragma: no cover
             # It seems like this is handled by get_name_info.
@@ -410,7 +410,7 @@ class BaseParser(xml.sax.ContentHandler):
 
     def start_key(self, attrs):
         name, datatype, handler, attribute = self.get_key_info(attrs, "key")
-        min = self.get_required(attrs) and 1 or 0
+        min = 1 if self.get_required(attrs) else 0
         key = info.KeyInfo(name, datatype, min, handler, attribute)
         if "default" in attrs:
             if min:
