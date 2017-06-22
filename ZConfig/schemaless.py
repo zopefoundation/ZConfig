@@ -93,12 +93,12 @@ class Context(object):
         self.top = Section()
         self.sections = []
 
-    def startSection(self, container, type, name):
-        newsec = Section(type, name)
+    def startSection(self, container, type_, name):
+        newsec = Section(type_, name)
         container.sections.append(newsec)
         return newsec
 
-    def endSection(self, container, type, name, newsect):
+    def endSection(self, container, type_, name, newsect):
         pass
 
     def importSchemaComponent(self, pkgname):

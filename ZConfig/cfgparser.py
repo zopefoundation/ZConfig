@@ -12,7 +12,6 @@
 #
 ##############################################################################
 """Configuration parser."""
-import sys
 
 import ZConfig
 import ZConfig.url
@@ -41,8 +40,7 @@ class ZConfigParser(object):
         if line:
             self.lineno += 1
             return False, line.strip()
-        else:
-            return True, None
+        return True, None
 
     def parse(self, section):
         done, line = self.nextline()
@@ -83,32 +81,32 @@ class ZConfigParser(object):
         m = _section_start_rx.match(text)
         if not m:
             self.error("malformed section header")
-        type, name = m.group('type', 'name')
-        type = self._normalize_case(type)
+        type_, name = m.group('type', 'name')
+        type_ = self._normalize_case(type_)
         if name:
             name = self._normalize_case(name)
         try:
-            newsect = self.context.startSection(section, type, name)
+            newsect = self.context.startSection(section, type_, name)
         except ZConfig.ConfigurationError as e:
             self.error(e.message)
 
         if isempty:
-            self.context.endSection(section, type, name, newsect)
+            self.context.endSection(section, type_, name, newsect)
             return section
-        else:
-            self.stack.append((type, name, section))
-            return newsect
+
+        self.stack.append((type_, name, section))
+        return newsect
 
     def end_section(self, section, rest):
         if not self.stack:
             self.error("unexpected section end")
-        type = self._normalize_case(rest.rstrip())
+        type_ = self._normalize_case(rest.rstrip())
         opentype, name, prevsection = self.stack.pop()
-        if type != opentype:
+        if type_ != opentype:
             self.error("unbalanced section end")
         try:
             self.context.endSection(
-                prevsection, type, name, section)
+                prevsection, type_, name, section)
         except ZConfig.ConfigurationError as e:
             self.error(e.args[0])
         return prevsection

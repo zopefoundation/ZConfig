@@ -38,7 +38,7 @@ class InfoMixin(object):
     Class = None
 
     default_kwargs = {'name': '', 'datatype': None, 'handler': None,
-                      'minOccurs': None, 'maxOccurs': None, 'attribute': None}
+                      'minOccurs': 0, 'maxOccurs': Unbounded, 'attribute': None}
 
     def make_one(self, **kwargs):
         args = self.default_kwargs.copy()
@@ -54,7 +54,7 @@ class BaseInfoTestCase(InfoMixin, unittest.TestCase):
         self.assertRaisesRegexp(SchemaError,
                                 'maxOccurs',
                                 self.make_one,
-                                maxOccurs=0)
+                                maxOccurs=0, minOccurs=0)
 
         # This case doesn't really make sense
         self.assertRaisesRegexp(SchemaError,

@@ -34,13 +34,12 @@ import re
 import sys
 import datetime
 
-from ZConfig._compat import text_type
-from ZConfig._compat import binary_type
-
 try:
     unicode
 except NameError:
+    # Python 3
     have_unicode = False
+    from functools import reduce
 else:
     have_unicode = True
 
@@ -331,11 +330,11 @@ def existing_file(v):
 
 def existing_dirpath(v):
     nv = os.path.expanduser(v)
-    dir = os.path.dirname(nv)
-    if not dir:
+    dirname = os.path.dirname(nv)
+    if not dirname:
         # relative pathname with no directory component
         return nv
-    if os.path.isdir(dir):
+    if os.path.isdir(dirname):
         return nv
     raise ValueError('The directory named as part of the path %s '
                      'does not exist.' % v)
@@ -349,12 +348,11 @@ class SuffixMultiplier(object):
         self._d = d
         self._default = default
         # all keys must be the same size
-        self._keysz = None
-        for k in d.keys():
-            if self._keysz is None:
-                self._keysz = len(k)
-            else:
-                assert self._keysz == len(k)
+        def check(a, b):
+            if len(a) != len(b):
+                raise ValueError("suffix length mismatch")
+            return a
+        self._keysz = len(reduce(check, d))
 
     def __call__(self, v):
         v = v.lower()

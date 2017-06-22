@@ -24,8 +24,6 @@ Each setting is given by a value specifier string, as described by
 :meth:`ExtendedConfigLoader.addOption`.
 """
 
-import sys
-
 import ZConfig
 import ZConfig.loader
 import ZConfig.matcher
@@ -141,13 +139,12 @@ class OptionBag(object):
         if L:
             del self.keypairs[name]
             return L
-        else:
-            return []
+        return []
 
     def keys(self):
         return self.keypairs.keys()
 
-    def get_section_info(self, type, name):
+    def get_section_info(self, type_, name):
         L = []  # what pertains to the child section
         R = []  # what we keep
         for item in self.sectitems:
@@ -156,15 +153,13 @@ class OptionBag(object):
             bk = self.basic_key(s, pos)
             if name and self._normalize_case(s) == name:
                 L.append((optpath[1:], val, pos))
-            elif bk == type: # pragma: no cover
+            elif bk == type_: # pragma: no cover
                 L.append((optpath[1:], val, pos))
             else:
                 R.append(item)
         if L:
             self.sectitems[:] = R
-            return OptionBag(self.schema, self.schema.gettype(type), L)
-        else:
-            return None
+            return OptionBag(self.schema, self.schema.gettype(type_), L)
 
     def finish(self):
         if self.sectitems or self.keypairs:
@@ -190,9 +185,9 @@ class MatcherMixin(object):
             return
         ZConfig.matcher.BaseMatcher.addValue(self, key, value, position)
 
-    def createChildMatcher(self, type, name):
-        sm = ZConfig.matcher.BaseMatcher.createChildMatcher(self, type, name)
-        bag = self.optionbag.get_section_info(type.name, name)
+    def createChildMatcher(self, type_, name):
+        sm = ZConfig.matcher.BaseMatcher.createChildMatcher(self, type_, name)
+        bag = self.optionbag.get_section_info(type_.name, name)
         if bag is not None:
             sm = ExtendedSectionMatcher(
                 sm.info, sm.type, sm.name, sm.handlers)

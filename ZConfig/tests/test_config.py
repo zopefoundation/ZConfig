@@ -46,9 +46,9 @@ class ConfigurationTestCase(unittest.TestCase):
         sio = StringIO(text)
         return self.loadfile(sio)
 
-    def loadfile(self, file):
+    def loadfile(self, file_or_path):
         schema = self.get_schema()
-        self.conf, self.handlers = ZConfig.loadConfigFile(schema, file)
+        self.conf, self.handlers = ZConfig.loadConfigFile(schema, file_or_path)
         return self.conf
 
     def check_simple_gets(self, conf):
@@ -245,10 +245,10 @@ class ConfigurationTestCase(unittest.TestCase):
 
     def test_load_from_relpath(self):
         fn = self.write_tempfile()
-        dir, name = os.path.split(fn)
+        dirname, name = os.path.split(fn)
         pwd = os.getcwd()
         try:
-            os.chdir(dir)
+            os.chdir(dirname)
             self.check_load_from_path(name)
         finally:
             os.chdir(pwd)

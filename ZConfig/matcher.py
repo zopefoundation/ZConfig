@@ -13,8 +13,6 @@
 ##############################################################################
 """Utility that manages the binding of configuration data to a section."""
 
-import sys
-
 import ZConfig
 
 from ZConfig.info import ValueInfo
@@ -22,19 +20,19 @@ from ZConfig._compat import raise_with_same_tb
 
 
 class BaseMatcher(object):
-    def __init__(self, info, type, handlers):
+    def __init__(self, info, type_, handlers):
         self.info = info
-        self.type = type
+        self.type = type_
         self._values = {}
-        for key, info in type:
-            if info.name == "+" and not info.issection():
+        for _type_key, type_info in type_:
+            if type_info.name == "+" and not type_info.issection():
                 v = {}
-            elif info.ismulti():
+            elif type_info.ismulti():
                 v = []
             else:
                 v = None
-            assert info.attribute is not None
-            self._values[info.attribute] = v
+            assert type_info.attribute is not None
+            self._values[type_info.attribute] = v
         self._sectionnames = {}
         self.handlers = handlers if handlers is not None else []
 
@@ -43,14 +41,14 @@ class BaseMatcher(object):
         extra = "type " + repr(self.type.name)
         return "<%s for %s>" % (clsname, extra)
 
-    def addSection(self, type, name, sectvalue):
+    def addSection(self, type_, name, sectvalue):
         if name:
             if name in self._sectionnames:
                 raise ZConfig.ConfigurationError(
                     "section names must not be re-used within the"
                     " same container:" + repr(name))
             self._sectionnames[name] = name
-        ci = self.type.getsectioninfo(type, name)
+        ci = self.type.getsectioninfo(type_, name)
         attr = ci.attribute
         v = self._values[attr]
         if ci.ismulti():
@@ -124,14 +122,14 @@ class BaseMatcher(object):
         else:
             self._values[attr] = value
 
-    def createChildMatcher(self, type, name):
-        ci = self.type.getsectioninfo(type.name, name)
+    def createChildMatcher(self, type_, name):
+        ci = self.type.getsectioninfo(type_.name, name)
         assert not ci.isabstract()
         if not ci.isAllowedName(name):
             raise ZConfig.ConfigurationError(
                 "%s is not an allowed name for %s sections"
                 % (repr(name), repr(ci.sectiontype.name)))
-        return SectionMatcher(ci, type, name, self.handlers)
+        return SectionMatcher(ci, type_, name, self.handlers)
 
     def finish(self):
         """Check the constraints of the section and convert to an application
@@ -234,13 +232,13 @@ class BaseMatcher(object):
 
 
 class SectionMatcher(BaseMatcher):
-    def __init__(self, info, type, name, handlers):
+    def __init__(self, info, type_, name, handlers):
         if name or info.allowUnnamed():
             self.name = name
         else:
             raise ZConfig.ConfigurationError(
-                repr(type.name) + " sections may not be unnamed")
-        BaseMatcher.__init__(self, info, type, handlers)
+                repr(type_.name) + " sections may not be unnamed")
+        BaseMatcher.__init__(self, info, type_, handlers)
 
     def createValue(self):
         return SectionValue(self._values, self.name, self)
@@ -285,7 +283,7 @@ class SectionValue(object):
 
     def __str__(self):
         l = []
-        attrnames = sorted([s for s in self.__dict__.keys() if s[0] != "_"])
+        attrnames = sorted([s for s in self.__dict__ if s[0] != "_"])
         for k in attrnames:
             v = getattr(self, k)
             l.append('%-40s: %s' % (k, v))
