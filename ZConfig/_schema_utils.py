@@ -13,11 +13,11 @@
 ##############################################################################
 from __future__ import print_function
 
-from abc import abstractmethod
 import argparse
 import itertools
 import sys
 import textwrap
+from abc import abstractmethod
 
 try:
     from itertools import ifilterfalse
@@ -279,6 +279,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
                     for sub in info.sectiontype:
                         self.visit(*sub)
 
+        self.fmt.example(info.example)
 
     @TypeVisitor(AbstractType)
     def _visit_AbstractType(self, name, info):

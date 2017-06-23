@@ -19,12 +19,10 @@ import textwrap
 import unittest
 
 import docutils
-import docutils.utils
 import docutils.frontend
 import docutils.parsers.rst
 import docutils.parsers.rst.directives
-
-
+import docutils.utils
 
 try:
     # Note that we're purposely using the old
@@ -99,6 +97,20 @@ class TestSchema2HTML(unittest.TestCase):
             res = run_transform(input_file(name))
             self.assertIn('</html>', res.getvalue())
             run_transform_rst(input_file(name))
+
+    def test_html_section_example(self):
+        name = 'simplesections.xml'
+        res = run_transform(input_file(name))
+        out = res.getvalue()
+        self.assertIn('Section Example', out)
+        self.assertIn('Multisection Example', out)
+
+    def test_rst_section_example(self):
+        name = 'simplesections.xml'
+        res = run_transform_rst(input_file(name))
+        out = res.getvalue()
+        self.assertIn('Section Example', out)
+        self.assertIn('Multisection Example', out)
 
     def test_cover_logging_components(self):
         res = run_transform('--package', 'ZConfig.components.logger')
