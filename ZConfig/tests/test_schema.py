@@ -1130,7 +1130,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
             </schema>
             """)
 
-    def test_section_example_is_error(self):
+    def test_section_example(self):
         schema = self.load_schema_text("""\
             <schema>
                 <sectiontype name="abc">
@@ -1144,7 +1144,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         self.assertEqual(schema.getinfo('def').sectiontype.example, 'This is a sectiontype example')
         self.assertEqual(schema.getinfo('def').example, 'This is an example')
 
-    def test_multisection_example_is_error(self):
+    def test_multisection_example(self):
         schema = self.load_schema_text("""\
             <schema>
                 <sectiontype name="abc">
