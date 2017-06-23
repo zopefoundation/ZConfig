@@ -5,7 +5,7 @@ Change History for ZConfig
 3.2.1 (unreleased)
 ------------------
 
-- Add support for ``example`` in ``section`` and `multisection``, and
+- Add support for ``example`` in ``section`` and ``multisection``, and
   include those examples in generated documentation. See
   https://github.com/zopefoundation/ZConfig/pull/5.
 
