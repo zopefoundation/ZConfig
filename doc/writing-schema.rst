@@ -413,7 +413,7 @@ element will be passed to the datatype conversion for the
 .. code-block:: xml
 
   <section>
-    description?
+    description?, example?
   </section>
 
 A ``section``  element is used to describe a section which may
@@ -463,7 +463,7 @@ it is listed.
 .. code-block:: xml
 
   <multisection>
-    description?
+    description?, example?
   </multisection>
 
 A ``multisection``  element is used to describe a section which
