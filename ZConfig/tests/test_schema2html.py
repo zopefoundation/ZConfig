@@ -19,10 +19,11 @@ import textwrap
 import unittest
 
 import docutils
+import docutils.utils
 import docutils.frontend
 import docutils.parsers.rst
 import docutils.parsers.rst.directives
-import docutils.utils
+
 
 try:
     # Note that we're purposely using the old

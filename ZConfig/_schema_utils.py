@@ -13,11 +13,11 @@
 ##############################################################################
 from __future__ import print_function
 
+from abc import abstractmethod
 import argparse
 import itertools
 import sys
 import textwrap
-from abc import abstractmethod
 
 try:
     from itertools import ifilterfalse
