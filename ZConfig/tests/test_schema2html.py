@@ -74,10 +74,6 @@ else:
 
 class TestSchema2HTML(unittest.TestCase):
 
-    def test_no_schema(self):
-        self.assertRaises(SystemExit,
-                          run_transform)
-
     def test_schema_only(self):
         res = run_transform(input_file('simple.xml'))
         self.assertIn('</html>', res.getvalue())

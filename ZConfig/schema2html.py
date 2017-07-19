@@ -86,7 +86,7 @@ class HtmlSchemaPrinter(AbstractSchemaPrinter):
     _schema_formatter = HtmlSchemaFormatter
 
 def main(argv=None):
-    argv = argv or sys.argv[1:]
+    argv = argv if argv is not None else sys.argv[1:]
 
     argparser = argparse.ArgumentParser(
         description="Print an HTML version of a schema")
