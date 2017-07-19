@@ -11,3 +11,5 @@ parts/
 doc/_build
 htmlcov/
 .coverage
+coverage.xml
+nosetests.xml

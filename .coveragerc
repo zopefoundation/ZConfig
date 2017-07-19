@@ -1,5 +1,15 @@
 [run]
+# This is not as helpful as it may seem, because the parent directory is
+# likely also named ZConfig, so this matches things like
+# /path/to/ZConfig/.tox/py*/lib/*
 source = ZConfig
+
+# datatypes.py is dynamically-created in a temporary directory and then
+# removed, which makes coverage reporting unhappy.
+omit =
+  */datatypes.py
+  .tox/*
+  ZConfig/tests/*
 
 [report]
 # Coverage is run on Py2 and Py3
