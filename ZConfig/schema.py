@@ -54,7 +54,7 @@ class BaseParser(xml.sax.ContentHandler):
         "description": ["key", "section", "multikey", "multisection",
                         "sectiontype", "abstracttype",
                         "schema", "component"],
-        "example": ["schema", "sectiontype", "key", "multikey"],
+        "example": ["schema", "sectiontype", "key", "multikey", "section", "multisection"],
         "metadefault": ["key", "section", "multikey", "multisection"],
         "default": ["key", "multikey"],
         "import": ["schema", "component"],

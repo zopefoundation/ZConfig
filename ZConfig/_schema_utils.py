@@ -279,6 +279,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
                     for sub in info.sectiontype:
                         self.visit(*sub)
 
+        self.fmt.example(info.example)
 
     @TypeVisitor(AbstractType)
     def _visit_AbstractType(self, name, info):

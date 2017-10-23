@@ -96,6 +96,20 @@ class TestSchema2HTML(unittest.TestCase):
             self.assertIn('</html>', res.getvalue())
             run_transform_rst(input_file(name))
 
+    def test_html_section_example(self):
+        name = 'simplesections.xml'
+        res = run_transform(input_file(name))
+        out = res.getvalue()
+        self.assertIn('Section Example', out)
+        self.assertIn('Multisection Example', out)
+
+    def test_rst_section_example(self):
+        name = 'simplesections.xml'
+        res = run_transform_rst(input_file(name))
+        out = res.getvalue()
+        self.assertIn('Section Example', out)
+        self.assertIn('Multisection Example', out)
+
     def test_cover_logging_components(self):
         res = run_transform('--package', 'ZConfig.components.logger')
         self.assertIn('eventlog', res.getvalue())
