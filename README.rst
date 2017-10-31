@@ -1,6 +1,24 @@
 ZConfig: Schema-driven configuration
 ====================================
 
+.. image:: https://img.shields.io/pypi/v/ZConfig.svg
+        :target: https://pypi.python.org/pypi/ZConfig/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/ZConfig.svg
+        :target: https://pypi.org/project/ZConfig/
+        :alt: Supported Python versions
+
+.. image:: https://travis-ci.org/zopefoundation/ZConfig.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/ZConfig
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/ZConfig/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/ZConfig?branch=master
+
+.. image:: https://readthedocs.org/projects/zconfig/badge/?version=latest
+        :target: http://zconfig.readthedocs.org/en/latest/
+        :alt: Documentation Status
+
 ZConfig is a configuration library intended for general use.  It
 supports a hierarchical schema-driven configuration model that allows
 a schema to specify data conversion routines written in Python.

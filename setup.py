@@ -32,7 +32,7 @@ tests_require = [
 
 options = dict(
     name="ZConfig",
-    version='3.2.1.dev0',
+    version='3.3.0.dev0',
     author="Fred L. Drake, Jr.",
     author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
@@ -72,7 +72,6 @@ options = dict(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
