@@ -9,20 +9,6 @@ with open("README.rst") as f:
 with open("CHANGES.rst") as f:
     CHANGES = f.read()
 
-def alltests():
-    import os
-    import sys
-    import unittest
-    # use the zope.testrunner machinery to find all the
-    # test suites we've put under ourselves
-    import zope.testrunner.find
-    import zope.testrunner.options
-    here = os.path.abspath(os.path.dirname(sys.argv[0]))
-    args = sys.argv[:]
-    defaults = ["--test-path", here]
-    options = zope.testrunner.options.get_options(args, defaults)
-    suites = list(zope.testrunner.find.find_suites(options))
-    return unittest.TestSuite(suites)
 
 tests_require = [
     'docutils',
@@ -80,8 +66,6 @@ options = dict(
         'Operating System :: OS Independent',
         'Topic :: Software Development',
     ],
-    # Support for 'setup.py test' when setuptools is available:
-    test_suite='__main__.alltests',
     tests_require=tests_require,
     extras_require={
         'test': tests_require,
