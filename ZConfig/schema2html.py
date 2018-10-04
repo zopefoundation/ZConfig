@@ -15,7 +15,11 @@ from __future__ import print_function
 
 import argparse
 from contextlib import contextmanager
-import cgi
+try:
+    import html
+except ImportError:
+    # Py2
+    import cgi as html
 import sys
 
 from ZConfig._schema_utils import AbstractSchemaPrinter
@@ -27,7 +31,7 @@ from ZConfig.sphinx import RstSchemaPrinter
 class HtmlSchemaFormatter(AbstractSchemaFormatter):
 
     def esc(self, x):
-        return cgi.escape(str(x))
+        return html.escape(str(x))
 
     @contextmanager
     def _simple_tag(self, tag):

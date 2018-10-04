@@ -19,10 +19,11 @@ import unittest
 import ZConfig
 
 from ZConfig.tests.support import CONFIG_BASE
+from ZConfig.tests.support import TestHelper
 
 from ZConfig._compat import NStringIO as StringIO
 
-class ConfigurationTestCase(unittest.TestCase):
+class ConfigurationTestCase(TestHelper, unittest.TestCase):
 
     schema = None
 
@@ -171,51 +172,51 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertNotIn('line', str(exc))
 
     def test_bad_directive(self):
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'unknown directive',
-                                self.loadtext, '%not a directive')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'unknown directive',
+                               self.loadtext, '%not a directive')
 
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'missing or unrecognized',
-                                self.loadtext, '%')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'missing or unrecognized',
+                               self.loadtext, '%')
 
     def test_bad_key(self):
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'malformed configuration data',
-                                self.loadtext, '(int-var')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'malformed configuration data',
+                               self.loadtext, '(int-var')
 
     def test_bad_section(self):
         self.schema = ZConfig.loadSchema(CONFIG_BASE + "simplesections.xml")
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'unexpected section end',
-                                self.loadtext, '</close>')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'unexpected section end',
+                               self.loadtext, '</close>')
 
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'unbalanced section end',
-                                self.loadtext, '<section>\n</close>')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'unbalanced section end',
+                               self.loadtext, '<section>\n</close>')
 
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'unclosed sections not allowed',
-                                self.loadtext, '<section>\n')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'unclosed sections not allowed',
+                               self.loadtext, '<section>\n')
 
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'malformed section header',
-                                self.loadtext, '<section()>\n</close>')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'malformed section header',
+                               self.loadtext, '<section()>\n</close>')
 
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'malformed section end',
-                                self.loadtext, '<section>\n</section')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'malformed section end',
+                               self.loadtext, '<section>\n</section')
 
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                'malformed section start',
-                                self.loadtext, '<section')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               'malformed section start',
+                               self.loadtext, '<section')
 
         # ConfigLoader.endSection raises this and it is recaught and changed to a
         # SyntaxError
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                "no values for",
-                                self.loadtext,
-                                "<hasmin foo>\n</hasmin>")
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               "no values for",
+                               self.loadtext,
+                               "<hasmin foo>\n</hasmin>")
 
     def test_configuration_error_str(self):
 

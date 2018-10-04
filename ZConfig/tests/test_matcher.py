@@ -21,6 +21,9 @@ from ZConfig.matcher import SectionValue
 from ZConfig.matcher import SectionMatcher
 from ZConfig.matcher import BaseMatcher
 
+from ZConfig.tests.support import TestHelper
+
+
 class SectionValueTestCase(unittest.TestCase):
 
     def test_repr(self):
@@ -46,7 +49,7 @@ class SectionValueTestCase(unittest.TestCase):
             'k                                       : v',
             str(sv))
 
-class SectionMatcherTestCase(unittest.TestCase):
+class SectionMatcherTestCase(TestHelper, unittest.TestCase):
 
     def test_constructor_error(self):
         class Mock(object):
@@ -54,12 +57,12 @@ class SectionMatcherTestCase(unittest.TestCase):
             def allowUnnamed(self):
                 return False
         mock = Mock()
-        self.assertRaisesRegexp(ConfigurationError,
-                                "sections may not be unnamed",
-                                SectionMatcher,
-                                mock, mock, None, None)
+        self.assertRaisesRegex(ConfigurationError,
+                               "sections may not be unnamed",
+                               SectionMatcher,
+                               mock, mock, None, None)
 
-class BaseMatcherTestCase(unittest.TestCase):
+class BaseMatcherTestCase(TestHelper, unittest.TestCase):
 
     def test_repr(self):
         class Mock(dict):
@@ -75,10 +78,10 @@ class BaseMatcherTestCase(unittest.TestCase):
         matcher = BaseMatcher(None, Mock(), None)
         matcher._sectionnames['foo'] = None
 
-        self.assertRaisesRegexp(ConfigurationError,
-                                "section names must not be re-used",
-                                matcher.addSection,
-                                None, 'foo', None)
+        self.assertRaisesRegex(ConfigurationError,
+                               "section names must not be re-used",
+                               matcher.addSection,
+                               None, 'foo', None)
 
     def test_construct_errors(self):
         class MockType(object):
@@ -133,15 +136,7 @@ class BaseMatcherTestCase(unittest.TestCase):
         t = MockType()
         t.sectiontype = MockType()
         matcher = BaseMatcher(None, t, None)
-        self.assertRaisesRegexp(ConfigurationError,
-                                'is not an allowed name',
-                                matcher.createChildMatcher,
-                                MockType(), 'ignored')
-
-
-
-def test_suite():
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+        self.assertRaisesRegex(ConfigurationError,
+                               'is not an allowed name',
+                               matcher.createChildMatcher,
+                               MockType(), 'ignored')

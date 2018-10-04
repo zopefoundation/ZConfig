@@ -23,6 +23,8 @@ import unittest
 
 import ZConfig.datatypes
 
+from ZConfig.tests.support import TestHelper
+
 here = os.path.abspath(__file__)
 
 try:
@@ -383,7 +385,7 @@ class DatatypeTestCase(unittest.TestCase):
 
         raises(TypeError, convert, '1y')
 
-class RegistryTestCase(unittest.TestCase):
+class RegistryTestCase(TestHelper, unittest.TestCase):
 
     def test_registry_does_not_mask_toplevel_imports(self):
         old_sys_path = sys.path[:]
@@ -406,24 +408,24 @@ class RegistryTestCase(unittest.TestCase):
 
     def test_register_shadow(self):
         reg = ZConfig.datatypes.Registry()
-        self.assertRaisesRegexp(ValueError,
-                                "conflicts with built-in type",
-                                reg.register,
-                                'integer', None)
+        self.assertRaisesRegex(ValueError,
+                               "conflicts with built-in type",
+                               reg.register,
+                               'integer', None)
 
         reg.register("foobar", None)
-        self.assertRaisesRegexp(ValueError,
-                                "already registered",
-                                reg.register,
-                                'foobar', None)
+        self.assertRaisesRegex(ValueError,
+                               "already registered",
+                               reg.register,
+                               'foobar', None)
 
     def test_get_fallback_basic_key(self):
         reg = ZConfig.datatypes.Registry({})
         self.assertIsNone(reg._basic_key)
-        self.assertRaisesRegexp(ValueError,
-                                "unloadable datatype name",
-                                reg.get,
-                                'integer')
+        self.assertRaisesRegex(ValueError,
+                               "unloadable datatype name",
+                               reg.get,
+                               'integer')
         self.assertIsNotNone(reg._basic_key)
 
 TEST_DATATYPE_SOURCE = """
@@ -431,10 +433,3 @@ TEST_DATATYPE_SOURCE = """
 
 my_sample_datatype = 42
 """
-
-
-def test_suite():
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')

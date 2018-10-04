@@ -26,6 +26,9 @@ from ZConfig.info import AbstractType
 from ZConfig.info import SectionType
 from ZConfig.info import SchemaType
 
+from ZConfig.tests.support import TestHelper
+
+
 class UnboundTestCase(unittest.TestCase):
 
     def test_order(self):
@@ -33,7 +36,7 @@ class UnboundTestCase(unittest.TestCase):
         self.assertFalse(Unbounded > Unbounded)
         self.assertEqual(Unbounded, Unbounded)
 
-class InfoMixin(object):
+class InfoMixin(TestHelper):
 
     Class = None
 
@@ -51,17 +54,17 @@ class BaseInfoTestCase(InfoMixin, unittest.TestCase):
     Class = BaseInfo
 
     def test_constructor_error(self):
-        self.assertRaisesRegexp(SchemaError,
-                                'maxOccurs',
-                                self.make_one,
-                                maxOccurs=0, minOccurs=0)
+        self.assertRaisesRegex(SchemaError,
+                               'maxOccurs',
+                               self.make_one,
+                               maxOccurs=0, minOccurs=0)
 
         # This case doesn't really make sense
-        self.assertRaisesRegexp(SchemaError,
-                                'minOccurs',
-                                self.make_one,
-                                maxOccurs=1,
-                                minOccurs=2)
+        self.assertRaisesRegex(SchemaError,
+                               'minOccurs',
+                               self.make_one,
+                               maxOccurs=1,
+                               minOccurs=2)
 
     def test_repr(self):
         # just doesn't raise
@@ -87,10 +90,10 @@ class BaseKeyInfoTestCase(InfoMixin, unittest.TestCase):
 
     def test_adddefaultc(self):
         info = self.make_one(name='foo', minOccurs=1)
-        self.assertRaisesRegexp(SchemaError,
-                                'unexpected key for default',
-                                info.adddefault,
-                                None, None, key='key')
+        self.assertRaisesRegex(SchemaError,
+                               'unexpected key for default',
+                               info.adddefault,
+                               None, None, key='key')
 
 class KeyInfoTestCase(InfoMixin, unittest.TestCase):
 
@@ -101,10 +104,10 @@ class KeyInfoTestCase(InfoMixin, unittest.TestCase):
     def test_add_with_default(self):
         info = self.make_one(minOccurs=1, name='name')
         info.adddefault('value', None)
-        self.assertRaisesRegexp(SchemaError,
-                                'cannot set more than one',
-                                info.adddefault,
-                                'value', None)
+        self.assertRaisesRegex(SchemaError,
+                               'cannot set more than one',
+                               info.adddefault,
+                               'value', None)
 
 class SectionInfoTestCase(InfoMixin, unittest.TestCase):
 
@@ -121,14 +124,14 @@ class SectionInfoTestCase(InfoMixin, unittest.TestCase):
     default_kwargs['sectiontype'] = MockSectionType
 
     def test_constructor_error(self):
-        self.assertRaisesRegexp(SchemaError,
-                                'must use a name',
-                                self.make_one,
-                                name='name', maxOccurs=2)
-        self.assertRaisesRegexp(SchemaError,
-                                'must specify a target attribute',
-                                self.make_one,
-                                name='*', maxOccurs=2)
+        self.assertRaisesRegex(SchemaError,
+                               'must use a name',
+                               self.make_one,
+                               name='name', maxOccurs=2)
+        self.assertRaisesRegex(SchemaError,
+                               'must specify a target attribute',
+                               self.make_one,
+                               name='*', maxOccurs=2)
 
     def test_misc(self):
         info = self.make_one(maxOccurs=1)
@@ -148,7 +151,7 @@ class AbstractTypeTestCase(unittest.TestCase):
         t.addsubtype(self)
         self.assertTrue(t.hassubtype('foo'))
 
-class SectionTypeTestCase(unittest.TestCase):
+class SectionTypeTestCase(TestHelper, unittest.TestCase):
 
     def make_one(self, name='', keytype=None, valuetype=None,
                  datatype=None, registry={}, types=None):
@@ -156,10 +159,10 @@ class SectionTypeTestCase(unittest.TestCase):
 
     def test_getinfo_no_key(self):
         info = self.make_one()
-        self.assertRaisesRegexp(ConfigurationError,
-                                "cannot match a key without a name",
-                                info.getinfo,
-                                None)
+        self.assertRaisesRegex(ConfigurationError,
+                               "cannot match a key without a name",
+                               info.getinfo,
+                               None)
 
     def test_required_types_with_name(self):
         info = self.make_one(name='foo')
@@ -176,17 +179,17 @@ class SectionTypeTestCase(unittest.TestCase):
 
         info._children.append(('foo', child))
 
-        self.assertRaisesRegexp(ConfigurationError,
-                                'already in use for key',
-                                info.getsectioninfo,
-                                None, 'foo')
+        self.assertRaisesRegex(ConfigurationError,
+                               'already in use for key',
+                               info.getsectioninfo,
+                               None, 'foo')
 
-        self.assertRaisesRegexp(ConfigurationError,
-                                'no matching section',
-                                info.getsectioninfo,
-                                None, 'baz')
+        self.assertRaisesRegex(ConfigurationError,
+                               'no matching section',
+                               info.getsectioninfo,
+                               None, 'baz')
 
-class SchemaTypeTestCase(unittest.TestCase):
+class SchemaTypeTestCase(TestHelper, unittest.TestCase):
 
     def test_various(self):
         class Mock(object):
@@ -207,14 +210,7 @@ class SchemaTypeTestCase(unittest.TestCase):
             schema.deriveSectionType(schema, None, None, None, None)
 
         schema.addComponent('name')
-        self.assertRaisesRegexp(SchemaError,
-                                'already have component',
-                                schema.addComponent,
-                                'name')
-
-
-def test_suite():
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+        self.assertRaisesRegex(SchemaError,
+                               'already have component',
+                               schema.addComponent,
+                               'name')

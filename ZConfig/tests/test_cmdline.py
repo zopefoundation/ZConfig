@@ -91,20 +91,20 @@ class CommandLineTest(ZConfig.tests.support.TestHelper, unittest.TestCase):
         # Ignore foo for now; it's not really important *when* it fails.
 
         # ValueErrors are converted into ConfigurationSyntaxErrors
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                "could not convert",
-                                foo.basic_key,
-                                'invalid name', ('<place>', 1,))
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               "could not convert",
+                               foo.basic_key,
+                               'invalid name', ('<place>', 1,))
 
         # missing keys return empty lists
         self.assertEqual(foo.get_key('no such key'), [])
 
         # VE for matchers do the same conversion
         matcher = loader.createSchemaMatcher()
-        self.assertRaisesRegexp(ZConfig.DataConversionError,
-                                "value did not match",
-                                matcher.addValue,
-                                'invalid name', 'value', (1, 1, '<place>'))
+        self.assertRaisesRegex(ZConfig.DataConversionError,
+                               "value did not match",
+                               matcher.addValue,
+                               'invalid name', 'value', (1, 1, '<place>'))
 
 
     simple_schema = None
@@ -193,28 +193,21 @@ class CommandLineTest(ZConfig.tests.support.TestHelper, unittest.TestCase):
         self.assertEqual(conf.s2.k3, ["value1", "value2", "value3", "value4"])
 
         self.clopts = [("path/that/dne=foo",)]
-        self.assertRaisesRegexp(ZConfig.ConfigurationError,
-                                "not all command line options were consumed",
-                                self.load_config_text,
-                                schema, "<st s1/>")
+        self.assertRaisesRegex(ZConfig.ConfigurationError,
+                               "not all command line options were consumed",
+                               self.load_config_text,
+                               schema, "<st s1/>")
 
     def test_bad_overrides(self):
         schema = self.get_simple_schema()
         self.clopts = [('',)]
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                "invalid configuration specifier",
-                                self.create_config_loader,
-                                schema)
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               "invalid configuration specifier",
+                               self.create_config_loader,
+                               schema)
 
         self.clopts = [('double//slashes=value',)]
-        self.assertRaisesRegexp(ZConfig.ConfigurationSyntaxError,
-                                "not allowed in an option path",
-                                self.create_config_loader,
-                                schema)
-
-
-def test_suite():
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+        self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
+                               "not allowed in an option path",
+                               self.create_config_loader,
+                               schema)

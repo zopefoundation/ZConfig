@@ -30,6 +30,9 @@ from ZConfig.components.logger import loghandler
 from ZConfig._compat import NStringIO as StringIO
 from ZConfig._compat import maxsize
 
+from ZConfig.tests.support import TestHelper
+
+
 class CustomFormatter(logging.Formatter):
     def formatException(self, ei):
         """Format and return the exception information as a string.
@@ -47,7 +50,7 @@ def read_file(filename):
         return f.read()
 
 
-class LoggingTestHelper:
+class LoggingTestHelper(TestHelper):
 
     # Not derived from unittest.TestCase; some test runners seem to
     # think that means this class contains tests.
@@ -229,7 +232,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
             "</eventlog>" % fn)
 
         # Mising old-files
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError,
             "old-files must be set",
             self.check_simple_logger,
@@ -242,7 +245,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
             "  </logfile>\n"
             "</eventlog>" % fn)
 
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError,
             "max-bytes or when must be set",
             self.check_simple_logger,
@@ -683,13 +686,13 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
 
         self.assertEqual(calls, ["acquire", "release"])
 
-class TestFunctions(unittest.TestCase):
+class TestFunctions(TestHelper, unittest.TestCase):
 
     def test_log_format_bad(self):
-        self.assertRaisesRegexp(ValueError,
-                                "Invalid log format string",
-                                handlers.log_format,
-                                "%{no-such-key}s")
+        self.assertRaisesRegex(ValueError,
+                               "Invalid log format string",
+                               handlers.log_format,
+                               "%{no-such-key}s")
 
     def test_resolve_deep(self):
         old_mod = None
@@ -708,15 +711,15 @@ class TestFunctions(unittest.TestCase):
                 sys.modules['logging.handlers'] = old_mod
 
     def test_http_handler_url(self):
-        self.assertRaisesRegexp(ValueError,
-                                'must be an http',
-                                handlers.http_handler_url, 'file://foo/baz')
-        self.assertRaisesRegexp(ValueError,
-                                'must specify a location',
-                                handlers.http_handler_url, 'http://')
-        self.assertRaisesRegexp(ValueError,
-                                'must specify a path',
-                                handlers.http_handler_url, 'http://server')
+        self.assertRaisesRegex(ValueError,
+                               'must be an http',
+                               handlers.http_handler_url, 'file://foo/baz')
+        self.assertRaisesRegex(ValueError,
+                               'must specify a location',
+                               handlers.http_handler_url, 'http://')
+        self.assertRaisesRegex(ValueError,
+                               'must specify a path',
+                               handlers.http_handler_url, 'http://server')
 
         v = handlers.http_handler_url("http://server/path;param?q=v#fragment")
         self.assertEqual(v, ('server', '/path;param?q=v#fragment'))
