@@ -2,7 +2,7 @@
 Change History for ZConfig
 ==========================
 
-3.3.0 (unreleased)
+3.3.0 (2018-10-04)
 ------------------
 
 - Drop support for Python 3.3.
