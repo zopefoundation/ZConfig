@@ -24,6 +24,7 @@ import logging
 options = doctest.REPORT_NDIFF | doctest.ELLIPSIS
 
 old = {}
+
 def setUp(test):
     logger = logging.getLogger()
     old['level'] = logger.level
@@ -33,6 +34,15 @@ def tearDown(test):
     logger = logging.getLogger()
     logger.level = old['level']
     logger.handlers = old['handlers']
+
+def findRoot():
+    here = os.path.dirname(os.path.abspath(__file__))
+    while not os.path.exists(os.path.join(here, 'setup.py')):
+        prev, here = here, os.path.dirname(here)
+        if here == prev:
+            # Let's avoid infinite loops at root
+            raise AssertionError('could not find my setup.py')
+    return here
 
 def docSetUp(test):
     # Python 2 makes __path__ and __file__ relative in some
@@ -45,9 +55,7 @@ def docSetUp(test):
 
     old['pwd'] = os.getcwd()
     doc_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        '..',
-        '..',
+        findRoot(),
         'doc')
     os.chdir(doc_path)
     setUp(test)
@@ -58,17 +66,18 @@ def docTearDown(test):
     old.clear()
 
 def test_suite():
+    root = findRoot()
     plugins = manuel.doctest.Manuel(optionflags=options)
     plugins += manuel.capture.Manuel()
     return unittest.TestSuite([
         manuel.testing.TestSuite(
             plugins,
-            '../../README.rst',
+            os.path.join(root, 'README.rst'),
             setUp=setUp, tearDown=tearDown,
         ),
         manuel.testing.TestSuite(
             plugins,
-            '../../doc/using-logging.rst',
+            os.path.join(root, 'doc', 'using-logging.rst'),
             globs={'resetLoggers': lambda: tearDown(None)},
             setUp=docSetUp, tearDown=docTearDown,
         ),

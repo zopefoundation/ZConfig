@@ -12,7 +12,7 @@ install:
     - pip install -U coverage coveralls
     - pip install -U -e .[test]
 script:
-    - coverage run setup.py -q test -q
+    - coverage run -m zope.testrunner --test-path=.
 notifications:
     email: false
 after_success:
