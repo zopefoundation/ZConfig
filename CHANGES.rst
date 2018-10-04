@@ -5,14 +5,16 @@ Change History for ZConfig
 3.3.0 (unreleased)
 ------------------
 
+- Drop support for Python 3.3.
+
+- Add support for Python 3.7.
+
 - Drop support for 'python setup.py test'. See `issue 38
   <https://github.com/zopefoundation/ZConfig/issues/38>`_.
 
 - Add support for ``example`` in ``section`` and ``multisection``, and
   include those examples in generated documentation. See
   https://github.com/zopefoundation/ZConfig/pull/5.
-
-- Drop support for Python 3.3.
 
 - Fix configuration loaders to decode byte data using UTF-8 instead of
   the default encoding (usually ASCII). See `issue 37

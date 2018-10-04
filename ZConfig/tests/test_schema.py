@@ -1159,8 +1159,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         self.assertEqual(schema[0][1].example, 'This is an example')
 
     def checkErrorText(self, schema, error_text):
-        self.assertRaisesRegexp(ZConfig.SchemaError, error_text,
-                                self.load_schema_text, schema)
+        self.assertRaisesRegex(ZConfig.SchemaError, error_text,
+                               self.load_schema_text, schema)
 
     def test_error_bad_parent(self):
         self.checkErrorText(

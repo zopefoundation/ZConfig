@@ -67,14 +67,14 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
 
     def test_schema_loader_source_errors(self):
         loader = ZConfig.loader.SchemaLoader()
-        self.assertRaisesRegexp(ZConfig.SchemaError,
-                                "illegal schema component name",
-                                loader.schemaComponentSource,
-                                '', None)
-        self.assertRaisesRegexp(ZConfig.SchemaError,
-                                "illegal schema component name",
-                                loader.schemaComponentSource,
-                                'foo..bar', None)
+        self.assertRaisesRegex(ZConfig.SchemaError,
+                               "illegal schema component name",
+                               loader.schemaComponentSource,
+                               '', None)
+        self.assertRaisesRegex(ZConfig.SchemaError,
+                               "illegal schema component name",
+                               loader.schemaComponentSource,
+                               'foo..bar', None)
 
     def test_config_loader_abstract_schema(self):
         class MockSchema(object):
@@ -84,10 +84,10 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             def gettype(self, _t):
                 return self
 
-        self.assertRaisesRegexp(ZConfig.SchemaError,
-                                "abstract type",
-                                ZConfig.loader.ConfigLoader,
-                                MockSchema())
+        self.assertRaisesRegex(ZConfig.SchemaError,
+                               "abstract type",
+                               ZConfig.loader.ConfigLoader,
+                               MockSchema())
 
         s = MockSchema()
         s._abstract = False
@@ -95,10 +95,10 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         loader = ZConfig.loader.ConfigLoader(s)
         s._abstract = True
 
-        self.assertRaisesRegexp(ZConfig.ConfigurationError,
-                                "cannot match abstract section",
-                                loader.startSection,
-                                None, None, None)
+        self.assertRaisesRegex(ZConfig.ConfigurationError,
+                               "cannot match abstract section",
+                               loader.startSection,
+                               None, None, None)
 
     def test_simple_import_using_prefix(self):
         self.load_schema_text("""\
@@ -387,7 +387,7 @@ class TestResourcesInZip(unittest.TestCase):
             ZConfig.loadConfigFile(schema, sio,
                                    overrides=["sample/data=othervalue"])
 
-class TestOpenPackageResource(unittest.TestCase):
+class TestOpenPackageResource(TestHelper, unittest.TestCase):
 
     magic_name = 'not a valid import name'
 
@@ -403,25 +403,18 @@ class TestOpenPackageResource(unittest.TestCase):
         self.__loader__ = MockLoader()
         self.__path__ = ['dir']
 
-        self.assertRaisesRegexp(ZConfig.SchemaResourceError,
-                                "error opening schema component",
-                                ZConfig.loader.openPackageResource,
-                                self.magic_name, 'a path')
+        self.assertRaisesRegex(ZConfig.SchemaResourceError,
+                               "error opening schema component",
+                               ZConfig.loader.openPackageResource,
+                               self.magic_name, 'a path')
 
         # Now with an empty path
         self.__path__ = []
-        self.assertRaisesRegexp(ZConfig.SchemaResourceError,
-                                "schema component not found",
-                                ZConfig.loader.openPackageResource,
-                                self.magic_name, 'a path')
+        self.assertRaisesRegex(ZConfig.SchemaResourceError,
+                               "schema component not found",
+                               ZConfig.loader.openPackageResource,
+                               self.magic_name, 'a path')
 
     def test_resource(self):
         r = ZConfig.loader.Resource(self, None)
         self.assertEqual(self.magic_name, r.magic_name)
-
-
-def test_suite():
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')

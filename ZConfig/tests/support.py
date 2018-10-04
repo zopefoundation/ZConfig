@@ -17,6 +17,7 @@
 import contextlib
 import os
 import sys
+from unittest import TestCase
 
 import ZConfig
 
@@ -58,6 +59,8 @@ class TestHelper(object):
 
     # Not derived from unittest.TestCase; some test runners seem to
     # think that means this class contains tests.
+
+    assertRaisesRegex = getattr(TestCase, 'assertRaisesRegex', TestCase.assertRaisesRegexp)
 
     def load_both(self, schema_url, conf_url):
         schema = self.load_schema(schema_url)
