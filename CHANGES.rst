@@ -11,6 +11,9 @@ Change History for ZConfig
 
 - Drop support for Python 3.3.
 
+- Fix configuration loaders to decode byte data using UTF-8 instead of
+  the default encoding (usually ASCII). See `issue 37
+  <https://github.com/zopefoundation/ZConfig/issues/37>`_.
 
 3.2.0 (2017-06-22)
 ------------------

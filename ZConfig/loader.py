@@ -227,9 +227,13 @@ class BaseLoader(AbstractBaseClass):
             # open for an unbounded amount of time and to catch IOErrors here,
             # where they make sense.
             try:
-                data = file.read().decode()
+                data = file.read()
             finally:
                 file.close()
+            if isinstance(data, bytes):
+                # Be sure to specify an (useful) encoding so we don't get
+                # the system default, typically ascii.
+                data = data.decode('utf-8')
             file = StringIO(data)
         return self.createResource(file, url)
 

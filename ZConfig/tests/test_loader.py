@@ -34,12 +34,24 @@ LIBRARY_DIR = os.path.join(os.path.dirname(myfile), "library")
 
 class LoaderTestCase(TestHelper, unittest.TestCase):
 
+    def test_open_resource_non_ascii(self):
+        # Files are decoded using utf-8 on open
+        loader = ZConfig.loader.SchemaLoader()
+        url = ZConfig.url.urljoin(CONFIG_BASE, "non-ascii.txt")
+        stream = loader.openResource(url)
+        val = stream.read()
+        self.assertEqual(
+            val,
+            u'# -*-coding: utf-8; mode: conf-*-\n'
+            u'This file contains a snowman, U+2603: \u2603\n'
+        )
+
     def test_schema_caching(self):
         loader = ZConfig.loader.SchemaLoader()
         url = ZConfig.url.urljoin(CONFIG_BASE, "simple.xml")
         schema1 = loader.loadURL(url)
         schema2 = loader.loadURL(url)
-        self.assertTrue(schema1 is schema2)
+        self.assertIs(schema1, schema2)
 
     def test_simple_import_with_cache(self):
         loader = ZConfig.loader.SchemaLoader()
