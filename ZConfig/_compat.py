@@ -38,7 +38,7 @@ NStringIO = NStringIO
 
 
 def TextIO(text):
-    "Return StringIO or BytesIO as appropriate"
+    """Return StringIO or BytesIO as appropriate"""
     return BytesIO(text) if isinstance(text, bytes) else StringIO(text)
 
 
@@ -100,7 +100,7 @@ else:  # pragma: no cover
 
 
 def raise_with_same_tb(exception):
-    "Raise an exception having the current traceback (if there is one)"
+    """Raise an exception having the current traceback (if there is one)"""
     reraise(type(exception), exception, sys.exc_info()[2])
 
 
