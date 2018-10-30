@@ -15,9 +15,11 @@ matrix:
 install:
     - pip install -U pip setuptools
     - pip install -U coverage coveralls
+    - pip install -U flake8
     - pip install -U -e .[test]
 script:
     - coverage run -m zope.testrunner --test-path=.
+    - flake8 --isolated setup.py ZConfig
 notifications:
     email: false
 after_success:
