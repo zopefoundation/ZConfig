@@ -19,7 +19,7 @@ install:
     - pip install -U -e .[test]
 script:
     - coverage run -m zope.testrunner --test-path=.
-    - flake8 --isolated setup.py ZConfig
+    - flake8 setup.py ZConfig
 notifications:
     email: false
 after_success:
