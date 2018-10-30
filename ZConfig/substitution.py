@@ -14,7 +14,12 @@
 """Shell-style string substitution helper."""
 
 import os
+import re
+
 import ZConfig
+
+
+_name_match = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*").match
 
 
 def substitute(s, mapping):
@@ -108,8 +113,3 @@ def _split(s):
         return prefix, name.lower(), name, s[i:], vtype
     else:
         return s, None, None, None, None
-
-
-import re
-_name_match = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*").match
-del re

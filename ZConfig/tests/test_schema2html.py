@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2017 Zope Foundation and Contributors.
+# Copyright (c) 2017, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -25,7 +25,6 @@ import docutils.parsers.rst
 import docutils.parsers.rst.directives
 
 
-
 try:
     # Note that we're purposely using the old
     # StringIO object on Python 2 because it auto-converts
@@ -39,11 +38,14 @@ except ImportError:
 from ZConfig import schema2html
 
 from ZConfig.sphinx import SchemaToRstDirective
-docutils.parsers.rst.directives.register_directive("zconfig", SchemaToRstDirective)
 from ZConfig.sphinx import RstSchemaFormatter
 
 from .support import input_file
 from .support import with_stdin_from_input_file
+
+
+docutils.parsers.rst.directives.register_directive("zconfig",
+                                                   SchemaToRstDirective)
 
 
 @contextlib.contextmanager
@@ -62,7 +64,8 @@ def run_transform(*args):
         with stdout_replaced(buf):
             schema2html.main(args)
         return buf
-    return schema2html.main(args) # pragma: no cover
+    return schema2html.main(args)  # pragma: no cover
+
 
 if schema2html.RstSchemaPrinter:
     def run_transform_rst(*args):
@@ -71,6 +74,7 @@ if schema2html.RstSchemaPrinter:
 else:
     def run_transform_rst(*args):
         pass
+
 
 class TestSchema2HTML(unittest.TestCase):
 
@@ -115,14 +119,15 @@ class TestSchema2HTML(unittest.TestCase):
         self.assertIn('eventlog', res.getvalue())
         run_transform_rst('--package', 'ZConfig.components.logger')
 
+
 class TestRst(unittest.TestCase):
 
     def _parse(self, text):
         document = docutils.utils.new_document(
             "Schema",
             settings=docutils.frontend.OptionParser(
-                    components=(docutils.parsers.rst.Parser,)
-                    ).get_default_values())
+                components=(docutils.parsers.rst.Parser,)
+            ).get_default_values())
 
         parser = docutils.parsers.rst.Parser()
         text = textwrap.dedent(text)
@@ -197,31 +202,37 @@ class TestRst(unittest.TestCase):
         self.assertNotIn("SyslogHandlerFactory", doc_text)
         self.assertNotIn("FileHandlerFactory", doc_text)
 
-
     def test_description_dedent(self):
         text = """No leading whitespace on this line.
         But this line has whitespace.
         As does this one.
         """
         written = []
+
         class FUT(RstSchemaFormatter):
+
             def __init__(self):
                 pass
+
             def _parsed(self, text, _):
                 return text
+
             def write(self, *texts):
                 written.extend(texts)
+
         fut = FUT()
         fut.description(text)
 
-        dedented = ("""No leading whitespace on this line.\n"""
-        """But this line has whitespace.\n"""
-        """As does this one.\n""")
+        dedented = ("No leading whitespace on this line.\n"
+                    "But this line has whitespace.\n"
+                    "As does this one.\n")
 
         self.assertEqual(written[0], dedented)
 
+
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

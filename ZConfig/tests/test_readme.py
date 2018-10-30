@@ -25,15 +25,18 @@ options = doctest.REPORT_NDIFF | doctest.ELLIPSIS
 
 old = {}
 
+
 def setUp(test):
     logger = logging.getLogger()
     old['level'] = logger.level
     old['handlers'] = logger.handlers[:]
 
+
 def tearDown(test):
     logger = logging.getLogger()
     logger.level = old['level']
     logger.handlers = old['handlers']
+
 
 def findRoot():
     here = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +46,7 @@ def findRoot():
             # Let's avoid infinite loops at root
             raise AssertionError('could not find my setup.py')
     return here
+
 
 def docSetUp(test):
     # Python 2 makes __path__ and __file__ relative in some
@@ -60,10 +64,12 @@ def docSetUp(test):
     os.chdir(doc_path)
     setUp(test)
 
+
 def docTearDown(test):
     os.chdir(old['pwd'])
     tearDown(test)
     old.clear()
+
 
 def test_suite():
     root = findRoot()
@@ -82,6 +88,7 @@ def test_suite():
             setUp=docSetUp, tearDown=docTearDown,
         ),
     ])
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

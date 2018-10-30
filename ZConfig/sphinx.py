@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2017 Zope Corporation and Contributors.
+# Copyright (c) 2017, 2018 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -22,7 +22,7 @@ try:
     import docutils.frontend
     import docutils.parsers.rst
     from docutils.parsers.rst import Directive
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     RstSchemaPrinter = None
     RstSchemaFormatter = None
 else:
@@ -52,7 +52,6 @@ else:
             document = docutils.utils.new_document(
                 name,
                 settings=self.settings)
-
 
             parser = docutils.parsers.rst.Parser()
             parser.parse(text, document)
@@ -88,7 +87,6 @@ else:
             yield
             self._current_node = old_node
 
-
         @contextmanager
         def describing(self, description=MARKER, after=None):
             dl = self._current_node
@@ -107,7 +105,6 @@ else:
             self._current_node = item
 
             self._describing(description, after)
-
 
         @contextmanager
         def described_as(self):
@@ -150,7 +147,6 @@ else:
             super(RstSchemaPrinter, self).printSchema()
             print(self.fmt.document.pformat(), file=self.fmt.stream)
 
-
     class SchemaToRstDirective(Directive):
         required_arguments = 1
         optional_arguments = 2
@@ -159,6 +155,7 @@ else:
             'members': str,
             'excluded-members': str,
         }
+
         def run(self):
             schema = load_schema(self.arguments[0],
                                  True, self.options.get('file'))
@@ -171,13 +168,14 @@ else:
             if 'excluded-members' in self.options:
                 excluded_members = self.options['excluded-members'].split()
 
-            printer = RstSchemaPrinter(schema, allowed_names=members, excluded_names=excluded_members)
+            printer = RstSchemaPrinter(schema, allowed_names=members,
+                                       excluded_names=excluded_members)
             printer.fmt.settings = self.state.document.settings
 
             printer.buildSchema()
 
             return printer.fmt.document.children
 
-    def setup(app): # pragma: no cover
+    def setup(app):  # pragma: no cover
         "Sphinx extension entry point to add the zconfig directive."
         app.add_directive("zconfig", SchemaToRstDirective)

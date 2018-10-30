@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2017 Zope Foundation and Contributors.
+# Copyright (c) 2017, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -27,6 +27,7 @@ from ZConfig.tests.support import TestHelper
 class SectionValueTestCase(unittest.TestCase):
 
     def test_repr(self):
+
         class MockMatcher(object):
             type = None
 
@@ -49,22 +50,28 @@ class SectionValueTestCase(unittest.TestCase):
             'k                                       : v',
             str(sv))
 
+
 class SectionMatcherTestCase(TestHelper, unittest.TestCase):
 
     def test_constructor_error(self):
+
         class Mock(object):
             name = 'name'
+
             def allowUnnamed(self):
                 return False
+
         mock = Mock()
         self.assertRaisesRegex(ConfigurationError,
                                "sections may not be unnamed",
                                SectionMatcher,
                                mock, mock, None, None)
 
+
 class BaseMatcherTestCase(TestHelper, unittest.TestCase):
 
     def test_repr(self):
+
         class Mock(dict):
             name = 'name'
 
@@ -72,6 +79,7 @@ class BaseMatcherTestCase(TestHelper, unittest.TestCase):
         repr(matcher)
 
     def test_duplicate_section_names(self):
+
         class Mock(dict):
             name = 'name'
 
@@ -84,6 +92,7 @@ class BaseMatcherTestCase(TestHelper, unittest.TestCase):
                                None, 'foo', None)
 
     def test_construct_errors(self):
+
         class MockType(object):
             attribute = 'attr'
 
@@ -98,7 +107,7 @@ class BaseMatcherTestCase(TestHelper, unittest.TestCase):
 
         type_ = []
         matcher = BaseMatcher(None, type_, None)
-        type_.append( ('key', MockType() ) )
+        type_.append(('key', MockType()))
 
         class MockSection(object):
             def getSectionDefinition(self):
@@ -116,7 +125,6 @@ class BaseMatcherTestCase(TestHelper, unittest.TestCase):
         matcher._values['attr'] = MockSection()
         with self.assertRaises(DataConversionError):
             matcher.constuct()
-
 
     def test_create_child_bad_name(self):
 

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -23,6 +23,7 @@ from ZConfig.tests.support import TestHelper
 
 from ZConfig._compat import NStringIO as StringIO
 
+
 class ConfigurationTestCase(TestHelper, unittest.TestCase):
 
     schema = None
@@ -37,10 +38,8 @@ class ConfigurationTestCase(TestHelper, unittest.TestCase):
         url = CONFIG_BASE + relurl
         self.conf, self.handlers = ZConfig.loadConfig(self.get_schema(), url)
         conf = self.conf
-        #self.assertEqual(conf.url, url)
         self.assertTrue(conf.getSectionName() is None)
         self.assertTrue(conf.getSectionType() is None)
-        #self.assertTrue(conf.delegate is None)
         return conf
 
     def loadtext(self, text):
@@ -100,14 +99,14 @@ class ConfigurationTestCase(TestHelper, unittest.TestCase):
         self.assertEqual(conf.var, "foo")
         # check each interleaved position between sections
         for c in "0123456":
-            self.assertEqual(getattr(conf, "var_" +c), "foo-" + c)
-        sect = [sect for sect in conf.sections
-                if sect.getSectionName() == "name"][0]
+            self.assertEqual(getattr(conf, "var_" + c), "foo-" + c)
+        sect = list(sect for sect in conf.sections
+                    if sect.getSectionName() == "name")[0]
         self.assertEqual(sect.var, "bar")
         self.assertEqual(sect.var_one, "splat")
         self.assertTrue(sect.var_three is None)
-        sect = [sect for sect in conf.sections
-                if sect.getSectionName() == "delegate"][0]
+        sect = list(sect for sect in conf.sections
+                    if sect.getSectionName() == "delegate")[0]
         self.assertEqual(sect.var, "spam")
         self.assertEqual(sect.var_two, "stuff")
         self.assertTrue(sect.var_three is None)
@@ -211,8 +210,8 @@ class ConfigurationTestCase(TestHelper, unittest.TestCase):
                                'malformed section start',
                                self.loadtext, '<section')
 
-        # ConfigLoader.endSection raises this and it is recaught and changed to a
-        # SyntaxError
+        # ConfigLoader.endSection raises this and it is recaught and
+        # changed to a SyntaxError
         self.assertRaisesRegex(ZConfig.ConfigurationSyntaxError,
                                "no values for",
                                self.loadtext,
@@ -269,6 +268,7 @@ class ConfigurationTestCase(TestHelper, unittest.TestCase):
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

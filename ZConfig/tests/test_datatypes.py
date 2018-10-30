@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -21,18 +21,12 @@ import datetime
 import tempfile
 import unittest
 
+import ZConfig._compat
 import ZConfig.datatypes
 
 from ZConfig.tests.support import TestHelper
 
 here = os.path.abspath(__file__)
-
-try:
-    unicode
-except NameError:
-    have_unicode = False
-else:
-    have_unicode = True
 
 
 class DatatypeTestCase(unittest.TestCase):
@@ -75,7 +69,7 @@ class DatatypeTestCase(unittest.TestCase):
         raises = self.assertRaises
 
         eq(convert("1"), 1.0)
-        self.assertTrue(type(convert(1)) is type(1.0))
+        self.assertIs(type(convert(1)), type(1.0))
         eq(convert("1.1"), 1.1)
         eq(convert("50.50"), 50.50)
         eq(convert("-50.50"), -50.50)
@@ -119,8 +113,8 @@ class DatatypeTestCase(unittest.TestCase):
         v = convert(value)
         self.assertEqual(v, value)
         self.assertTrue(isinstance(v, str))
-        if have_unicode:
-            unicode_value = unicode(value)
+        if ZConfig._compat.have_unicode:
+            unicode_value = ZConfig._compat.text_type(value)
             v = convert(unicode_value)
             self.assertEqual(v, value)
             self.assertTrue(isinstance(v, str))
@@ -250,7 +244,6 @@ class DatatypeTestCase(unittest.TestCase):
 
     def test_datatype_socket_address(self):
         convert = self.types.get("socket-address")
-        eq = self.assertEqual
         AF_INET = socket.AF_INET
         AF_INET6 = socket.AF_INET6
         defhost = ZConfig.datatypes.DEFAULT_HOST
@@ -263,9 +256,9 @@ class DatatypeTestCase(unittest.TestCase):
         check("Host.Example.Com:80", AF_INET, ("host.example.com", 80))
         check(":80",                 AF_INET, (defhost, 80))
         check("80",                  AF_INET, (defhost, 80))
-        check("host.EXAMPLE.com",    AF_INET, ("host.example.com",None))
-        check("::1",                 AF_INET6,("::1", None))
-        check("[::]:80",             AF_INET6,("::", 80))
+        check("host.EXAMPLE.com",    AF_INET, ("host.example.com", None))
+        check("::1",                 AF_INET6, ("::1", None))
+        check("[::]:80",             AF_INET6, ("::", 80))
         a1 = convert("/tmp/var/@345.4")
         a2 = convert("/tmp/var/@345.4:80")
         self.assertEqual(a1.address, "/tmp/var/@345.4")
@@ -273,7 +266,7 @@ class DatatypeTestCase(unittest.TestCase):
         if hasattr(socket, "AF_UNIX"):
             self.assertEqual(a1.family, socket.AF_UNIX)
             self.assertEqual(a2.family, socket.AF_UNIX)
-        else: # pragma: no cover
+        else:  # pragma: no cover
             self.assertTrue(a1.family is None)
             self.assertTrue(a2.family is None)
 
@@ -295,8 +288,10 @@ class DatatypeTestCase(unittest.TestCase):
         eq(convert('WWW.HOSTNAME.COM'),  'www.hostname.com')
         eq(convert('127.0.0.1'),         '127.0.0.1')
         eq(convert('::1'),               '::1')
-        eq(convert('2001:DB8:1234:4567:89AB:cdef:0:1'), '2001:db8:1234:4567:89ab:cdef:0:1')
-        eq(convert('2001:DB8:1234:4567::10.11.12.13'), '2001:db8:1234:4567::10.11.12.13')
+        eq(convert('2001:DB8:1234:4567:89AB:cdef:0:1'),
+           '2001:db8:1234:4567:89ab:cdef:0:1')
+        eq(convert('2001:DB8:1234:4567::10.11.12.13'),
+           '2001:db8:1234:4567::10.11.12.13')
         raises(ValueError, convert,  '1hostnamewithleadingnumeric')
         raises(ValueError, convert,  '255.255')
         raises(ValueError, convert,  '12345678')
@@ -385,6 +380,7 @@ class DatatypeTestCase(unittest.TestCase):
 
         raises(TypeError, convert, '1y')
 
+
 class RegistryTestCase(TestHelper, unittest.TestCase):
 
     def test_registry_does_not_mask_toplevel_imports(self):
@@ -404,7 +400,6 @@ class RegistryTestCase(TestHelper, unittest.TestCase):
             shutil.rmtree(tmpdir)
             sys.path[:] = old_sys_path
         self.assertEqual(datatype, 42)
-
 
     def test_register_shadow(self):
         reg = ZConfig.datatypes.Registry()
@@ -427,6 +422,7 @@ class RegistryTestCase(TestHelper, unittest.TestCase):
                                reg.get,
                                'integer')
         self.assertIsNotNone(reg._basic_key)
+
 
 TEST_DATATYPE_SOURCE = """
 # sample datatypes file

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2001 Zope Foundation and Contributors.
+# Copyright (c) 2001, 2018 Zope Foundation and Contributors.
 #
 # This software is subject to the provisions of the Zope Public License,
 # Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
@@ -13,28 +13,24 @@
 
 """Handlers which can plug into a PEP 282 logger."""
 
+import logging
+import logging.handlers
 import os
-
 import weakref
-
-from logging import Handler, StreamHandler
-from logging.handlers import RotatingFileHandler as _RotatingFileHandler
-from logging.handlers import TimedRotatingFileHandler \
-     as _TimedRotatingFileHandler
-from logging.handlers import SysLogHandler, BufferingHandler
-from logging.handlers import HTTPHandler, SMTPHandler
-from logging.handlers import NTEventLogHandler as Win32EventLogHandler
-
-# Export these, they're used in handlers.py
-SysLogHandler = SysLogHandler
-HTTPHandler = HTTPHandler
-SMTPHandler = SMTPHandler
-Win32EventLogHandler = Win32EventLogHandler
 
 from ZConfig._compat import maxsize
 
 
+# Export these, they're used in handlers.py
+StreamHandler = logging.StreamHandler
+SysLogHandler = logging.handlers.SysLogHandler
+HTTPHandler = logging.handlers.HTTPHandler
+SMTPHandler = logging.handlers.SMTPHandler
+Win32EventLogHandler = logging.handlers.NTEventLogHandler
+
+
 _reopenable_handlers = []
+
 
 def closeFiles():
     """Reopen all logfiles managed by ZConfig configuration."""
@@ -43,6 +39,7 @@ def closeFiles():
         h = wr()
         if h is not None:
             h.close()
+
 
 def reopenFiles():
     """Reopen all logfiles managed by ZConfig configuration."""
@@ -56,6 +53,7 @@ def reopenFiles():
         else:
             h.reopen()
 
+
 def _remove_from_reopenable(wr):
     try:
         _reopenable_handlers.remove(wr)
@@ -63,7 +61,7 @@ def _remove_from_reopenable(wr):
         pass
 
 
-class FileHandler(StreamHandler):
+class FileHandler(logging.StreamHandler):
     """File handler which supports reopening of logs.
 
     Re-opening should be used instead of the 'rollover' feature of
@@ -72,7 +70,7 @@ class FileHandler(StreamHandler):
 
     def __init__(self, filename, mode="a"):
         filename = os.path.abspath(filename)
-        StreamHandler.__init__(self, open(filename, mode))
+        logging.StreamHandler.__init__(self, open(filename, mode))
         self.baseFilename = filename
         self.mode = mode
         self._wr = weakref.ref(self, _remove_from_reopenable)
@@ -85,8 +83,8 @@ class FileHandler(StreamHandler):
         # StreamHandler.close() isn't called.  This seems the best
         # compromise.  :-(
         try:
-            StreamHandler.close(self)
-        except KeyError: # pragma: no cover
+            logging.StreamHandler.close(self)
+        except KeyError:  # pragma: no cover
             pass
         _remove_from_reopenable(self._wr)
 
@@ -103,11 +101,12 @@ class Win32FileHandler(FileHandler):
     """File-based log handler for Windows that supports an additional 'rotate'
     method.  reopen() is generally useless since Windows cannot do a move on
     an open file.
+
     """
+
     def rotate(self, rotateFilename=None):
         if not rotateFilename:
             rotateFilename = self.baseFilename + ".last"
-        error = None
         self.close()
         try:
             os.rename(self.baseFilename, rotateFilename)
@@ -116,42 +115,44 @@ class Win32FileHandler(FileHandler):
 
         self.stream = open(self.baseFilename, self.mode)
 
+
 if os.name == "nt":
     # Make it the default for Windows - we install a 'reopen' handler that
     # tries to rotate the logfile.
     FileHandler = Win32FileHandler
 
 
-class RotatingFileHandler(_RotatingFileHandler):
+class RotatingFileHandler(logging.handlers.RotatingFileHandler):
 
     def __init__(self, *args, **kw):
-        _RotatingFileHandler.__init__(self, *args, **kw)
+        logging.handlers.RotatingFileHandler.__init__(self, *args, **kw)
         self._wr = weakref.ref(self, _remove_from_reopenable)
         _reopenable_handlers.append(self._wr)
 
     def close(self):
-        _RotatingFileHandler.close(self)
-        _remove_from_reopenable(self._wr)
-
-    def reopen(self):
-        self.doRollover()
-
-class TimedRotatingFileHandler(_TimedRotatingFileHandler):
-
-    def __init__(self, *args, **kw):
-        _TimedRotatingFileHandler.__init__(self, *args, **kw)
-        self._wr = weakref.ref(self, _remove_from_reopenable)
-        _reopenable_handlers.append(self._wr)
-
-    def close(self):
-        _TimedRotatingFileHandler.close(self)
+        logging.handlers.RotatingFileHandler.close(self)
         _remove_from_reopenable(self._wr)
 
     def reopen(self):
         self.doRollover()
 
 
-class NullHandler(Handler):
+class TimedRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
+
+    def __init__(self, *args, **kw):
+        logging.handlers.TimedRotatingFileHandler.__init__(self, *args, **kw)
+        self._wr = weakref.ref(self, _remove_from_reopenable)
+        _reopenable_handlers.append(self._wr)
+
+    def close(self):
+        logging.handlers.TimedRotatingFileHandler.close(self)
+        _remove_from_reopenable(self._wr)
+
+    def reopen(self):
+        self.doRollover()
+
+
+class NullHandler(logging.Handler):
     """Handler that does nothing."""
 
     def emit(self, record):
@@ -161,7 +162,7 @@ class NullHandler(Handler):
         pass
 
 
-class StartupHandler(BufferingHandler):
+class StartupHandler(logging.handlers.BufferingHandler):
     """Handler which stores messages in a buffer until later.
 
     This is useful at startup before we can know that we can safely
@@ -169,7 +170,7 @@ class StartupHandler(BufferingHandler):
     """
 
     def __init__(self):
-        BufferingHandler.__init__(self, maxsize)
+        logging.handlers.BufferingHandler.__init__(self, maxsize)
 
     def shouldFlush(self, record):
         return False

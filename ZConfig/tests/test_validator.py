@@ -20,8 +20,10 @@ from ZConfig import validator
 from .support import input_file
 from .support import with_stdin_from_input_file
 
+
 def run_validator(*args):
     return validator.main(args)
+
 
 class TestValidator(unittest.TestCase):
 
@@ -52,6 +54,7 @@ class TestValidator(unittest.TestCase):
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

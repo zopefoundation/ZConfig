@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2016 Zope Foundation and Contributors.
+# Copyright (c) 2016, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -12,7 +12,11 @@
 #
 ##############################################################################
 
+from io import StringIO
+from io import BytesIO
+import abc
 import sys
+
 
 PY3 = sys.version_info[0] >= 3
 
@@ -20,19 +24,23 @@ PY3 = sys.version_info[0] >= 3
 if str is not bytes:
     from io import StringIO as NStringIO
     string_types = str
+    text_type = str
+    have_unicode = False
 else:
     # Python 2
     from io import BytesIO as NStringIO
-    string_types = str, unicode
+    string_types = str, unicode  # noqa: F821
+    text_type = string_types[1]  # avoid direct reference!
+    have_unicode = True
+
 
 NStringIO = NStringIO
 
-from io import StringIO
-from io import BytesIO
 
 def TextIO(text):
-    "Return StringIO or BytesIO as appropriate"
+    """Return StringIO or BytesIO as appropriate"""
     return BytesIO(text) if isinstance(text, bytes) else StringIO(text)
+
 
 try:
     import urllib2
@@ -58,24 +66,23 @@ except ImportError:
 
 urlparse = urlparse
 
-if PY3: # pragma: no cover
+
+if PY3:  # pragma: no cover
     import builtins
     exec_ = getattr(builtins, "exec")
-    text_type = str
     binary_type = bytes
     maxsize = sys.maxsize
 
-    def reraise(tp, value, tb=None): #pragma NO COVER
+    def reraise(tp, value, tb=None):  # pragma NO COVER
         if value.__traceback__ is not tb:
             raise value.with_traceback(tb)
         raise value
 
-else: # pragma: no cover
-    text_type = unicode
+else:  # pragma: no cover
     binary_type = bytes
     maxsize = sys.maxint
 
-    def exec_(code, globs=None, locs=None): #pragma NO COVER
+    def exec_(code, globs=None, locs=None):  # pragma NO COVER
         """Execute code in a namespace."""
         if globs is None:
             frame = sys._getframe(1)
@@ -93,9 +100,9 @@ else: # pragma: no cover
 
 
 def raise_with_same_tb(exception):
-	"Raise an exception having the current traceback (if there is one)"
-	reraise(type(exception), exception, sys.exc_info()[2])
+    """Raise an exception having the current traceback (if there is one)"""
+    reraise(type(exception), exception, sys.exc_info()[2])
 
-import abc
+
 # workaround the metaclass diff in Py2/Py3
 AbstractBaseClass = abc.ABCMeta('AbstractBaseClass', (object,), {})

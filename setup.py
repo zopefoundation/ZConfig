@@ -23,7 +23,8 @@ options = dict(
     author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
     description="Structured Configuration Library",
-    keywords='configuration structured simple flexible typed hierarchy logging',
+    keywords=('configuration structured simple flexible typed hierarchy'
+              ' logging'),
     long_description=README + "\n\n" + CHANGES,
     license="ZPL 2.1",
     url="https://github.com/zopefoundation/ZConfig/",

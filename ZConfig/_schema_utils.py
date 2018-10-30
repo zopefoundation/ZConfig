@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2017 Zope Corporation and Contributors.
+# Copyright (c) 2017, 2018 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -39,6 +39,9 @@ from ZConfig.info import MultiKeyInfo
 from ZConfig.info import AbstractType
 
 
+MARKER = object()
+
+
 class _VisitorBuilder(object):
 
     def __init__(self):
@@ -50,7 +53,6 @@ class _VisitorBuilder(object):
             return func
         return dec
 
-MARKER = object()
 
 class AbstractSchemaFormatter(AbstractBaseClass):
 
@@ -134,27 +136,30 @@ class AbstractSchemaFormatter(AbstractBaseClass):
 
 class AbstractSchemaPrinter(AbstractBaseClass):
 
-
-    def __init__(self, schema, stream=None, allowed_names=(), excluded_names=()):
+    def __init__(self, schema, stream=None,
+                 allowed_names=(), excluded_names=()):
         self.schema = schema
         stream = stream or sys.stdout
         self._explained = set()
         self._seen_typenames = set()
         self.fmt = self._schema_formatter(schema, stream)
 
-
         def _make_predicate(names):
             names = {x.lower() for x in names}
+
             def predicate(name_info):
                 name, _ = name_info
                 return name and name.lower() in names
+
             return predicate
 
         def _make_filter(names, filt):
             iter_all = self._iter_schema_items
             pred = _make_predicate(names)
+
             def it():
                 return filt(pred, iter_all())
+
             return it
 
         if allowed_names:
@@ -162,7 +167,8 @@ class AbstractSchemaPrinter(AbstractBaseClass):
 
         if excluded_names:
             excluded_names = {x.lower() for x in excluded_names}
-            self._iter_schema_items = _make_filter(excluded_names, ifilterfalse)
+            self._iter_schema_items = _make_filter(excluded_names,
+                                                   ifilterfalse)
             self._included = lambda st: st.name not in excluded_names
 
     @abstractmethod
@@ -173,7 +179,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
         return True
 
     def _explain(self, st):
-        if st.name in self._explained: # pragma: no cover
+        if st.name in self._explained:  # pragma: no cover
             return
 
         self._explained.add(st.name)
@@ -192,14 +198,14 @@ class AbstractSchemaPrinter(AbstractBaseClass):
         def everything():
             return itertools.chain(self.schema.itertypes(),
                                    self.schema)
-        # The abstract types tend to be the most important. Since
-        # we only document a concrete type the first time we find it,
-        # and we can find extensions of abstract types beneath
-        # the abstract type which is itself buried under a concrete section,
-        # all the different permutations would be only documented once under
-        # that section. By exposing these first, they get documented at the top-level,
-        # and each concrete section that uses the abstract type gets a reference
-        # to it.
+        # The abstract types tend to be the most important. Since we
+        # only document a concrete type the first time we find it, and
+        # we can find extensions of abstract types beneath the abstract
+        # type which is itself buried under a concrete section, all the
+        # different permutations would be only documented once under
+        # that section. By exposing these first, they get documented at
+        # the top-level, and each concrete section that uses the
+        # abstract type gets a reference to it.
 
         def abstract_sections(base):
             for name, info in base:
@@ -219,7 +225,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
         self.buildSchema()
 
     def buildSchema(self):
-        seen = set() # prevent duplicates at the top-level
+        seen = set()  # prevent duplicates at the top-level
         # as we find multiple abstract types
         with self.fmt.body():
             with self.fmt.item_list():
@@ -258,14 +264,14 @@ class AbstractSchemaPrinter(AbstractBaseClass):
 
             with self.fmt.item_list():
                 for sub in info:
-                    self.visit(*sub) # pragma: no cover
-
+                    self.visit(*sub)  # pragma: no cover
 
     @TypeVisitor(SectionInfo)
     def _visit_SectionInfo(self, name, info):
         st = info.sectiontype
         if st.isabstract():
-            with self.fmt.describing(info.description, lambda: self._explain(st)):
+            with self.fmt.describing(info.description,
+                                     lambda: self._explain(st)):
                 self.fmt.abstract_name(st.name)
                 self.fmt.concrete_name(info.name)
 
@@ -283,7 +289,8 @@ class AbstractSchemaPrinter(AbstractBaseClass):
 
     @TypeVisitor(AbstractType)
     def _visit_AbstractType(self, name, info):
-        with self.fmt.describing(info.description, lambda: self._explain(info)):
+        with self.fmt.describing(info.description,
+                                 lambda: self._explain(info)):
             self.fmt.abstract_name(info.name)
 
     def _visit_default(self, name, info):
@@ -305,8 +312,9 @@ def load_schema(schema, package, package_file):
     if not package:
         schema_reader = argparse.FileType('r')(schema)
     else:
-        schema_template = "<schema><import package='%s' file='%s' /></schema>" % (
-            schema, package_file or 'component.xml')
+        schema_template = (
+            "<schema><import package='%s' file='%s' /></schema>"
+            % (schema, package_file or 'component.xml'))
         from ZConfig._compat import TextIO
         schema_reader = TextIO(schema_template)
 

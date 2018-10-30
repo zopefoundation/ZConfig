@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2003 Zope Foundation and Contributors.
+# Copyright (c) 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -13,6 +13,7 @@
 ##############################################################################
 """Tests of the %import mechanism.
 """
+
 import unittest
 
 import ZConfig
@@ -21,8 +22,8 @@ import ZConfig.tests.support
 from ZConfig._compat import NStringIO as StringIO
 
 
-class TestImportFromConfiguration(
-    ZConfig.tests.support.TestHelper, unittest.TestCase):
+class TestImportFromConfiguration(ZConfig.tests.support.TestHelper,
+                                  unittest.TestCase):
 
     def test_simple_import(self):
         schema = self.load_schema_text("<schema/>")
@@ -52,6 +53,7 @@ class TestImportFromConfiguration(
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

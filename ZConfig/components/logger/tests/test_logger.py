@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -76,7 +76,7 @@ class LoggingTestHelper(TestHelper):
         for h in self._old_logger.handlers:
             self._old_logger.removeHandler(h)
         for h in self._old_handlers:
-            self._old_logger.addHandler(h) # pragma: no cover
+            self._old_logger.addHandler(h)  # pragma: no cover
         self._old_logger.setLevel(self._old_level)
 
         while self._created:
@@ -212,7 +212,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assertEqual(logfile.backupCount, 11)
         self.assertEqual(logfile.interval, 86400*3)
-        self.assertTrue(isinstance(logfile, loghandler.TimedRotatingFileHandler))
+        self.assertIsInstance(logfile, loghandler.TimedRotatingFileHandler)
         logger.removeHandler(logfile)
         logfile.close()
 
@@ -258,7 +258,6 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
             "  </logfile>\n"
             "</eventlog>" % fn)
 
-
     def test_with_rotating_logfile_and_STD_should_fail(self):
         for path in ('STDERR', 'STDOUT'):
             for param in ('old-files 10', 'max-size 5mb'):
@@ -273,7 +272,6 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                     "    %s\n"
                     "  </logfile>\n"
                     "</eventlog>" % (path, param))
-
 
     def check_standard_stream(self, name):
         old_stream = getattr(sys, name)
@@ -333,10 +331,10 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         syslog = logger.handlers[0]
         self.assertEqual(syslog.level, logging.ERROR)
         self.assertTrue(isinstance(syslog, loghandler.SysLogHandler))
-        syslog.close() # avoid ResourceWarning
+        syslog.close()  # avoid ResourceWarning
         try:
-            syslog.socket.close() # ResourceWarning under 3.2
-        except socket.SocketError: # pragma: no cover
+            syslog.socket.close()  # ResourceWarning under 3.2
+        except socket.SocketError:  # pragma: no cover
             pass
 
     def test_with_http_logger_localhost(self):
@@ -686,6 +684,7 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
 
         self.assertEqual(calls, ["acquire", "release"])
 
+
 class TestFunctions(TestHelper, unittest.TestCase):
 
     def test_log_format_bad(self):
@@ -727,9 +726,12 @@ class TestFunctions(TestHelper, unittest.TestCase):
     def test_close_files(self):
         class F(object):
             closed = 0
+
             def close(self):
                 self.closed += 1
+
         f = F()
+
         def wr():
             return f
 
@@ -788,8 +790,10 @@ class TestStartupHandler(unittest.TestCase):
         self.assertEqual(maxsize, handler.capacity)
 
         records = []
+
         def handle(record):
             records.append(record)
+
         handle.handle = handle
 
         handler.flushBufferTo(handle)
@@ -800,6 +804,7 @@ class TestStartupHandler(unittest.TestCase):
         self.assertEqual([1], records)
 
         del handle.handle
+
 
 def test_logger_convenience_function_and_ommiting_name_to_get_root_logger():
     """
@@ -853,11 +858,13 @@ We'll configure the rot logger and a non-root logger.
 
     """
 
+
 def test_suite():
     return unittest.TestSuite([
         unittest.defaultTestLoader.loadTestsFromName(__name__),
         doctest.DocTestSuite()
     ])
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest="test_suite")

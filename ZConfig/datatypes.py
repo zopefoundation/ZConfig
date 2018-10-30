@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -27,6 +27,7 @@ argument and returns a suitable value, or raises an exception if the
 input value is not acceptable. :exc:`ValueError` is the preferred
 exception for disallowed inputs, but any other exception will be
 properly propagated.
+
 """
 
 import os
@@ -34,14 +35,10 @@ import re
 import sys
 import datetime
 
-try:
-    unicode
-except NameError:
-    # Python 3
-    have_unicode = False
+from ZConfig._compat import have_unicode, text_type, PY3
+
+if PY3:
     from functools import reduce
-else:
-    have_unicode = True
 
 
 class MemoizedConversion(object):
@@ -51,6 +48,7 @@ class MemoizedConversion(object):
     at a later time; failed conversions are not cached in any way, since
     it is difficult to raise a meaningful exception providing
     information about the specific failure.
+
     """
 
     def __init__(self, conversion):
@@ -75,6 +73,7 @@ class RangeCheckedConversion(object):
     not ``None``, are the inclusive endpoints of the allowed range.
     Values returned by *conversion* which lay outside the range
     described by *min* and *max* cause :exc:`ValueError` to be raised.
+
     """
 
     def __init__(self, conversion, min=None, max=None):
@@ -132,6 +131,7 @@ def check_locale(value):
 
 
 class BasicKeyConversion(RegularExpressionConversion):
+
     def __init__(self):
         RegularExpressionConversion.__init__(self, "[a-zA-Z][-._a-zA-Z0-9]*")
 
@@ -141,14 +141,16 @@ class BasicKeyConversion(RegularExpressionConversion):
 
 
 class ASCIIConversion(RegularExpressionConversion):
+
     def __call__(self, value):
         value = RegularExpressionConversion.__call__(self, value)
-        if have_unicode and isinstance(value, unicode):
+        if have_unicode and isinstance(value, text_type):
             value = value.encode("ascii")
         return value
 
 
 _ident_re = "[_a-zA-Z][_a-zA-Z0-9]*"
+
 
 class IdentifierConversion(ASCIIConversion):
     reason = "not a valid Python identifier"
@@ -220,7 +222,7 @@ class InetAddress(object):
                 # last part is not the port number
                 host = s
                 p = None
-            if p: # else leave port at None
+            if p:  # else leave port at None
                 port = port_number(p)
             host = host.lower()
         else:
@@ -244,6 +246,7 @@ inet_address = InetAddress(DEFAULT_HOST)
 inet_connection_address = InetAddress("127.0.0.1")
 inet_binding_address = InetAddress("")
 
+
 class SocketAddress(object):
     # Parsing results in family and address
     # Family can be AF_UNIX (for addresses that are path names)
@@ -253,6 +256,7 @@ class SocketAddress(object):
     # Notice that no DNS lookup is performed, so if the host
     # is a DNS name, DNS lookup may end up with either IPv4 or
     # IPv6 addresses, or both
+
     def __init__(self, s):
         import socket
         if "/" in s or s.find(os.sep) >= 0:
@@ -267,10 +271,12 @@ class SocketAddress(object):
     def _parse_address(self, s):
         return inet_address(s)
 
+
 class SocketBindingAddress(SocketAddress):
 
     def _parse_address(self, s):
         return inet_binding_address(s)
+
 
 class SocketConnectionAddress(SocketAddress):
 
@@ -288,13 +294,13 @@ class IpaddrOrHostname(RegularExpressionConversion):
         # We allow underscores in hostnames although this is considered
         # illegal according to RFC1034.
         # Addition: IPv6 addresses are now also accepted
-        expr = (r"(^(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr
-                r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr cont'd
-                r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\." #ipaddr cont'd
-                r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])$)" #ipaddr cont'd
-                r"|([A-Za-z_][-A-Za-z0-9_.]*[-A-Za-z0-9_])" # or hostname
-                r"|([0-9A-Fa-f:.]+:[0-9A-Fa-f:.]*)" # or superset of IPv6 addresses
-                                     # (requiring at least one colon)
+        expr = (r"(^(\d|[01]?\d\d|2[0-4]\d|25[0-5])\."  # ipaddr
+                r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\."    # ipaddr cont'd
+                r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])\."    # ipaddr cont'd
+                r"(\d|[01]?\d\d|2[0-4]\d|25[0-5])$)"    # ipaddr cont'd
+                r"|([A-Za-z_][-A-Za-z0-9_.]*[-A-Za-z0-9_])"  # or hostname
+                # or superset of IPv6 addresses (requiring at least one colon)
+                r"|([0-9A-Fa-f:.]+:[0-9A-Fa-f:.]*)"
                 )
         RegularExpressionConversion.__init__(self, expr)
 
@@ -310,11 +316,13 @@ class IpaddrOrHostname(RegularExpressionConversion):
                 raise ValueError('%r is not a valid IPv6 address' % value)
         return result
 
+
 def existing_directory(v):
     nv = os.path.expanduser(v)
     if os.path.isdir(nv):
         return nv
     raise ValueError('%s is not an existing directory' % v)
+
 
 def existing_path(v):
     nv = os.path.expanduser(v)
@@ -322,11 +330,13 @@ def existing_path(v):
         return nv
     raise ValueError('%s is not an existing path' % v)
 
+
 def existing_file(v):
     nv = os.path.expanduser(v)
     if os.path.exists(nv):
         return nv
     raise ValueError('%s is not an existing file' % v)
+
 
 def existing_dirpath(v):
     nv = os.path.expanduser(v)
@@ -348,10 +358,12 @@ class SuffixMultiplier(object):
         self._d = d
         self._default = default
         # all keys must be the same size
+
         def check(a, b):
             if len(a) != len(b):
                 raise ValueError("suffix length mismatch")
             return a
+
         self._keysz = len(reduce(check, d))
 
     def __call__(self, v):
@@ -418,8 +430,8 @@ stock_datatypes = {
     "socket-address":    SocketAddress,
     "socket-binding-address":    SocketBindingAddress,
     "socket-connection-address": SocketConnectionAddress,
-    "ipaddr-or-hostname":IpaddrOrHostname(),
-    "existing-directory":existing_directory,
+    "ipaddr-or-hostname": IpaddrOrHostname(),
+    "existing-directory": existing_directory,
     "existing-path":     existing_path,
     "existing-file":     existing_file,
     "existing-dirpath":  existing_dirpath,
@@ -442,7 +454,9 @@ class Registry(object):
     If given, *stock* should be a mapping which defines the "built-in"
     data types for the registry; if omitted or ``None``, the standard
     set of data types is used (see :ref:`standard-datatypes`).
+
     """
+
     def __init__(self, stock=None):
         if stock is None:
             stock = stock_datatypes.copy()
@@ -459,7 +473,7 @@ class Registry(object):
                     return k
 
         # If they followed the rules, we shouldn't get here.
-        return str(conversion) # pragma: no cover
+        return str(conversion)  # pragma: no cover
 
     def get(self, name):
         """Return the type conversion routine for *name*.
@@ -470,6 +484,7 @@ class Registry(object):
         registered, this method uses the :meth:`search` method to load
         the conversion function. This is the only method the rest of
         :mod:`ZConfig` requires.
+
         """
         if '.' not in name:
             if self._basic_key is None:
@@ -493,6 +508,7 @@ class Registry(object):
         If *name* is already registered or provided as a stock data
         type, :exc:`ValueError` is raised (this includes the case when
         *name* was found using the :meth:`search` method).
+
         """
         if name in self._stock:
             raise ValueError("datatype name conflicts with built-in type: "
@@ -509,8 +525,9 @@ class Registry(object):
         for the name by dynamically importing the containing module
         and extracting the value of the name. The name must refer to a
         usable conversion function.
+
         """
-        if not "." in name:
+        if "." not in name:
             raise ValueError("unloadable datatype name: " + repr(name))
         components = name.split('.')
         start = components[0]

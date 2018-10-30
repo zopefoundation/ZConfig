@@ -32,6 +32,7 @@ def basic_key_mapping_password_to_passwd(key):
         key = "passwd"
     return key
 
+
 def user_info_conversion(section):
     return section
 
@@ -65,6 +66,7 @@ class CookbookTestCase(ZConfig.tests.support.TestHelper, unittest.TestCase):
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

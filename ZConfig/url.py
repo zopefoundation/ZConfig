@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -15,11 +15,13 @@
 
 ZConfig and urllib2 expect file: URLs to consistently use the '//'
 hostpart seperator; the functions here enforce this constraint.
+
 """
 
 from ZConfig._compat import urlparse as _urlparse
 
 urlsplit = _urlparse.urlsplit
+
 
 def urlnormalize(url):
     lc = url.lower()
@@ -33,11 +35,11 @@ def urlunsplit(parts):
     parts.insert(3, '')
     url = _urlparse.urlunparse(tuple(parts))
     if (parts[0] == "file"
-        and url.startswith("file:/")
-        and not url.startswith("file:///")):
+            and url.startswith("file:/")
+            and not url.startswith("file:///")):
         # It may not be possible to get here anymore with
         # modern urlparse, at least not on posix?
-        url = "file://" + url[5:] # pragma: no cover
+        url = "file://" + url[5:]  # pragma: no cover
     return url
 
 
@@ -51,5 +53,5 @@ def urljoin(base, relurl):
     if url.startswith("file:/") and not url.startswith("file:///"):
         # It may not be possible to get here anymore with
         # modern urlparse, at least not on posix?
-        url = "file://" + url[5:] # pragma: no cover
+        url = "file://" + url[5:]  # pragma: no cover
     return url

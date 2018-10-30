@@ -28,6 +28,7 @@ _logging_levels = {
     "notset": 0,
     }
 
+
 def logging_level(value):
     s = str(value).lower()
     if s in _logging_levels:

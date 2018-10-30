@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -33,13 +33,17 @@ separate packages.
 """
 __docformat__ = "reStructuredText"
 
+from ZConfig._compat import TextIO
+import ZConfig.loader
+
+loadConfigFile = ZConfig.loader.loadConfigFile
+loadSchemaFile = ZConfig.loader.loadSchemaFile
+loadConfig = ZConfig.loader.loadConfig
+loadSchema = ZConfig.loader.loadSchema
+
+
 version_info = (3, 0)
 __version__ = ".".join([str(n) for n in version_info])
-
-from ZConfig.loader import loadConfig, loadConfigFile
-from ZConfig.loader import loadSchema, loadSchemaFile
-
-from ZConfig._compat import TextIO
 
 
 class ConfigurationError(Exception):
@@ -48,8 +52,8 @@ class ConfigurationError(Exception):
     All instances provide a ``message`` attribute that describes
     the specific error, and a ``url`` attribute that gives the URL
     of the resource the error was located in, or ``None``.
-    """
 
+    """
 
     # The 'message' attribute was deprecated for BaseException with
     # Python 2.6; here we create descriptor properties to continue using it
@@ -214,12 +218,14 @@ class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
 
 def configureLoggers(text):
     """Configure one or more loggers from configuration text."""
-    schema = loadSchemaFile(TextIO("""
+
+    schema = ZConfig.loader.loadSchemaFile(TextIO("""
     <schema>
     <import package='ZConfig.components.logger'/>
     <multisection type='logger' name='*' attribute='loggers'/>
     </schema>
     """))
 
-    for factory in loadConfigFile(schema, TextIO(text))[0].loggers:
+    config, _ = ZConfig.loader.loadConfigFile(schema, TextIO(text))
+    for factory in config.loggers:
         factory()

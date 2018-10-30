@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -13,11 +13,25 @@
 ##############################################################################
 """Configuration parser."""
 
+import re
+
 import ZConfig
 import ZConfig.url
 
 from ZConfig.substitution import isname, substitute
 from ZConfig._compat import raise_with_same_tb
+
+
+# _name_re does not allow "(" or ")" for historical reasons.  Though
+# the restriction could be lifted, there seems no need to do so.
+_name_re = r"[^\s()]+"
+_keyvalue_rx = re.compile(r"(?P<key>%s)\s*(?P<value>[^\s].*)?$"
+                          % _name_re)
+_section_start_rx = re.compile(r"(?P<type>%s)"
+                               r"(?:\s+(?P<name>%s))?"
+                               r"$"
+                               % (_name_re, _name_re))
+
 
 class ZConfigParser(object):
 
@@ -172,21 +186,7 @@ class ZConfigParser(object):
             ZConfig.ConfigurationSyntaxError(
                 message, self.url, self.lineno))
 
-
     def _normalize_case(self, string):
         # This method is factored out solely to allow subclasses to modify
         # the behavior of the parser.
         return string.lower()
-
-
-import re
-# _name_re does not allow "(" or ")" for historical reasons.  Though
-# the restriction could be lifted, there seems no need to do so.
-_name_re = r"[^\s()]+"
-_keyvalue_rx = re.compile(r"(?P<key>%s)\s*(?P<value>[^\s].*)?$"
-                          % _name_re)
-_section_start_rx = re.compile(r"(?P<type>%s)"
-                               r"(?:\s+(?P<name>%s))?"
-                               r"$"
-                               % (_name_re, _name_re))
-del re

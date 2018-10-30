@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -22,6 +22,7 @@ from functools import total_ordering
 
 from ZConfig._compat import AbstractBaseClass
 
+
 @total_ordering
 class UnboundedThing(object):
     __slots__ = ()
@@ -34,8 +35,9 @@ class UnboundedThing(object):
     def __eq__(self, other):
         return isinstance(other, self.__class__)
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):  # pragma: no cover
         return "<Unbounded>"
+
 
 Unbounded = UnboundedThing()
 
@@ -64,8 +66,10 @@ class BaseInfo(object):
 
     def __init__(self, name, datatype, minOccurs, maxOccurs, handler,
                  attribute):
-        assert maxOccurs is not None, "Use Unbounded for an upper bound, not None"
-        assert minOccurs is not None, "Use 0 for a lower bound, not None"
+        assert maxOccurs is not None, (
+            "Use Unbounded for an upper bound, not None")
+        assert minOccurs is not None, (
+            "Use 0 for a lower bound, not None")
 
         if maxOccurs < 1:
             raise ZConfig.SchemaError(
@@ -403,7 +407,7 @@ class SectionType(object):
                     if st.isabstract():
                         try:
                             st = st.getsubtype(type_)
-                        except ZConfig.ConfigurationError: # pragma: no cover
+                        except ZConfig.ConfigurationError:  # pragma: no cover
                             raise ZConfig.ConfigurationError(
                                 "section type %s not allowed for name %s"
                                 % (repr(type_), repr(key)))
@@ -420,19 +424,19 @@ class SectionType(object):
                 return info
             elif info.sectiontype.isabstract():
                 st = info.sectiontype
-                if st.name == type_: # pragma: no cover
+                if st.name == type_:  # pragma: no cover
                     raise ZConfig.ConfigurationError(
                         "cannot define section with an abstract type")
                 try:
                     st = st.getsubtype(type_)
-                except ZConfig.ConfigurationError: # pragma: no cover
+                except ZConfig.ConfigurationError:  # pragma: no cover
                     # not this one; maybe a different one
                     pass
                 else:
                     return info
         raise ZConfig.ConfigurationError(
-            "no matching section defined for type='%s', name='%s'" % (
-            type_, name))
+            "no matching section defined for type='%s', name='%s'"
+            % (type_, name))
 
     def isabstract(self):
         return False
@@ -470,7 +474,7 @@ class SchemaType(SectionType):
             alltypes.remove(n)
         if self.name and self.name in alltypes:
             # Not clear we can get here
-            alltypes.remove(self.name) # pragma: no cover.
+            alltypes.remove(self.name)  # pragma: no cover.
         return alltypes
 
     def createSectionType(self, name, keytype, valuetype, datatype):
