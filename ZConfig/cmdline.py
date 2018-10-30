@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2003 Zope Foundation and Contributors.
+# Copyright (c) 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -22,6 +22,7 @@ options for everything the configuration file can include.
 
 Each setting is given by a value specifier string, as described by
 :meth:`ExtendedConfigLoader.addOption`.
+
 """
 
 import ZConfig
@@ -29,6 +30,7 @@ import ZConfig.loader
 import ZConfig.matcher
 
 from ZConfig._compat import raise_with_same_tb
+
 
 class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
     """A :class:`~.ConfigLoader` subclass that adds support for
@@ -153,7 +155,7 @@ class OptionBag(object):
             bk = self.basic_key(s, pos)
             if name and self._normalize_case(s) == name:
                 L.append((optpath[1:], val, pos))
-            elif bk == type_: # pragma: no cover
+            elif bk == type_:  # pragma: no cover
                 L.append((optpath[1:], val, pos))
             else:
                 R.append(item)
@@ -205,6 +207,7 @@ class ExtendedSectionMatcher(MatcherMixin, ZConfig.matcher.SectionMatcher):
     def finish(self):
         self.finish_optionbag()
         return ZConfig.matcher.SectionMatcher.finish(self)
+
 
 class ExtendedSchemaMatcher(MatcherMixin, ZConfig.matcher.SchemaMatcher):
     def finish(self):

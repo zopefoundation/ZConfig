@@ -25,6 +25,7 @@ class LoggerFactoryBase(Factory):
     to allow the app time to set an effective user).  An instance of
     this wrapper is a callable which, when called, returns a logger
     object.
+
     """
 
     def __init__(self, section):
@@ -55,6 +56,7 @@ class LoggerFactoryBase(Factory):
 
         If all handlers and the logger itself have level==NOTSET, this
         returns NOTSET.
+
         """
         import logging
         lowest = self.level
@@ -74,6 +76,7 @@ class LoggerFactoryBase(Factory):
         factory directly; handlers for child loggers are not affected.
         (This can be considered a bug, but is sufficient at the
         moment.)
+
         """
         logger = self()
         for handler in logger.handlers:

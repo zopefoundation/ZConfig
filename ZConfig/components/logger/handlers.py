@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2003 Zope Foundation and Contributors.
+# Copyright (c) 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -20,6 +20,7 @@ from ZConfig._compat import urlparse
 
 from ZConfig.components.logger.factory import Factory
 
+
 _log_format_variables = {
     'name': '',
     'levelno': '3',
@@ -37,6 +38,7 @@ _log_format_variables = {
     'process': 1,
     }
 
+
 def log_format(value):
     value = ctrl_char_insert(value)
     try:
@@ -48,13 +50,16 @@ def log_format(value):
         raise ValueError('Invalid log format string %s' % value)
     return value
 
+
 _control_char_rewrites = {r'\n': '\n', r'\t': '\t', r'\b': '\b',
                           r'\f': '\f', r'\r': '\r'}.items()
+
 
 def ctrl_char_insert(value):
     for pattern, replacement in _control_char_rewrites:
         value = value.replace(pattern, replacement)
     return value
+
 
 def resolve(name):
     """Given a dotted name, returns an object imported from a Python module."""
@@ -70,7 +75,9 @@ def resolve(name):
             found = getattr(found, n)
     return found
 
+
 class HandlerFactory(Factory):
+
     def __init__(self, section):
         Factory.__init__(self)
         self.section = section
@@ -90,10 +97,12 @@ class HandlerFactory(Factory):
         logger.setLevel(self.section.level)
         return logger
 
-    def getLevel(self): # pragma: no cover Is this used?
+    def getLevel(self):  # pragma: no cover Is this used?
         return self.section.level
 
+
 class FileHandlerFactory(HandlerFactory):
+
     def create_loghandler(self):
         from ZConfig.components.logger import loghandler
         path = self.section.path
@@ -130,6 +139,7 @@ class FileHandlerFactory(HandlerFactory):
             handler = loghandler.FileHandler(path)
         return handler
 
+
 _syslog_facilities = {
     "auth": 1,
     "authpriv": 1,
@@ -153,6 +163,7 @@ _syslog_facilities = {
     "local7": 1,
     }
 
+
 def syslog_facility(value):
     value = value.lower()
     if value not in _syslog_facilities:
@@ -160,16 +171,21 @@ def syslog_facility(value):
         raise ValueError("Syslog facility must be one of " + ", ".join(L))
     return value
 
+
 class SyslogHandlerFactory(HandlerFactory):
+
     def create_loghandler(self):
         from ZConfig.components.logger import loghandler
         return loghandler.SysLogHandler(self.section.address.address,
                                         self.section.facility)
 
+
 class Win32EventLogFactory(HandlerFactory):
+
     def create_loghandler(self):
         from ZConfig.components.logger import loghandler
         return loghandler.Win32EventLogHandler(self.section.appname)
+
 
 def http_handler_url(value):
     scheme, netloc, path, param, query, fragment = urlparse.urlparse(value)
@@ -191,6 +207,7 @@ def http_handler_url(value):
         q.append(fragment)
     return (netloc, path + ''.join(q))
 
+
 def get_or_post(value):
     value = value.upper()
     if value not in ('GET', 'POST'):
@@ -198,13 +215,17 @@ def get_or_post(value):
                          + repr(value))
     return value
 
+
 class HTTPHandlerFactory(HandlerFactory):
+
     def create_loghandler(self):
         from ZConfig.components.logger import loghandler
         host, selector = self.section.url
         return loghandler.HTTPHandler(host, selector, self.section.method)
 
+
 class SMTPHandlerFactory(HandlerFactory):
+
     def create_loghandler(self):
         from ZConfig.components.logger import loghandler
         host, port = self.section.smtp_server

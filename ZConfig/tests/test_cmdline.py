@@ -106,7 +106,6 @@ class CommandLineTest(ZConfig.tests.support.TestHelper, unittest.TestCase):
                                matcher.addValue,
                                'invalid name', 'value', (1, 1, '<place>'))
 
-
     simple_schema = None
 
     def get_simple_schema(self):

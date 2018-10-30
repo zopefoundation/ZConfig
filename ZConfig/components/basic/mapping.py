@@ -14,5 +14,6 @@
 
 """Python datatype for the ZConfig.components.basic.mapping section type."""
 
+
 def mapping(section):
     return section.mapping

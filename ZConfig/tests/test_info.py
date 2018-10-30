@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2017 Zope Foundation and Contributors.
+# Copyright (c) 2017, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -36,12 +36,14 @@ class UnboundTestCase(unittest.TestCase):
         self.assertFalse(Unbounded > Unbounded)
         self.assertEqual(Unbounded, Unbounded)
 
+
 class InfoMixin(TestHelper):
 
     Class = None
 
     default_kwargs = {'name': '', 'datatype': None, 'handler': None,
-                      'minOccurs': 0, 'maxOccurs': Unbounded, 'attribute': None}
+                      'minOccurs': 0, 'maxOccurs': Unbounded,
+                      'attribute': None}
 
     def make_one(self, **kwargs):
         args = self.default_kwargs.copy()
@@ -70,6 +72,7 @@ class BaseInfoTestCase(InfoMixin, unittest.TestCase):
         # just doesn't raise
         repr(self.make_one())
 
+
 class BaseKeyInfoTestCase(InfoMixin, unittest.TestCase):
 
     class Class(BaseKeyInfo):
@@ -95,6 +98,7 @@ class BaseKeyInfoTestCase(InfoMixin, unittest.TestCase):
                                info.adddefault,
                                None, None, key='key')
 
+
 class KeyInfoTestCase(InfoMixin, unittest.TestCase):
 
     Class = KeyInfo
@@ -109,12 +113,14 @@ class KeyInfoTestCase(InfoMixin, unittest.TestCase):
                                info.adddefault,
                                'value', None)
 
+
 class SectionInfoTestCase(InfoMixin, unittest.TestCase):
 
     Class = SectionInfo
 
     class MockSectionType(object):
         name = None
+
         @classmethod
         def isabstract(cls):
             return True
@@ -139,6 +145,7 @@ class SectionInfoTestCase(InfoMixin, unittest.TestCase):
         self.assertFalse(info.isAllowedName('*'))
         self.assertFalse(info.isAllowedName('+'))
 
+
 class AbstractTypeTestCase(unittest.TestCase):
 
     def test_subtypes(self):
@@ -150,6 +157,7 @@ class AbstractTypeTestCase(unittest.TestCase):
         self.name = 'foo'
         t.addsubtype(self)
         self.assertTrue(t.hassubtype('foo'))
+
 
 class SectionTypeTestCase(TestHelper, unittest.TestCase):
 
@@ -169,10 +177,13 @@ class SectionTypeTestCase(TestHelper, unittest.TestCase):
         self.assertEqual(['foo'], info.getrequiredtypes())
 
     def test_getsectioninfo(self):
+
         class MockChild(object):
             _issection = False
+
             def issection(self):
                 return self._issection
+
         child = MockChild()
 
         info = self.make_one()
@@ -188,6 +199,7 @@ class SectionTypeTestCase(TestHelper, unittest.TestCase):
                                'no matching section',
                                info.getsectioninfo,
                                None, 'baz')
+
 
 class SchemaTypeTestCase(TestHelper, unittest.TestCase):
 

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -23,13 +23,17 @@ from ZConfig.tests.support import TestHelper, CONFIG_BASE
 def uppercase(value):
     return str(value).upper()
 
+
 def appsection(value):
     return MySection(value)
+
 
 def get_foo(section):
     return section.foo
 
+
 class MySection:
+
     def __init__(self, value):
         self.conf = value
 
@@ -41,7 +45,6 @@ def get_section_attributes(section):
 
 class SchemaTestCase(TestHelper, unittest.TestCase):
     """Tests of the basic schema support itself."""
-
 
     def test_minimal_schema(self):
         schema = self.load_schema_text("<schema/>")
@@ -55,7 +58,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         schema, conf = self.load_both("simple.xml", "simple.conf")
         self._verifySimpleConf(conf)
 
-    def _verifySimpleConf(self,conf):
+    def _verifySimpleConf(self, conf):
         eq = self.assertEqual
         eq(conf.var1, 'abc')
         eq(conf.int_var, 12)
@@ -320,7 +323,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                           <sect a/>
                           <sect a/>
                           """)
-        conf = self.load_config_text(schema, """\
+        self.load_config_text(schema, """\
                                      <nesting a>
                                        <sect a/>
                                      </nesting>
@@ -587,7 +590,6 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
 
     def test_section_value_mutation(self):
         schema, conf = self.load_both("simple.xml", "simple.conf")
-        orig = conf.empty
         new = []
         conf.empty = new
         self.assertTrue(conf.empty is new)
@@ -645,7 +647,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
               <section type='abstract' name='*' attribute='s2'/>
             </schema>
             """)
-        conf = self.load_config_text(schema, """\
+        self.load_config_text(schema, """\
                                      <t2>
                                        <t1 s1/>
                                      </t2>
@@ -663,7 +665,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
               <section type='abstract' attribute='s2'/>
             </schema>
             """)
-        conf = self.load_config_text(schema, """\
+        self.load_config_text(schema, """\
                                      <t2>
                                        <t1 s1/>
                                      </t2>
@@ -676,6 +678,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                 %s
             </schema>
             """
+
         def check(thing, self=self, template=template):
             text = template % thing
             self.assertRaises(ZConfig.SchemaError,
@@ -999,8 +1002,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         self._verifySimpleConf(self.load_config(schema, "simple.conf"))
 
     def test_extends_fragment_failure(self):
-        self.assertRaises(ZConfig.SchemaError,
-                          self.load_schema_text,
+        self.assertRaises(
+            ZConfig.SchemaError, self.load_schema_text,
             "<schema extends='%s/library.xml#foo'/>" % CONFIG_BASE)
 
     def test_extends_description_override(self):
@@ -1097,7 +1100,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                 </sectiontype>
             </schema>
             """)
-        self.assertEqual(schema.gettype('abc').getinfo('def').example, 'This is an example')
+        self.assertEqual(schema.gettype('abc').getinfo('def').example,
+                         'This is an example')
 
     def test_multikey_example(self):
         schema = self.load_schema_text("""\
@@ -1109,7 +1113,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                 </sectiontype>
             </schema>
             """)
-        self.assertEqual(schema.gettype('abc').getinfo('def').example, 'This is an example')
+        self.assertEqual(schema.gettype('abc').getinfo('def').example,
+                         'This is an example')
 
     def test_sectiontype_example(self):
         schema = self.load_schema_text("""\
@@ -1141,7 +1146,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                 </section>
             </schema>
             """)
-        self.assertEqual(schema.getinfo('def').sectiontype.example, 'This is a sectiontype example')
+        self.assertEqual(schema.getinfo('def').sectiontype.example,
+                         'This is a sectiontype example')
         self.assertEqual(schema.getinfo('def').example, 'This is an example')
 
     def test_multisection_example(self):
@@ -1155,7 +1161,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                 </multisection>
             </schema>
             """)
-        self.assertEqual(schema[0][1].sectiontype.example, 'This is a sectiontype example')
+        self.assertEqual(schema[0][1].sectiontype.example,
+                         'This is a sectiontype example')
         self.assertEqual(schema[0][1].example, 'This is an example')
 
     def checkErrorText(self, schema, error_text):
@@ -1174,12 +1181,13 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         self.checkErrorText("<schema>text",
                             "non-blank character data")
 
-
     def test_error_subclass(self):
         import ZConfig.schema
         import ZConfig.datatypes
+
         class MockLoader(object):
             registry = ZConfig.datatypes.Registry()
+
         parser = ZConfig.schema.SchemaParser(MockLoader(), 'url')
         parser.push_prefix({'prefix': __name__})
         parser.push_prefix({'prefix': '.' + __name__})
@@ -1231,7 +1239,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         self.checkErrorText(
             """
             <schema>
-              <multikey name='foo' required="yes" default="1" attribute='keymap'/>
+              <multikey name='foo' required="yes" default="1"
+                        attribute='keymap'/>
             </schema>
             """,
             "default values for multikey must be given")
@@ -1330,6 +1339,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

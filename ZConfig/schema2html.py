@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2003 Zope Corporation and Contributors.
+# Copyright (c) 2003, 2018 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,7 +11,6 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import print_function
 
 import argparse
 from contextlib import contextmanager
@@ -27,6 +26,7 @@ from ZConfig._schema_utils import AbstractSchemaFormatter
 from ZConfig._schema_utils import MARKER
 from ZConfig._schema_utils import load_schema
 from ZConfig.sphinx import RstSchemaPrinter
+
 
 class HtmlSchemaFormatter(AbstractSchemaFormatter):
 
@@ -85,9 +85,11 @@ class HtmlSchemaFormatter(AbstractSchemaFormatter):
         yield
         self.write('</body></html>')
 
+
 class HtmlSchemaPrinter(AbstractSchemaPrinter):
 
     _schema_formatter = HtmlSchemaFormatter
+
 
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
@@ -97,39 +99,45 @@ def main(argv=None):
     argparser.add_argument(
         "schema",
         metavar='[SCHEMA-OR-PACKAGE]',
-        help="The schema to print. By default, a file. Optionally, a Python package."
-             " If not given, defaults to reading a schema file from stdin",
-        default="-"
+        help=("The schema to print. By default, a file."
+              " Optionally, a Python package."
+              " If not given, defaults to reading a schema file from stdin"),
+        default="-",
         )
     argparser.add_argument(
         "--out", "-o",
         help="Write the schema to this file; if not given, write to stdout",
-        type=argparse.FileType('w'))
+        type=argparse.FileType('w'),
+    )
     argparser.add_argument(
         "--package",
         action='store_true',
         default=False,
-        help="The SCHEMA-OR-PACKAGE argument indicates a Python package instead of a file."
-             " The component.xml (by default) from the package will be read.")
+        help=("The SCHEMA-OR-PACKAGE argument indicates a Python package"
+              " instead of a file. The component.xml (by default) from the"
+              " package will be read."),
+        )
     argparser.add_argument(
         "--package-file",
         action="store",
         default="component.xml",
-        help="When PACKAGE is given, this can specify the file inside it to load.")
-
+        help=("When PACKAGE is given, this can specify the file inside it"
+              " to load."),
+    )
     argparser.add_argument(
         "--members",
         action="store",
         nargs="*",
-        help="Only output sections and types in this list (and reachable from it)")
-
+        help=("Only output sections and types in this list (and reachable"
+              " from it)."),
+    )
     if RstSchemaPrinter:
         argparser.add_argument(
             "--format",
             action="store",
-            choices=('html', 'xml'), # XXX Can we get actual valid RST out?
+            choices=('html', 'xml'),  # XXX Can we get actual valid RST out?
             default="HTML",
-            help="What output format to produce"
+            help="The output format to produce."
         )
 
     args = argparser.parse_args(argv)
@@ -142,11 +150,10 @@ def main(argv=None):
     if hasattr(args, 'format') and args.format == 'xml':
         printer_factory = RstSchemaPrinter
 
-
     printer_factory(schema, out, allowed_names=args.members).printSchema()
 
-
     return 0
+
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -55,7 +55,7 @@ class BaseMatcher(object):
             v.append(sectvalue)
         elif v is None:
             self._values[attr] = sectvalue
-        else: # pragma: no cover
+        else:  # pragma: no cover
             raise ZConfig.ConfigurationError(
                 "too many instances of %s section" % repr(ci.sectiontype.name))
 
@@ -76,7 +76,7 @@ class BaseMatcher(object):
                 raise ZConfig.ConfigurationError(
                     repr(key) + " is not a known key name")
             k, ci = arbkey_info
-        if ci.issection(): # pragma: no cover
+        if ci.issection():  # pragma: no cover
             if ci.name:
                 extra = " in %s sections" % repr(self.type.name)
             else:
@@ -90,15 +90,15 @@ class BaseMatcher(object):
         v = self._values[attr]
         if v is None:
             if k == '+':
-                v = {} # pragma: no cover
+                v = {}  # pragma: no cover
             elif ismulti:
-                v = [] # pragma: no cover
+                v = []  # pragma: no cover
             self._values[attr] = v
         elif not ismulti:
             if k != '+':
                 raise ZConfig.ConfigurationError(
                     repr(key) + " does not support multiple values")
-        elif len(v) == ci.maxOccurs: # pragma: no cover
+        elif len(v) == ci.maxOccurs:  # pragma: no cover
             # This code may be impossible to hit. Previously it would
             # have raised a NameError because it used an unbound
             # local.
@@ -113,7 +113,7 @@ class BaseMatcher(object):
                 else:
                     v[realkey] = [value]
             else:
-                if realkey in v: # pragma: no cover
+                if realkey in v:  # pragma: no cover
                     raise ZConfig.ConfigurationError(
                         "too many values for " + repr(key))
                 v[realkey] = value
@@ -155,7 +155,7 @@ class BaseMatcher(object):
                     raise ZConfig.ConfigurationError(
                         "no values for %s; %s required" % (key, ci.minOccurs))
                 else:
-                    v = values[attr] = default[:] # pragma: no cover
+                    v = values[attr] = default[:]  # pragma: no cover
             if ci.ismulti():
                 if not v:
                     default = ci.getdefault()
@@ -169,7 +169,7 @@ class BaseMatcher(object):
                         % (key, len(v), ci.minOccurs))
             if v is None and not ci.issection():
                 if ci.ismulti():
-                    v = ci.getdefault()[:] # pragma: no cover
+                    v = ci.getdefault()[:]  # pragma: no cover
                 else:
                     v = ci.getdefault()
                 values[attr] = v
@@ -282,12 +282,12 @@ class SectionValue(object):
         return "<%s for %s %s>" % (clsname, self._matcher.type.name, name)
 
     def __str__(self):
-        l = []
+        lst = []
         attrnames = sorted([s for s in self.__dict__ if s[0] != "_"])
         for k in attrnames:
             v = getattr(self, k)
-            l.append('%-40s: %s' % (k, v))
-        return '\n'.join(l)
+            lst.append('%-40s: %s' % (k, v))
+        return '\n'.join(lst)
 
     def getSectionName(self):
         return self._name

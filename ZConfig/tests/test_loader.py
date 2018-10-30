@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -77,10 +77,13 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                                'foo..bar', None)
 
     def test_config_loader_abstract_schema(self):
+
         class MockSchema(object):
             _abstract = True
+
             def isabstract(self):
                 return self._abstract
+
             def gettype(self, _t):
                 return self
 
@@ -223,7 +226,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
 
     def test_urlsplit_urlunsplit(self):
         # Extracted from Python's test.test_urlparse module:
-        for url, parsed, split in [
+        samples = [
             ('http://www.python.org',
              ('http', 'www.python.org', '', '', '', ''),
              ('http', 'www.python.org', '', '', '')),
@@ -239,7 +242,8 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             ('file:///tmp/junk.txt',
              ('file', '', '/tmp/junk.txt', '', '', ''),
              ('file', '', '/tmp/junk.txt', '', '')),
-            ]:
+        ]
+        for url, parsed, split in samples:
             result = ZConfig.url.urlsplit(url)
             self.assertEqual(result, split)
             result2 = ZConfig.url.urlunsplit(result)
@@ -386,6 +390,7 @@ class TestResourcesInZip(unittest.TestCase):
         with self.assertRaises(ZConfig.ConfigurationSyntaxError):
             ZConfig.loadConfigFile(schema, sio,
                                    overrides=["sample/data=othervalue"])
+
 
 class TestOpenPackageResource(TestHelper, unittest.TestCase):
 

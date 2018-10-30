@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2003 Zope Foundation and Contributors.
+# Copyright (c) 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -13,7 +13,8 @@
 ##############################################################################
 
 """Tests of the 'basic' section types provided as part of
-ZConfig.components.basic."""
+ZConfig.components.basic.
+"""
 
 import ZConfig.tests.support
 import unittest
@@ -42,8 +43,8 @@ SIMPLE_SCHEMA = '''\
 '''
 
 
-class BasicSectionTypeTestCase(
-    ZConfig.tests.support.TestHelper, unittest.TestCase):
+class BasicSectionTypeTestCase(ZConfig.tests.support.TestHelper,
+                               unittest.TestCase):
 
     schema = None
 
@@ -86,6 +87,7 @@ class BasicSectionTypeTestCase(
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

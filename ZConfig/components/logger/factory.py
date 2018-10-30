@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -12,11 +12,13 @@
 #
 ##############################################################################
 
-_marker = object()
-
 from abc import abstractmethod
 
 from ZConfig._compat import AbstractBaseClass
+
+
+_marker = object()
+
 
 class Factory(AbstractBaseClass):
     """Generic wrapper for instance construction.
@@ -27,7 +29,9 @@ class Factory(AbstractBaseClass):
 
     The instance is created using the factory's create() method, which
     must be overriden by subclasses.
+
     """
+
     def __init__(self):
         self.instance = _marker
 

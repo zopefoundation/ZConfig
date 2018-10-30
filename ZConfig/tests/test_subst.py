@@ -29,8 +29,10 @@ class SubstitutionTestCase(unittest.TestCase):
              "name1": "abc",
              "name_": "def",
              "_123": "ghi"}
+
         def check(s, v):
             self.assertEqual(substitute(s, d), v)
+
         check("$name", "value")
         check(" $name ", " value ")
         check("${name}", "value")
@@ -65,9 +67,11 @@ class SubstitutionTestCase(unittest.TestCase):
 
     def test_syntax_errors(self):
         d = {"name": "${next"}
+
         def check(s):
             self.assertRaises(SubstitutionSyntaxError,
                               substitute, s, d)
+
         check("${")
         check("${name")
         check("${1name}")
@@ -104,6 +108,7 @@ class SubstitutionTestCase(unittest.TestCase):
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

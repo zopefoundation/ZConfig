@@ -23,6 +23,7 @@ import unittest
 
 from ZConfig.schemaless import Section
 
+
 class TestSection(unittest.TestCase):
 
     def test_init_with_data(self):
@@ -37,6 +38,7 @@ def test_suite():
             manuel.doctest.Manuel(),
             '../schemaless.txt'),
     ])
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

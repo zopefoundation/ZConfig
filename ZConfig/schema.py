@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -25,6 +25,7 @@ from ZConfig import url
 from ZConfig._compat import raise_with_same_tb
 
 BLANK = u''
+
 
 def parseResource(resource, loader):
     parser = SchemaParser(loader, resource.url)
@@ -54,7 +55,8 @@ class BaseParser(xml.sax.ContentHandler):
         "description": ["key", "section", "multikey", "multisection",
                         "sectiontype", "abstracttype",
                         "schema", "component"],
-        "example": ["schema", "sectiontype", "key", "multikey", "section", "multisection"],
+        "example": ["schema", "sectiontype", "key", "multikey",
+                    "section", "multisection"],
         "metadefault": ["key", "section", "multikey", "multisection"],
         "default": ["key", "multikey"],
         "import": ["schema", "component"],
@@ -101,17 +103,17 @@ class BaseParser(xml.sax.ContentHandler):
         # self._schema is assigned to in self.start_<_top_level>, so
         # most of the checks for it being None are just extra precaution.
         if name == self._top_level:
-            if self._schema is not None: # pragma: no cover
+            if self._schema is not None:  # pragma: no cover
                 self.error("schema element improperly nested")
             getattr(self, "start_" + name)(attrs)
         elif name in self._handled_tags:
-            if self._schema is None: # pragma: no cover
+            if self._schema is None:  # pragma: no cover
                 self.error(name + " element outside of schema")
             getattr(self, "start_" + name)(attrs)
         elif name in self._cdata_tags:
-            if self._schema is None: # pragma: no cover
+            if self._schema is None:  # pragma: no cover
                 self.error(name + " element outside of schema")
-            if self._cdata is not None: # pragma: no cover
+            if self._cdata is not None:  # pragma: no cover
                 # this should be handled by the earlier nesting check
                 self.error(name + " element improperly nested")
             self._cdata = []
@@ -137,7 +139,7 @@ class BaseParser(xml.sax.ContentHandler):
             getattr(self, "characters_" + name)(data)
 
     def endDocument(self):
-        if self._schema is None: # pragma: no cover
+        if self._schema is None:  # pragma: no cover
             # this would have to be a broken subclass
             self.error("no %s found" % self._top_level)
 
@@ -148,7 +150,7 @@ class BaseParser(xml.sax.ContentHandler):
             return (self._locator.getLineNumber(),
                     self._locator.getColumnNumber(),
                     (self._locator.getSystemId() or self._url))
-        return None, None, self._url # pragma: no cover
+        return None, None, self._url  # pragma: no cover
 
     def get_handler(self, attrs):
         v = attrs.get("handler")
@@ -235,7 +237,7 @@ class BaseParser(xml.sax.ContentHandler):
         any_name, name, attribute = self.get_name_info(attrs, element)
         if any_name == '*':
             self.error(element + " may not specify '*' for name")
-        if not name and any_name != '+': # pragma: no cover
+        if not name and any_name != '+':  # pragma: no cover
             # Can we even get here?
             self.error(element + " name may not be omitted or empty")
         datatype = self.get_datatype(attrs, "datatype", "string")
@@ -365,7 +367,7 @@ class BaseParser(xml.sax.ContentHandler):
         handler = self.get_handler(attrs)
         minOccurs = 1 if self.get_required(attrs) else 0
         any_name, name, attribute = self.get_name_info(attrs, "section", "*")
-        if any_name and not attribute: # pragma: no cover
+        if any_name and not attribute:  # pragma: no cover
             # It seems like this is handled by get_name_info.
             self.error(
                 "attribute must be specified if section name is '*' or '+'")
@@ -380,7 +382,8 @@ class BaseParser(xml.sax.ContentHandler):
     def start_multisection(self, attrs):
         sectiontype = self.get_sectiontype(attrs)
         minOccurs, maxOccurs = self.get_ordinality(attrs)
-        any_name, name, attribute = self.get_name_info(attrs, "multisection", "*")
+        any_name, name, attribute = self.get_name_info(
+            attrs, "multisection", "*")
         if any_name not in ("*", "+"):
             self.error("multisection must specify '*' or '+' for the name")
         handler = self.get_handler(attrs)
@@ -431,7 +434,8 @@ class BaseParser(xml.sax.ContentHandler):
         name, datatype, handler, attribute = self.get_key_info(attrs,
                                                                "multikey")
         minOccurs, maxOccurs = self.get_ordinality(attrs)
-        key = info.MultiKeyInfo(name, datatype, minOccurs, maxOccurs, handler, attribute)
+        key = info.MultiKeyInfo(name, datatype, minOccurs, maxOccurs,
+                                handler, attribute)
         self._stack[-1].addkey(key)
         self._stack.append(key)
 
@@ -598,7 +602,7 @@ class ComponentParser(BaseParser):
         self.pop_prefix()
 
     def _check_not_toplevel(self, what):
-        if not self._stack: # pragma: no cover
+        if not self._stack:  # pragma: no cover
             # we can't get here because the elements that call
             # this function have specified _allowed_parents that are
             # checked first

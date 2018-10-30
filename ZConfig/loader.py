@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -214,7 +214,7 @@ class BaseLoader(AbstractBaseClass):
             except urllib2.URLError as e:
                 # urllib2.URLError has a particularly hostile str(), so we
                 # generally don't want to pass it along to the user.
-                self._raise_open_error(url, e.reason) # pragma: no cover
+                self._raise_open_error(url, e.reason)  # pragma: no cover
             except (IOError, OSError) as e:
                 # Python 2.1 raises a different error from Python 2.2+,
                 # so we catch both to make sure we detect the situation.
@@ -371,7 +371,7 @@ class SchemaLoader(BaseLoader):
 
     def schemaComponentSource(self, package, filename):
         parts = package.split(".")
-        if not parts: # pragma: no cover. can we even get here?
+        if not parts:  # pragma: no cover. can we even get here?
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + repr(package))
         if "" in parts:
@@ -401,8 +401,8 @@ class ConfigLoader(BaseLoader):
     conform to the schema *schema*.  The ``load*()`` methods
     return a tuple consisting of the configuration object and a
     composite handler.
-    """
 
+    """
 
     def __init__(self, schema):
         if schema.isabstract():
