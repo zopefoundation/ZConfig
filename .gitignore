@@ -13,3 +13,8 @@ htmlcov/
 .coverage
 coverage.xml
 nosetests.xml
+
+# No / at the end of htmlcov so it can be a symlink that points to some
+# more interesting location (possibly served by a webserver).
+#
+/htmlcov
