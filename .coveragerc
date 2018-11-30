@@ -9,6 +9,8 @@ source = ZConfig
 omit =
   */datatypes.py
   .tox/*
+  ZConfig/components/basic/tests/*
+  ZConfig/components/logger/tests/*
   ZConfig/tests/*
 
 [report]
