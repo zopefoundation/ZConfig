@@ -1,20 +1,25 @@
 *.pyc
-*.egg-info
-__pycache__
-.cache/
-.tox/
-.installed.cfg
-bin/
-develop-eggs/
-eggs/
-parts/
-doc/_build
-htmlcov/
-.coverage
-coverage.xml
+/.cache/
+/.tox/
+/doc/_build
+ZConfig.egg-info
+__pycache__/
 nosetests.xml
 
+# Buildout
+#
+/.installed.cfg
+/bin/
+/develop-eggs/
+/eggs/
+/parts/
+
+# Coverage
+#
 # No / at the end of htmlcov so it can be a symlink that points to some
 # more interesting location (possibly served by a webserver).
 #
+/.coverage
+/.coverage.*
+/coverage.xml
 /htmlcov
