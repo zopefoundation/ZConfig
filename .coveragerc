@@ -26,3 +26,4 @@ exclude_lines =
     if sys.platform\[:3\] == "win":
     if __name__ == "__main__":
     if __name__ == '__main__':
+precision = 1
