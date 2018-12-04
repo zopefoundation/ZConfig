@@ -1,4 +1,6 @@
 [run]
+branch = true
+
 # This is not as helpful as it may seem, because the parent directory is
 # likely also named ZConfig, so this matches things like
 # /path/to/ZConfig/.tox/py*/lib/*
