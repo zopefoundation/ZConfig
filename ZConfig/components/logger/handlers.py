@@ -110,13 +110,22 @@ class FileHandlerFactory(HandlerFactory):
         old_files = self.section.old_files
         when = self.section.when
         interval = self.section.interval
-        if path == "STDERR":
+        encoding = self.section.encoding
+        delay = self.section.delay
+
+        def check_std_stream():
             if max_bytes or old_files:
-                raise ValueError("cannot rotate STDERR")
+                raise ValueError("cannot rotate " + path)
+            if delay:
+                raise ValueError("cannot delay opening " + path)
+            if encoding:
+                raise ValueError("cannot specify encoding for " + path)
+
+        if path == "STDERR":
+            check_std_stream()
             handler = loghandler.StreamHandler(sys.stderr)
         elif path == "STDOUT":
-            if max_bytes or old_files:
-                raise ValueError("cannot rotate STDOUT")
+            check_std_stream()
             handler = loghandler.StreamHandler(sys.stdout)
         elif when or max_bytes or old_files or interval:
             if not old_files:
@@ -128,15 +137,17 @@ class FileHandlerFactory(HandlerFactory):
                     interval = 1
                 handler = loghandler.TimedRotatingFileHandler(
                     path, when=when, interval=interval,
-                    backupCount=old_files)
+                    backupCount=old_files, encoding=encoding, delay=delay)
             elif max_bytes:
                 handler = loghandler.RotatingFileHandler(
-                    path, maxBytes=max_bytes, backupCount=old_files)
+                    path, maxBytes=max_bytes, backupCount=old_files,
+                    encoding=encoding, delay=delay)
             else:
                 raise ValueError(
                     "max-bytes or when must be set for log rotation")
         else:
-            handler = loghandler.FileHandler(path)
+            handler = loghandler.FileHandler(
+                path, encoding=encoding, delay=delay)
         return handler
 
 

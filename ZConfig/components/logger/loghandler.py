@@ -61,29 +61,26 @@ def _remove_from_reopenable(wr):
         pass
 
 
-class FileHandler(logging.StreamHandler):
+class FileHandler(logging.FileHandler):
     """File handler which supports reopening of logs.
 
     Re-opening should be used instead of the 'rollover' feature of
     the FileHandler from the standard library's logging package.
     """
 
-    def __init__(self, filename, mode="a"):
-        filename = os.path.abspath(filename)
-        logging.StreamHandler.__init__(self, open(filename, mode))
-        self.baseFilename = filename
-        self.mode = mode
+    def __init__(self, filename, mode="a", encoding=None, delay=False):
+        logging.FileHandler.__init__(self, filename,
+                                     mode=mode, encoding=encoding, delay=delay)
         self._wr = weakref.ref(self, _remove_from_reopenable)
         _reopenable_handlers.append(self._wr)
 
     def close(self):
-        self.stream.close()
         # This can raise a KeyError if the handler has already been
         # removed, but a later error can be raised if
         # StreamHandler.close() isn't called.  This seems the best
         # compromise.  :-(
         try:
-            logging.StreamHandler.close(self)
+            logging.FileHandler.close(self)
         except KeyError:  # pragma: no cover
             pass
         _remove_from_reopenable(self._wr)
@@ -91,8 +88,12 @@ class FileHandler(logging.StreamHandler):
     def reopen(self):
         self.acquire()
         try:
-            self.stream.close()
-            self.stream = open(self.baseFilename, self.mode)
+            if self.stream is not None:
+                self.stream.close()
+                if self.delay:
+                    self.stream = None
+                else:
+                    self.stream = self._open()
         finally:
             self.release()
 
@@ -113,7 +114,10 @@ class Win32FileHandler(FileHandler):
         except OSError:
             pass
 
-        self.stream = open(self.baseFilename, self.mode)
+        if self.delay:
+            self.stream = None
+        else:
+            self.stream = self._open()
 
 
 if os.name == "nt":
@@ -152,14 +156,8 @@ class TimedRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
         self.doRollover()
 
 
-class NullHandler(logging.Handler):
+class NullHandler(logging.NullHandler):
     """Handler that does nothing."""
-
-    def emit(self, record):
-        pass
-
-    def handle(self, record):
-        pass
 
 
 class StartupHandler(logging.handlers.BufferingHandler):
