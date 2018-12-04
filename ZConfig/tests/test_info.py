@@ -36,6 +36,9 @@ class UnboundTestCase(unittest.TestCase):
         self.assertFalse(Unbounded > Unbounded)
         self.assertEqual(Unbounded, Unbounded)
 
+    def test_repr(self):
+        self.assertEqual(repr(Unbounded), '<Unbounded>')
+
 
 class InfoMixin(TestHelper):
 
