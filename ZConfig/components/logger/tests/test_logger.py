@@ -170,6 +170,45 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assertTrue(isinstance(logfile, loghandler.FileHandler))
+        self.assertFalse(logfile.delay)
+        self.assertIsNotNone(logfile.stream)
+        logger.removeHandler(logfile)
+        logfile.close()
+
+    def test_with_encoded(self):
+        fn = self.mktemp()
+        logger = self.check_simple_logger("<eventlog>\n"
+                                          "  <logfile>\n"
+                                          "    path %s\n"
+                                          "    level debug\n"
+                                          "    encoding shift-jis\n"
+                                          "  </logfile>\n"
+                                          "</eventlog>" % fn)
+        logfile = logger.handlers[0]
+        self.assertEqual(logfile.level, logging.DEBUG)
+        self.assertTrue(isinstance(logfile, loghandler.FileHandler))
+        self.assertFalse(logfile.delay)
+        self.assertIsNotNone(logfile.stream)
+        self.assertEqual(logfile.stream.encoding, "shift-jis")
+        logger.removeHandler(logfile)
+        logfile.close()
+
+    def test_with_logfile_delayed(self):
+        fn = self.mktemp()
+        logger = self.check_simple_logger("<eventlog>\n"
+                                          "  <logfile>\n"
+                                          "    path %s\n"
+                                          "    level debug\n"
+                                          "    delay true\n"
+                                          "  </logfile>\n"
+                                          "</eventlog>" % fn)
+        logfile = logger.handlers[0]
+        self.assertEqual(logfile.level, logging.DEBUG)
+        self.assertTrue(isinstance(logfile, loghandler.FileHandler))
+        self.assertTrue(logfile.delay)
+        self.assertIsNone(logfile.stream)
+        logger.info("this is a test")
+        self.assertIsNotNone(logfile.stream)
         logger.removeHandler(logfile)
         logfile.close()
 
@@ -178,6 +217,18 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
 
     def test_with_stdout(self):
         self.check_standard_stream("stdout")
+
+    def test_delayed_stderr(self):
+        self.check_standard_stream_cannot_delay("stderr")
+
+    def test_delayed_stdout(self):
+        self.check_standard_stream_cannot_delay("stdout")
+
+    def test_encoded_stderr(self):
+        self.check_standard_stream_cannot_encode("stderr")
+
+    def test_encoded_stdout(self):
+        self.check_standard_stream_cannot_encode("stdout")
 
     def test_with_rotating_logfile(self):
         fn = self.mktemp()
@@ -295,6 +346,50 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
             setattr(sys, name, old_stream)
         logger.warning("woohoo!")
         self.assertTrue(sio.getvalue().find("woohoo!") >= 0)
+
+    def check_standard_stream_cannot_delay(self, name):
+        old_stream = getattr(sys, name)
+        conf = self.get_config("""
+            <eventlog>
+              <logfile>
+                level info
+                path %s
+                delay true
+              </logfile>
+            </eventlog>
+            """ % name.upper())
+        self.assertTrue(conf.eventlog is not None)
+        sio = StringIO()
+        setattr(sys, name, sio)
+        try:
+            with self.assertRaises(ValueError) as cm:
+                conf.eventlog()
+            self.assertIn("cannot delay opening %s" % name.upper(),
+                          str(cm.exception))
+        finally:
+            setattr(sys, name, old_stream)
+
+    def check_standard_stream_cannot_encode(self, name):
+        old_stream = getattr(sys, name)
+        conf = self.get_config("""
+            <eventlog>
+              <logfile>
+                level info
+                path %s
+                encoding utf-8
+              </logfile>
+            </eventlog>
+            """ % name.upper())
+        self.assertTrue(conf.eventlog is not None)
+        sio = StringIO()
+        setattr(sys, name, sio)
+        try:
+            with self.assertRaises(ValueError) as cm:
+                conf.eventlog()
+            self.assertIn("cannot specify encoding for %s" % name.upper(),
+                          str(cm.exception))
+        finally:
+            setattr(sys, name, old_stream)
 
     def test_custom_formatter(self):
         old_stream = sys.stdout
@@ -680,9 +775,43 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
         h.release = lambda: calls.append("release")
 
         h.reopen()
-        h.close()
-
         self.assertEqual(calls, ["acquire", "release"])
+        del calls[:]
+
+        # FileHandler.close() does acquire/release, and invokes
+        # StreamHandler.flush(), which does the same. Since the lock is
+        # recursive, that's ok.
+        #
+        h.close()
+        self.assertEqual(calls, ["acquire", "acquire", "release", "release"])
+
+    def test_with_logfile_delayed_reopened(self):
+        fn = self.mktemp()
+        conf = self.get_config("<logger>\n"
+                               "  <logfile>\n"
+                               "    path %s\n"
+                               "    level debug\n"
+                               "    delay true\n"
+                               "    encoding shift-jis\n"
+                               "  </logfile>\n"
+                               "</logger>" % fn)
+        logger = conf.loggers[0]()
+        logfile = logger.handlers[0]
+        self.assertTrue(logfile.delay)
+        self.assertIsNone(logfile.stream)
+        logger.info("this is a test")
+        self.assertIsNotNone(logfile.stream)
+        self.assertEqual(logfile.stream.encoding, "shift-jis")
+
+        # After reopening, we expect the stream to be reset, to be
+        # opened at the next event to be logged:
+        logfile.reopen()
+        self.assertIsNone(logfile.stream)
+        logger.info("this is another test")
+        self.assertIsNotNone(logfile.stream)
+        self.assertEqual(logfile.stream.encoding, "shift-jis")
+        logger.removeHandler(logfile)
+        logfile.close()
 
 
 class TestFunctions(TestHelper, unittest.TestCase):

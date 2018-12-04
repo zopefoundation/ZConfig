@@ -44,6 +44,26 @@
     <key name="format"
          default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
          datatype=".log_format"/>
+    <key name="encoding" required="no" datatype="string">
+      <description>
+        Encoding for the underlying file.
+
+        If not specified, Python's default encoding handling is used.
+
+        This cannot be specified for STDOUT or STDERR destinations, and
+        must be omitted in such cases.
+      </description>
+    </key>
+    <key name="delay" required="no" default="false" datatype="boolean">
+      <description>
+        If true, opening of the log file will be delayed until a message
+        is emitted.  This avoids creating logfiles that may only be
+        written to rarely or under special conditions.
+
+        This cannot be specified for STDOUT or STDERR destinations, and
+        must be omitted in such cases.
+      </description>
+    </key>
   </sectiontype>
 
   <sectiontype name="syslog"

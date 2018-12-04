@@ -2,10 +2,13 @@
 Change History for ZConfig
 ==========================
 
-3.3.1 (unreleased)
+3.4.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- The ``logfile`` section type defined by the ``ZConfig.components.logger``
+  package supports the optional ``delay`` and ``encoding`` parameters.
+  These can only be used for regular files, not the special ``STDOUT``
+  and ``STDERR`` streams.
 
 
 3.3.0 (2018-10-04)
