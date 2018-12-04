@@ -117,7 +117,7 @@ class Win32FileHandler(FileHandler):
         if self.delay:
             self.stream = None
         else:
-            self.stream = open(self.baseFilename, self.mode, self.encoding)
+            self.stream = self._open()
 
 
 if os.name == "nt":
