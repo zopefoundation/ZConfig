@@ -133,6 +133,18 @@ class CommandLineTest(ZConfig.tests.support.TestHelper, unittest.TestCase):
         self.assertEqual(conf.k2, 12)
         self.assertEqual(conf.k3, 19)
 
+    def test_reading_config_without_clopts(self):
+        schema = self.get_simple_schema()
+        conf = self.load_config_text(schema, """\
+            k0 stuff
+            k1 special-stuff
+            k2 42
+            """)
+        self.assertEqual(conf.k0, "stuff")
+        self.assertEqual(conf.k1, "special-stuff")
+        self.assertEqual(conf.k2, 42)
+        self.assertEqual(conf.k3, 19)
+
     def test_unknown_key(self):
         self.clopts = [("foo=bar", None)]
         schema = self.get_simple_schema()

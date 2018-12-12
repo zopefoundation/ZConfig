@@ -95,8 +95,7 @@ class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
         return sm
 
     def cook(self):
-        if self.clopts:
-            return OptionBag(self.schema, self.schema, self.clopts)
+        return OptionBag(self.schema, self.schema, self.clopts)
 
 
 class OptionBag(object):
@@ -155,7 +154,7 @@ class OptionBag(object):
             bk = self.basic_key(s, pos)
             if name and self._normalize_case(s) == name:
                 L.append((optpath[1:], val, pos))
-            elif bk == type_:  # pragma: no cover
+            elif bk == type_:
                 L.append((optpath[1:], val, pos))
             else:
                 R.append(item)

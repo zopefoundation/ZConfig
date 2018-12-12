@@ -179,7 +179,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
         return True
 
     def _explain(self, st):
-        if st.name in self._explained:  # pragma: no cover
+        if st.name in self._explained:
             return
 
         self._explained.add(st.name)
@@ -264,7 +264,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
 
             with self.fmt.item_list():
                 for sub in info:
-                    self.visit(*sub)  # pragma: no cover
+                    self.visit(*sub)
 
     @TypeVisitor(SectionInfo)
     def _visit_SectionInfo(self, name, info):

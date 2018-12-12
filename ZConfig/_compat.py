@@ -67,22 +67,22 @@ except ImportError:
 urlparse = urlparse
 
 
-if PY3:  # pragma: no cover
+if PY3:
     import builtins
     exec_ = getattr(builtins, "exec")
     binary_type = bytes
     maxsize = sys.maxsize
 
-    def reraise(tp, value, tb=None):  # pragma NO COVER
+    def reraise(tp, value, tb=None):
         if value.__traceback__ is not tb:
             raise value.with_traceback(tb)
         raise value
 
-else:  # pragma: no cover
+else:
     binary_type = bytes
     maxsize = sys.maxint
 
-    def exec_(code, globs=None, locs=None):  # pragma NO COVER
+    def exec_(code, globs=None, locs=None):
         """Execute code in a namespace."""
         if globs is None:
             frame = sys._getframe(1)

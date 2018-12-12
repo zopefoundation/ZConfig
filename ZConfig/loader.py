@@ -371,7 +371,7 @@ class SchemaLoader(BaseLoader):
 
     def schemaComponentSource(self, package, filename):
         parts = package.split(".")
-        if not parts:  # pragma: no cover. can we even get here?
+        if not parts:  # pragma: no cover
             raise ZConfig.SchemaError(
                 "illegal schema component name: " + repr(package))
         if "" in parts:

@@ -50,6 +50,27 @@ class TestImportFromConfiguration(ZConfig.tests.support.TestHelper,
         self.assertRaises(ZConfig.SchemaError, loader.loadFile,
                           StringIO("%import ZConfig.tests.missing\n"))
 
+    def test_empty_directive(self):
+        schema = self.load_schema_text("<schema/>")
+        loader = self.create_config_loader(schema)
+
+        with self.assertRaises(ZConfig.ConfigurationSyntaxError) as cm:
+            loader.loadFile(StringIO("%import\n"))
+
+        self.assertIn('missing argument to %import directive',
+                      str(cm.exception))
+        self.assertIn('(line 1)', str(cm.exception))
+
+    def test_bogus_directive(self):
+        schema = self.load_schema_text("<schema/>")
+        loader = self.create_config_loader(schema)
+
+        with self.assertRaises(ZConfig.SchemaError) as cm:
+            loader.loadFile(StringIO("%import .\n"))
+
+        self.assertIn("illegal schema component name: '.'",
+                      str(cm.exception))
+
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
