@@ -12,46 +12,126 @@
     </description>
     <key name="formatter" datatype="dotted-name" required="no">
       <description>
-        Logging formatter class.  The default is 'logging.Formatter'.
+        Logging formatter class.  The default is :class:`logging.Formatter`.
         An alternative is 'zope.exceptions.log.Formatter',
         which enhances exception tracebacks with information from
-        __traceback_info__ and __traceback_supplement__ variables.
+        ``__traceback_info__`` and ``__traceback_supplement__``
+        variables from each stack frame.
       </description>
     </key>
     <key name="dateformat"
-         default="%Y-%m-%dT%H:%M:%S"/>
+         default="%Y-%m-%dT%H:%M:%S">
+      <description>
+        Timestamp format used for the 'asctime' field.
+
+        This is used with Python's :func:`time.strftime` function,
+        so must be compatible with that function on the host platform.
+      </description>
+    </key>
     <key name="level"
          default="notset"
-         datatype="ZConfig.components.logger.datatypes.logging_level"/>
+         datatype="ZConfig.components.logger.datatypes.logging_level">
+      <description format="rest">
+        Output level for the log handler.
+
+        Python standard logging levels are supported by name
+        (case-insensitive), as are the following additional names:
+
+        * ``all`` (level 1)
+        * ``trace`` (level 5)
+        * ``blather`` (level 15)
+
+        These additional level names are not defined using
+        :func:`logging.addLevelName`, though an application may do so.
+
+        Numeric values ``0`` through ``50`` (inclusive) are permitted.
+      </description>
+    </key>
   </sectiontype>
 
   <sectiontype name="logfile"
                datatype=".FileHandlerFactory"
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
-	<example><![CDATA[
+    <example><![CDATA[
         <logfile>
             path STDOUT
             format %(name)s %(message)s
         </logfile>
     ]]>
     </example>
-    <key name="path" required="yes"/>
-    <key name="old-files" required="no" default="0" datatype="integer"/>
-    <key name="max-size" required="no" default="0" datatype="byte-size"/>
-    <key name="when" required="no" default="" datatype="string"/>
-    <key name="interval" required="no" default="0" datatype="integer"/>
+    <key name="path" required="yes">
+      <description>
+        Path of the log file to write.
+
+        Specifying ``STDOUT`` or ``STDERR`` will cause the appropriate
+        standard stream to be used instead of a file.  In these cases,
+        rotation, encoding, and delayed opening are not available, and
+        will be considered configuration errors.
+      </description>
+    </key>
+    <key name="old-files" required="no" default="0" datatype="integer">
+      <description format="rest">
+        Number of old log files which will be retained when rotation is
+        configured.
+
+        This must be set to a positive integer if rotation is
+        configured.  An error is generated if rotation is requested
+        without setting ``old-files``.
+      </description>
+    </key>
+    <key name="max-size" required="no" default="0" datatype="byte-size">
+      <description>
+        Target maximum size for a logfile; once a logfile reaches the
+        maximum size, it will be rotated.
+      </description>
+    </key>
+    <key name="when" required="no" default="" datatype="string">
+      <description format="rest">
+        Specification for specific time at which rotation should occur.
+
+        Allowed values are described for
+        :class:`logging.handlers.TimedRotatingFileHandler`; this value is
+        passed through to the underlying handler.
+      </description>
+    </key>
+    <key name="interval" required="no" default="0" datatype="integer">
+      <description format="rest">
+        Frequency of rotation at the time specified by ``when``.
+
+        If not specified, but ``when`` is specified, this will default
+        to ``1``.
+
+        If ``when`` is not specified, it is an error to specify
+        ``interval``.
+      </description>
+    </key>
     <key name="format"
          default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
-         datatype=".log_format"/>
+         datatype=".log_format">
+      <description format="rest">
+        Format string for log entries.  This value is used to create an
+        instance of the class identified by ``formatter``.
+
+        The following escape characters are supported with the same
+        replacements as in Python string literals:
+
+            \b  \f  \n  \r  \t
+
+        %-replacements are checked to refer to the fields available in
+        the :class:`logging.LogRecord` instances created without extra
+        fields.  Referring to other fields will generate an error in
+        loading the configuration.
+      </description>
+    </key>
     <key name="encoding" required="no" datatype="string">
       <description>
         Encoding for the underlying file.
 
         If not specified, Python's default encoding handling is used.
 
-        This cannot be specified for STDOUT or STDERR destinations, and
-        must be omitted in such cases.
+        This cannot be specified for ``STDOUT`` or ``STDERR``
+        destinations, and must be omitted in such cases.
       </description>
     </key>
     <key name="delay" required="no" default="false" datatype="boolean">
@@ -60,8 +140,8 @@
         is emitted.  This avoids creating logfiles that may only be
         written to rarely or under special conditions.
 
-        This cannot be specified for STDOUT or STDERR destinations, and
-        must be omitted in such cases.
+        This cannot be specified for ``STDOUT`` or ``STDERR``
+        destinations, and must be omitted in such cases.
       </description>
     </key>
   </sectiontype>

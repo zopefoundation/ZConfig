@@ -105,11 +105,12 @@ Files
 
 The ``<logfile>`` handler writes to files or standard output or standard error
 (when the ``path`` is ``STDOUT`` or ``STDERR`` respectively). It
-configures a :class:`logging.StreamHandler`. When the
-``interval`` or ``max-size`` attributes are set, the files on disk
+configures a :class:`logging.FileHandler` or :class:`logging.StreamHandler`.
+When the ``when`` or ``max-size`` attributes are set, the files on disk
 will be rotated either at :class:`set intervals
 <logging.handlers.TimedRotatingFileHandler>` or when files
-:class:`reach the set size <logging.handlers.RotatingFileHandler>`, respectively.
+:class:`reach the set size <logging.handlers.RotatingFileHandler>`,
+respectively.
 
 .. zconfig:: ZConfig.components.logger
      :file: handlers.xml
