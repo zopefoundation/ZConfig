@@ -326,25 +326,26 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
 
     def check_standard_stream(self, name):
         old_stream = getattr(sys, name)
+        conf = self.get_config("""
+            <eventlog>
+              <logfile>
+                level info
+                path %s
+              </logfile>
+            </eventlog>
+            """ % name.upper())
+        self.assertTrue(conf.eventlog is not None)
         # The factory has already been created; make sure it picks up
         # the stderr we set here when we create the logger and
         # handlers:
         sio = StringIO()
         setattr(sys, name, sio)
         try:
-            conf = self.get_config("""
-                <eventlog>
-                  <logfile>
-                    level info
-                    path %s
-                  </logfile>
-                </eventlog>
-                """ % name.upper())
-            self.assertTrue(conf.eventlog is not None)
             logger = conf.eventlog()
         finally:
             setattr(sys, name, old_stream)
         logger.warning("woohoo!")
+        self.assertIs(logger.handlers[0].stream, sio)
         self.assertTrue(sio.getvalue().find("woohoo!") >= 0)
 
     def check_standard_stream_cannot_delay(self, name):

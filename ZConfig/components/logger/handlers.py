@@ -127,10 +127,16 @@ class FileHandlerFactory(HandlerFactory):
 
         if path == "STDERR":
             check_std_stream()
-            factory = functools.partial(loghandler.StreamHandler, sys.stderr)
+
+            def factory():
+                return loghandler.StreamHandler(sys.stderr)
+
         elif path == "STDOUT":
             check_std_stream()
-            factory = functools.partial(loghandler.StreamHandler, sys.stdout)
+
+            def factory():
+                return loghandler.StreamHandler(sys.stdout)
+
         elif when or max_bytes or old_files or interval:
             if not old_files:
                 raise ValueError("old-files must be set for log rotation")
