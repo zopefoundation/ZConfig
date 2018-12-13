@@ -31,7 +31,7 @@
     <key name="level"
          default="notset"
          datatype="ZConfig.components.logger.datatypes.logging_level">
-      <description format="rest">
+      <description>
         Output level for the log handler.
 
         Python standard logging levels are supported by name
@@ -71,7 +71,7 @@
       </description>
     </key>
     <key name="old-files" required="no" default="0" datatype="integer">
-      <description format="rest">
+      <description>
         Number of old log files which will be retained when rotation is
         configured.
 
@@ -87,7 +87,7 @@
       </description>
     </key>
     <key name="when" required="no" default="" datatype="string">
-      <description format="rest">
+      <description>
         Specification for specific time at which rotation should occur.
 
         Allowed values are described for
@@ -96,7 +96,7 @@
       </description>
     </key>
     <key name="interval" required="no" default="0" datatype="integer">
-      <description format="rest">
+      <description>
         Frequency of rotation at the time specified by ``when``.
 
         If not specified, but ``when`` is specified, this will default
@@ -109,12 +109,12 @@
     <key name="format"
          default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
          datatype=".log_format">
-      <description format="rest">
+      <description>
         Format string for log entries.  This value is used to create an
         instance of the class identified by ``formatter``.
 
         The following escape characters are supported with the same
-        replacements as in Python string literals:
+        replacements as in Python string literals::
 
             \b  \f  \n  \r  \t
 
