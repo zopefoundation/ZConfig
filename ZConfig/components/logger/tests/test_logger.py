@@ -270,7 +270,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
     def test_with_timed_rotating_logfile_and_size_should_fail(self):
         fn = self.mktemp()
         self.assertRaises(
-            ValueError,
+            ZConfig.DataConversionError,
             self.check_simple_logger_factory,
             "<eventlog>\n"
             "  <logfile>\n"
@@ -284,7 +284,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
 
         # Mising old-files
         self.assertRaisesRegex(
-            ValueError,
+            ZConfig.DataConversionError,
             "old-files must be set",
             self.check_simple_logger_factory,
             "<eventlog>\n"
@@ -297,7 +297,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
             "</eventlog>" % fn)
 
         self.assertRaisesRegex(
-            ValueError,
+            ZConfig.DataConversionError,
             "max-bytes or when must be set",
             self.check_simple_logger_factory,
             "<eventlog>\n"
@@ -313,7 +313,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         for path in ('STDERR', 'STDOUT'):
             for param in ('old-files 10', 'max-size 5mb'):
                 self.assertRaises(
-                    ValueError,
+                    ZConfig.DataConversionError,
                     self.check_simple_logger_factory,
                     "<eventlog>\n"
                     "  <logfile>\n"
@@ -349,7 +349,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertTrue(sio.getvalue().find("woohoo!") >= 0)
 
     def check_standard_stream_cannot_delay(self, name):
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ZConfig.DataConversionError) as cm:
             self.get_config("""
                 <eventlog>
                   <logfile>
@@ -364,7 +364,7 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
                       str(cm.exception))
 
     def check_standard_stream_cannot_encode(self, name):
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ZConfig.DataConversionError) as cm:
             self.get_config("""
                 <eventlog>
                   <logfile>
@@ -490,26 +490,35 @@ class TestConfig(LoggingTestHelper, unittest.TestCase):
         self.assertEqual(handler.mailport, 487)
 
     def test_with_email_notifier_with_invalid_credentials(self):
-        self.assertRaises(ValueError,
-                          self.check_simple_logger,
-                          "<eventlog>\n"
-                          "  <email-notifier>\n"
-                          "    to sysadmin@example.com\n"
-                          "    from zlog-user@example.com\n"
-                          "    level fatal\n"
-                          "    smtp-username john\n"
-                          "  </email-notifier>\n"
-                          "</eventlog>")
-        self.assertRaises(ValueError,
-                          self.check_simple_logger,
-                          "<eventlog>\n"
-                          "  <email-notifier>\n"
-                          "    to sysadmin@example.com\n"
-                          "    from zlog-user@example.com\n"
-                          "    level fatal\n"
-                          "    smtp-password john\n"
-                          "  </email-notifier>\n"
-                          "</eventlog>")
+        # smtp-username without smtp-password
+        with self.assertRaises(ZConfig.DataConversionError) as cm:
+            self.check_simple_logger_factory(
+                "<eventlog>\n"
+                "  <email-notifier>\n"
+                "    to sysadmin@example.com\n"
+                "    from zlog-user@example.com\n"
+                "    level fatal\n"
+                "    smtp-username john\n"
+                "  </email-notifier>\n"
+                "</eventlog>")
+        self.assertIn(
+            'both smtp-username and smtp-password or none must be given',
+            str(cm.exception))
+
+        # smtp-password without smtp-username
+        with self.assertRaises(ZConfig.DataConversionError) as cm:
+            self.check_simple_logger_factory(
+                "<eventlog>\n"
+                "  <email-notifier>\n"
+                "    to sysadmin@example.com\n"
+                "    from zlog-user@example.com\n"
+                "    level fatal\n"
+                "    smtp-password john\n"
+                "  </email-notifier>\n"
+                "</eventlog>")
+        self.assertIn(
+            'both smtp-username and smtp-password or none must be given',
+            str(cm.exception))
 
     def check_simple_logger_factory(self, text, level=logging.INFO):
         conf = self.get_config(text)
@@ -876,6 +885,9 @@ class TestFunctions(TestHelper, unittest.TestCase):
             self.assertEqual(convert(name), convert(name.upper()))
         self.assertRaises(ValueError, convert, "hopefully-not-a-valid-value")
         self.assertEqual(convert('10'), 10)
+        self.assertRaises(ValueError, convert, '-1000')
+        self.assertRaises(ValueError, convert, '-1')
+        self.assertRaises(ValueError, convert, '51')
         self.assertRaises(ValueError, convert, '100')
 
     def test_http_method(self):

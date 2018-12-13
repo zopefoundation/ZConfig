@@ -254,6 +254,15 @@ class HTTPHandlerFactory(HandlerFactory):
 
 class SMTPHandlerFactory(HandlerFactory):
 
+    def __init__(self, section):
+        HandlerFactory.__init__(self, section)
+        username = self.section.smtp_username
+        password = self.section.smtp_password
+        if (username or password) and not (username and password):
+            raise ValueError(
+                'Either both smtp-username and smtp-password or none must be '
+                'given')
+
     def create_loghandler(self):
         from ZConfig.components.logger import loghandler
         host, port = self.section.smtp_server
@@ -262,13 +271,9 @@ class SMTPHandlerFactory(HandlerFactory):
         else:
             mailhost = host, port
         kwargs = {}
-        if self.section.smtp_username and self.section.smtp_password:
+        if self.section.smtp_username:
             kwargs['credentials'] = (self.section.smtp_username,
                                      self.section.smtp_password)
-        elif (self.section.smtp_username or self.section.smtp_password):
-            raise ValueError(
-                'Either both smtp-username and smtp-password or none must be '
-                'given')
         return loghandler.SMTPHandler(mailhost,
                                       self.section.fromaddr,
                                       self.section.toaddrs,
