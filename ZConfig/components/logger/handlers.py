@@ -14,6 +14,7 @@
 """ZConfig factory datatypes for log handlers."""
 
 from abc import abstractmethod
+import functools
 import sys
 
 from ZConfig._compat import urlparse
@@ -79,21 +80,22 @@ def resolve(name):
 class HandlerFactory(Factory):
 
     def __init__(self, section):
+        import logging
         Factory.__init__(self)
         self.section = section
+        if self.section.formatter:
+            self.create_formatter = resolve(self.section.formatter)
+        else:
+            self.create_formatter = logging.Formatter
 
     @abstractmethod
     def create_loghandler(self):
         "subclasses must override create_loghandler()"
 
     def create(self):
-        import logging
         logger = self.create_loghandler()
-        if self.section.formatter:
-            f = resolve(self.section.formatter)
-        else:
-            f = logging.Formatter
-        logger.setFormatter(f(self.section.format, self.section.dateformat))
+        logger.setFormatter(self.create_formatter(
+            self.section.format, self.section.dateformat))
         logger.setLevel(self.section.level)
         return logger
 
@@ -103,18 +105,20 @@ class HandlerFactory(Factory):
 
 class FileHandlerFactory(HandlerFactory):
 
-    def create_loghandler(self):
+    def __init__(self, section):
+        HandlerFactory.__init__(self, section)
+
         from ZConfig.components.logger import loghandler
-        path = self.section.path
-        max_bytes = self.section.max_size
-        old_files = self.section.old_files
-        when = self.section.when
-        interval = self.section.interval
-        encoding = self.section.encoding
-        delay = self.section.delay
+        path = section.path
+        max_bytes = section.max_size
+        old_files = section.old_files
+        when = section.when
+        interval = section.interval
+        encoding = section.encoding
+        delay = section.delay
 
         def check_std_stream():
-            if max_bytes or old_files:
+            if max_bytes or old_files or when:
                 raise ValueError("cannot rotate " + path)
             if delay:
                 raise ValueError("cannot delay opening " + path)
@@ -123,10 +127,10 @@ class FileHandlerFactory(HandlerFactory):
 
         if path == "STDERR":
             check_std_stream()
-            handler = loghandler.StreamHandler(sys.stderr)
+            factory = functools.partial(loghandler.StreamHandler, sys.stderr)
         elif path == "STDOUT":
             check_std_stream()
-            handler = loghandler.StreamHandler(sys.stdout)
+            factory = functools.partial(loghandler.StreamHandler, sys.stdout)
         elif when or max_bytes or old_files or interval:
             if not old_files:
                 raise ValueError("old-files must be set for log rotation")
@@ -135,20 +139,27 @@ class FileHandlerFactory(HandlerFactory):
                     raise ValueError("can't set *both* max_bytes and when")
                 if not interval:
                     interval = 1
-                handler = loghandler.TimedRotatingFileHandler(
+                factory = functools.partial(
+                    loghandler.TimedRotatingFileHandler,
                     path, when=when, interval=interval,
                     backupCount=old_files, encoding=encoding, delay=delay)
             elif max_bytes:
-                handler = loghandler.RotatingFileHandler(
+                factory = functools.partial(
+                    loghandler.RotatingFileHandler,
                     path, maxBytes=max_bytes, backupCount=old_files,
                     encoding=encoding, delay=delay)
             else:
                 raise ValueError(
                     "max-bytes or when must be set for log rotation")
         else:
-            handler = loghandler.FileHandler(
+            factory = functools.partial(
+                loghandler.FileHandler,
                 path, encoding=encoding, delay=delay)
-        return handler
+
+        self._factory = factory
+
+    def create_loghandler(self):
+        return self._factory()
 
 
 _syslog_facilities = {

@@ -121,8 +121,12 @@ class ZConfigParser(object):
         try:
             self.context.endSection(
                 prevsection, type_, name, section)
+        except ZConfig.DataConversionError as e:
+            e.lineno = self.lineno
+            e.url = self.url
+            raise
         except ZConfig.ConfigurationError as e:
-            self.error(e.args[0])
+            self.error(e.message)
         return prevsection
 
     def handle_key_value(self, section, rest):
@@ -137,7 +141,9 @@ class ZConfigParser(object):
         try:
             section.addValue(key, value, (self.lineno, None, self.url))
         except ZConfig.ConfigurationError as e:
-            self.error(e.args[0])
+            e.lineno = self.lineno
+            e.url = self.url
+            raise
 
     def handle_directive(self, section, rest):
         m = _keyvalue_rx.match(rest)
