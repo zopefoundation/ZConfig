@@ -10,6 +10,12 @@ Change History for ZConfig
   These can only be used for regular files, not the special ``STDOUT``
   and ``STDERR`` streams.
 
+- More validation on the parameters to the ``logfile`` and
+  ``email-notifier`` sections is performed early (at the construction of
+  the factory, rather than at creation of the ``logging`` handler).
+  This allows more checking of parameter combinations before any log
+  files are opened.
+
 
 3.3.0 (2018-10-04)
 ------------------
