@@ -13,6 +13,7 @@ with open("CHANGES.rst") as f:
 tests_require = [
     'docutils',
     'manuel',
+    'zope.exceptions',
     'zope.testrunner',
 ]
 

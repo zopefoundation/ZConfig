@@ -6,6 +6,16 @@ Change History for ZConfig
 ------------------
 
 - The ``logfile`` section type defined by the ``ZConfig.components.logger``
+  package supports an optional ``style`` parameter.  This can be used to
+  configure alternate format styles as found in the Python 3 standard
+  library.  Four ``style`` values are supported: ``classic`` (the
+  default), ``format`` (equivalent to ``style='{'`` in Python 3),
+  ``template`` (equivalent to ``style='$'``), and ``safe-template``
+  (similar to ``template``, but using the ``string.Template`` method
+  ``safe_substitute`` method).  A best-effort implementation is provided
+  for Python 2.
+
+- The ``logfile`` section type defined by the ``ZConfig.components.logger``
   package supports the optional ``delay`` and ``encoding`` parameters.
   These can only be used for regular files, not the special ``STDOUT``
   and ``STDERR`` streams.
