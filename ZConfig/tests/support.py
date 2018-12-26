@@ -35,6 +35,26 @@ def input_file(fname):
     return os.path.abspath(os.path.join(INPUT_DIR, fname))
 
 
+@contextlib.contextmanager
+def _replaced_stream(name, buf=None):
+    if buf is None:
+        buf = StringIO()
+    old_stream = getattr(sys, name)
+    setattr(sys, name, buf)
+    try:
+        yield
+    finally:
+        setattr(sys, name, old_stream)
+
+
+def stderr_replaced(buf=None):
+    return _replaced_stream('stderr', buf)
+
+
+def stdout_replaced(buf=None):
+    return _replaced_stream('stdout', buf)
+
+
 def with_stdin_from_input_file(fname):
     input_fname = input_file(fname)
 

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2017 Zope Foundation and Contributors.
+# Copyright (c) 2017, 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -16,9 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 from ZConfig import validator
-
-from .support import input_file
-from .support import with_stdin_from_input_file
+from ZConfig._compat import NStringIO as StringIO
+from ZConfig.tests import support
 
 
 def run_validator(*args):
@@ -28,28 +27,39 @@ def run_validator(*args):
 class TestValidator(unittest.TestCase):
 
     def test_no_schema(self):
-        self.assertRaises(SystemExit,
-                          run_validator)
+        sio = StringIO()
+        with support.stderr_replaced(sio):
+            with self.assertRaises(SystemExit) as cm:
+                run_validator()
+        self.assertEqual(cm.exception.code, 2)
+        err = sio.getvalue()
+        # Checked separately since these are included very differently
+        # with different versions of Python's argparse module.
+        self.assertIn('-s/--schema', err)
+        self.assertIn(' required', err)
 
     def test_schema_only(self):
-        res = run_validator("--schema", input_file('simple.xml'))
+        res = run_validator("--schema", support.input_file('simple.xml'))
         self.assertEqual(res, 0)
 
-    @with_stdin_from_input_file('simple.conf')
+    @support.with_stdin_from_input_file('simple.conf')
     def test_schema_only_redirect(self):
-        res = run_validator("--schema", input_file('simple.xml'))
+        res = run_validator("--schema", support.input_file('simple.xml'))
         self.assertEqual(res, 0)
 
     def test_good_config(self):
-        res = run_validator("--schema", input_file('simple.xml'),
-                            input_file('simple.conf'),
-                            input_file('simple.conf'))
+        res = run_validator("--schema", support.input_file('simple.xml'),
+                            support.input_file('simple.conf'),
+                            support.input_file('simple.conf'))
         self.assertEqual(res, 0)
 
     def test_bad_config(self):
-        res = run_validator("--schema", input_file("simple.xml"),
-                            input_file("outer.conf"))
+        sio = StringIO()
+        with support.stderr_replaced(sio):
+            res = run_validator("--schema", support.input_file("simple.xml"),
+                                support.input_file("outer.conf"))
         self.assertEqual(res, 1)
+        self.assertIn("'refouter' is not a known key name", sio.getvalue())
 
 
 def test_suite():
