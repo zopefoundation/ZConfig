@@ -91,7 +91,7 @@ _log_format_styles = {
 
 _log_format_variables = {
     'name': __name__,
-    'levelno': '3',
+    'levelno': 3,
     'levelname': 'DEBUG',
     'pathname': 'apath',
     'filename': 'afile',
@@ -99,8 +99,8 @@ _log_format_variables = {
     'lineno': 1,
     'created': 1.1,
     'asctime': 'atime',
-    'msecs': 1,
-    'relativeCreated': 1,
+    'msecs': 1.1,
+    'relativeCreated': 1.1,
     'thread': 1,
     'message': 'amessage',
     'process': 1,

@@ -23,22 +23,8 @@ from ZConfig.components.logger.factory import Factory
 import ZConfig.components.logger.formatter
 
 
-_log_format_variables = {
-    'name': '',
-    'levelno': '3',
-    'levelname': 'DEBUG',
-    'pathname': 'apath',
-    'filename': 'afile',
-    'module': 'amodule',
-    'lineno': 1,
-    'created': 1.1,
-    'asctime': 'atime',
-    'msecs': 1,
-    'relativeCreated': 1,
-    'thread': 1,
-    'message': 'amessage',
-    'process': 1,
-    }
+_log_format_variables = (
+    ZConfig.components.logger.formatter._log_format_variables)
 
 
 def log_format(value):
