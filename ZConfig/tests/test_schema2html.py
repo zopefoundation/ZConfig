@@ -13,8 +13,6 @@
 ##############################################################################
 from __future__ import absolute_import
 
-import contextlib
-import sys
 import textwrap
 import unittest
 
@@ -40,28 +38,17 @@ from ZConfig import schema2html
 from ZConfig.sphinx import SchemaToRstDirective
 from ZConfig.sphinx import RstSchemaFormatter
 
-from .support import input_file
-from .support import with_stdin_from_input_file
+from ZConfig.tests import support
 
 
 docutils.parsers.rst.directives.register_directive("zconfig",
                                                    SchemaToRstDirective)
 
 
-@contextlib.contextmanager
-def stdout_replaced(buf):
-    old_stdout = sys.stdout
-    sys.stdout = buf
-    try:
-        yield
-    finally:
-        sys.stdout = old_stdout
-
-
 def run_transform(*args):
     if '--out' not in args and '-o' not in args:
         buf = StringIO()
-        with stdout_replaced(buf):
+        with support.stdout_replaced(buf):
             schema2html.main(args)
         return buf
     return schema2html.main(args)  # pragma: no cover
@@ -70,7 +57,11 @@ def run_transform(*args):
 if schema2html.RstSchemaPrinter:
     def run_transform_rst(*args):
         args += ('--format', 'xml')
-        return run_transform(*args)
+        # Capture stderr to suppress junk like
+        # description:3: (ERROR/3) Unknown interpreted text role "class".
+        # description:3: (ERROR/3) Unknown interpreted text role "func".
+        with support.stderr_replaced():
+            return run_transform(*args)
 else:
     def run_transform_rst(*args):
         pass
@@ -79,11 +70,11 @@ else:
 class TestSchema2HTML(unittest.TestCase):
 
     def test_schema_only(self):
-        res = run_transform(input_file('simple.xml'))
+        res = run_transform(support.input_file('simple.xml'))
         self.assertIn('</html>', res.getvalue())
-        run_transform_rst(input_file('simple.xml'))
+        run_transform_rst(support.input_file('simple.xml'))
 
-    @with_stdin_from_input_file('simple.xml')
+    @support.with_stdin_from_input_file('simple.xml')
     def test_schema_only_redirect(self):
         res = run_transform("-")
         self.assertIn('</html>', res.getvalue())
@@ -96,20 +87,20 @@ class TestSchema2HTML(unittest.TestCase):
                      'base.xml',
                      'library.xml',
                      'simplesections.xml',):
-            res = run_transform(input_file(name))
+            res = run_transform(support.input_file(name))
             self.assertIn('</html>', res.getvalue())
-            run_transform_rst(input_file(name))
+            run_transform_rst(support.input_file(name))
 
     def test_html_section_example(self):
         name = 'simplesections.xml'
-        res = run_transform(input_file(name))
+        res = run_transform(support.input_file(name))
         out = res.getvalue()
         self.assertIn('Section Example', out)
         self.assertIn('Multisection Example', out)
 
     def test_rst_section_example(self):
         name = 'simplesections.xml'
-        res = run_transform_rst(input_file(name))
+        res = run_transform_rst(support.input_file(name))
         out = res.getvalue()
         self.assertIn('Section Example', out)
         self.assertIn('Multisection Example', out)
@@ -131,7 +122,11 @@ class TestRst(unittest.TestCase):
 
         parser = docutils.parsers.rst.Parser()
         text = textwrap.dedent(text)
-        parser.parse(text, document)
+        with support.stderr_replaced():
+            # Capture stderr to suppress junk like
+            # description:3: (ERROR/3) Unknown interpreted text role "class".
+            # description:3: (ERROR/3) Unknown interpreted text role "func".
+            parser.parse(text, document)
         return document
 
     def test_parse_package(self):
