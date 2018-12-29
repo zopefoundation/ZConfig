@@ -18,7 +18,6 @@ import doctest
 import logging
 import os
 import sys
-import tempfile
 import unittest
 
 import ZConfig
@@ -30,7 +29,8 @@ from ZConfig.components.logger import loghandler
 from ZConfig._compat import NStringIO as StringIO
 from ZConfig._compat import maxsize
 
-from ZConfig.tests.support import TestHelper
+import ZConfig.tests.support
+import ZConfig.components.logger.tests.support
 
 
 class CustomFormatter(logging.Formatter):
@@ -50,69 +50,8 @@ def read_file(filename):
         return f.read()
 
 
-class LoggingTestHelper(TestHelper):
-
-    # Not derived from unittest.TestCase; some test runners seem to
-    # think that means this class contains tests.
-
-    # XXX This tries to save and restore the state of logging around
-    # the test.  Somewhat surgical; there may be a better way.
-
-    def setUp(self):
-        self._created = []
-        self._old_logger = logging.getLogger()
-        self._old_level = self._old_logger.level
-        self._old_handlers = self._old_logger.handlers[:]
-        self._old_logger.handlers[:] = []
-        self._old_logger.setLevel(logging.WARN)
-
-        self._old_logger_dict = logging.root.manager.loggerDict.copy()
-        logging.root.manager.loggerDict.clear()
-
-    def tearDown(self):
-        logging.root.manager.loggerDict.clear()
-        logging.root.manager.loggerDict.update(self._old_logger_dict)
-
-        for h in self._old_logger.handlers:
-            self._old_logger.removeHandler(h)
-        for h in self._old_handlers:
-            self._old_logger.addHandler(h)  # pragma: no cover
-        self._old_logger.setLevel(self._old_level)
-
-        while self._created:
-            os.unlink(self._created.pop())
-
-        self.assertEqual(loghandler._reopenable_handlers, [])
-        loghandler.closeFiles()
-        loghandler._reopenable_handlers == []
-
-    def mktemp(self):
-        fd, fn = tempfile.mkstemp()
-        os.close(fd)
-        self._created.append(fn)
-        return fn
-
-    def move(self, fn):
-        nfn = self.mktemp()
-        os.rename(fn, nfn)
-        return nfn
-
-    _schema = None
-
-    def get_schema(self):
-        if self._schema is None:
-            sio = StringIO(self._schematext)
-            self.__class__._schema = ZConfig.loadSchemaFile(sio)
-        return self._schema
-
-    def get_config(self, text):
-        conf, handler = ZConfig.loadConfigFile(self.get_schema(),
-                                               StringIO(text))
-        self.assertTrue(not handler)
-        return conf
-
-
-class TestConfig(LoggingTestHelper, unittest.TestCase):
+class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
+                 unittest.TestCase):
 
     _schematext = """
       <schema>
@@ -547,7 +486,9 @@ else:
     _RotateTestBase = unittest.TestCase
 
 
-class TestReopeningRotatingLogfiles(LoggingTestHelper, _RotateTestBase):
+class TestReopeningRotatingLogfiles(
+        ZConfig.components.logger.tests.support.LoggingTestHelper,
+        _RotateTestBase):
 
     # These tests should not be run on Windows.
 
@@ -810,13 +751,31 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
         logfile.close()
 
 
-class TestFunctions(TestHelper, unittest.TestCase):
+class TestFunctions(ZConfig.tests.support.TestHelper, unittest.TestCase):
 
-    def test_log_format_bad(self):
-        self.assertRaisesRegex(ValueError,
-                               "Invalid log format string",
-                               handlers.log_format,
-                               "%{no-such-key}s")
+    def test_log_format_bad_syntax_1(self):
+        with self.assertRaises(ValueError) as cm:
+            # Really, disallowed character following '%':
+            handlers.log_format('%{no-such-key}s')
+        self.assertEqual(str(cm.exception),
+                         'Invalid log format string %{no-such-key}s')
+
+    def test_log_format_bad_syntax_2(self):
+        with self.assertRaises(ValueError) as cm:
+            # Missing trailing 's':
+            handlers.log_format('%(levelname)')
+        self.assertEqual(str(cm.exception),
+                         'Invalid log format string %(levelname)')
+
+    def test_log_format_unknown_key(self):
+        with self.assertRaises(ValueError) as cm:
+            handlers.log_format('%(no-such-key)s')
+        self.assertEqual(str(cm.exception),
+                         'Invalid log format string %(no-such-key)s')
+
+    def test_log_format_ok(self):
+        fmt = handlers.log_format(r'\n\t\b\f\r')
+        self.assertEqual(fmt, '\n\t\b\f\r')
 
     def test_resolve_deep(self):
         old_mod = None

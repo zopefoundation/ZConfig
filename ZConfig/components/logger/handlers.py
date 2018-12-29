@@ -20,6 +20,7 @@ import sys
 from ZConfig._compat import urlparse
 
 from ZConfig.components.logger.factory import Factory
+import ZConfig.components.logger.formatter
 
 
 _log_format_variables = {
@@ -41,7 +42,7 @@ _log_format_variables = {
 
 
 def log_format(value):
-    value = ctrl_char_insert(value)
+    value = ZConfig.components.logger.formatter.ctrl_char_insert(value)
     try:
         # Make sure the format string uses only names that will be
         # provided, and has reasonable type flags for each, and does
@@ -52,41 +53,18 @@ def log_format(value):
     return value
 
 
-_control_char_rewrites = {r'\n': '\n', r'\t': '\t', r'\b': '\b',
-                          r'\f': '\f', r'\r': '\r'}.items()
-
-
-def ctrl_char_insert(value):
-    for pattern, replacement in _control_char_rewrites:
-        value = value.replace(pattern, replacement)
-    return value
-
-
-def resolve(name):
-    """Given a dotted name, returns an object imported from a Python module."""
-    name = name.split('.')
-    used = name.pop(0)
-    found = __import__(used)
-    for n in name:
-        used += '.' + n
-        try:
-            found = getattr(found, n)
-        except AttributeError:
-            __import__(used)
-            found = getattr(found, n)
-    return found
+# Backward compatibility, because paranoia is our friend:
+ctrl_char_insert = ZConfig.components.logger.formatter.ctrl_char_insert
+resolve = ZConfig.components.logger.formatter.resolve
 
 
 class HandlerFactory(Factory):
 
     def __init__(self, section):
-        import logging
         Factory.__init__(self)
         self.section = section
-        if self.section.formatter:
-            self.create_formatter = resolve(self.section.formatter)
-        else:
-            self.create_formatter = logging.Formatter
+        factory = ZConfig.components.logger.formatter.FormatterFactory(section)
+        self.create_formatter = factory
 
     @abstractmethod
     def create_loghandler(self):
@@ -94,8 +72,7 @@ class HandlerFactory(Factory):
 
     def create(self):
         logger = self.create_loghandler()
-        logger.setFormatter(self.create_formatter(
-            self.section.format, self.section.dateformat))
+        logger.setFormatter(self.create_formatter())
         logger.setLevel(self.section.level)
         return logger
 

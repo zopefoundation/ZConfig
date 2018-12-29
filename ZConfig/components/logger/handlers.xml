@@ -1,4 +1,4 @@
-<component prefix="ZConfig.components.logger.handlers">
+<component prefix="ZConfig.components.logger">
   <description>
   </description>
 
@@ -12,8 +12,13 @@
     </description>
     <key name="formatter" datatype="dotted-name" required="no">
       <description>
-        Logging formatter class.  The default is :class:`logging.Formatter`.
-        An alternative is 'zope.exceptions.log.Formatter',
+        Logging formatter class.
+
+        The default is :class:`logging.Formatter` except for Python 2,
+        where a compatible formatter is used that supports the ``style``
+        option added in Python 3.
+
+        One alternative is 'zope.exceptions.log.Formatter',
         which enhances exception tracebacks with information from
         ``__traceback_info__`` and ``__traceback_supplement__``
         variables from each stack frame.
@@ -47,10 +52,20 @@
         Numeric values ``0`` through ``50`` (inclusive) are permitted.
       </description>
     </key>
+    <key name="style"
+         default="classic"
+         datatype=".formatter.log_format_style">
+      <description>
+        Replacement mechanism to use with the ``format`` string.
+
+        The value must be one of ``classic`` (the default), ``format``,
+        ``template``, or ``safe-template``.
+      </description>
+    </key>
   </sectiontype>
 
   <sectiontype name="logfile"
-               datatype=".FileHandlerFactory"
+               datatype=".handlers.FileHandlerFactory"
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
     <example><![CDATA[
@@ -108,7 +123,7 @@
     </key>
     <key name="format"
          default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
-         datatype=".log_format">
+         datatype=".formatter.escaped_string">
       <description>
         Format string for log entries.  This value is used to create an
         instance of the class identified by ``formatter``.
@@ -147,39 +162,40 @@
   </sectiontype>
 
   <sectiontype name="syslog"
-               datatype=".SyslogHandlerFactory"
+               datatype=".handlers.SyslogHandlerFactory"
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
-    <key name="facility" default="user" datatype=".syslog_facility"/>
+    <key name="facility" default="user" datatype=".handlers.syslog_facility"/>
     <key name="address" datatype="socket-address" default="localhost:514"/>
     <key name="format"
          default="%(name)s %(message)s"
-         datatype=".log_format"/>
+         datatype=".formatter.escaped_string"/>
   </sectiontype>
 
   <sectiontype name="win32-eventlog"
-               datatype=".Win32EventLogFactory"
+               datatype=".handlers.Win32EventLogFactory"
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
     <key name="appname" default="Zope"/>
     <key name="format"
          default="%(levelname)s %(name)s %(message)s"
-         datatype=".log_format"/>
+         datatype=".formatter.escaped_string"/>
   </sectiontype>
 
   <sectiontype name="http-logger"
-               datatype=".HTTPHandlerFactory"
+               datatype=".handlers.HTTPHandlerFactory"
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
-    <key name="url" default="http://localhost/" datatype=".http_handler_url"/>
-    <key name="method" default="GET" datatype=".get_or_post"/>
+    <key name="url" default="http://localhost/"
+         datatype=".handlers.http_handler_url"/>
+    <key name="method" default="GET" datatype=".handlers.get_or_post"/>
     <key name="format"
          default="%(asctime)s %(levelname)s %(name)s %(message)s"
-         datatype=".log_format"/>
+         datatype=".formatter.escaped_string"/>
   </sectiontype>
 
   <sectiontype name="email-notifier"
-               datatype=".SMTPHandlerFactory"
+               datatype=".handlers.SMTPHandlerFactory"
                implements="ZConfig.logger.handler"
                extends="ZConfig.logger.base-log-handler">
     <example><![CDATA[
@@ -211,7 +227,7 @@
     </key>
     <key name="format"
          default="%(asctime)s %(levelname)s %(name)s %(message)s"
-         datatype=".log_format">
+         datatype=".formatter.escaped_string">
       <description>
         Format string for the email content.
 
