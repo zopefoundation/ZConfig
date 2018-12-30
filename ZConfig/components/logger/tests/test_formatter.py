@@ -82,6 +82,16 @@ class StyledFormatterTestHelper(
       </schema>
     """
 
+    _config_template = """\
+      <eventlog>
+        <logfile>
+          path STDOUT
+          level debug
+          %s
+        </logfile>
+      </eventlog>
+    """
+
     def setUp(self):
         ZConfig.components.logger.tests.support.LoggingTestHelper.setUp(self)
         self.record = logging.LogRecord(
@@ -107,16 +117,6 @@ class StyledFormatterTestHelper(
 
 class LoggerStyledFormatterTestCase(StyledFormatterTestHelper,
                                     unittest.TestCase):
-
-    _config_template = """\
-      <eventlog>
-        <logfile>
-          path STDOUT
-          level debug
-          %s
-        </logfile>
-      </eventlog>
-    """
 
     def test_classic_explicit(self):
         factory = self.get_formatter_factory(
@@ -445,3 +445,60 @@ class Py2EncodingTestCase(StyledFormatterTestHelper,
         msg = formatter.format(self.record)
 
         self.assertIsInstance(msg, unicode)  # NOQA
+
+
+class FieldTypesTestCase(StyledFormatterTestHelper, unittest.TestCase):
+
+    def test_levelno_integer_classic(self):
+        factory = self.get_formatter_factory(
+            style='classic',
+            format='%(levelname)s %(levelno)2d %(message)s')
+        formatter = factory()
+        output = formatter.format(self.record)
+        self.assertIn('WARNING 30 my message', output)
+
+    def test_levelno_integer_format(self):
+        factory = self.get_formatter_factory(
+            style='format',
+            format='{levelname} {levelno:02d} {message}')
+        formatter = factory()
+        output = formatter.format(self.record)
+        self.assertIn('WARNING 30 my message', output)
+
+    def test_msecs_float_classic(self):
+        factory = self.get_formatter_factory(
+            style='classic',
+            format='%(asctime)s.%(msecs)03.0f %(levelname)s %(message)s')
+        formatter = factory()
+        self.record.msecs = 619.041919708252
+        output = formatter.format(self.record)
+        expected = '%s.619 WARNING my message' % self.record.asctime
+        self.assertIn(expected, output)
+
+    def test_msecs_float_format(self):
+        factory = self.get_formatter_factory(
+            style='format',
+            format='{asctime}.{msecs:03.0f} {levelname} {message}')
+        formatter = factory()
+        self.record.msecs = 619.041919708252
+        output = formatter.format(self.record)
+        expected = '%s.619 WARNING my message' % self.record.asctime
+        self.assertIn(expected, output)
+
+    def test_relative_created_float_classic(self):
+        factory = self.get_formatter_factory(
+            style='classic',
+            format='%(relativeCreated)+.3f %(levelname)s %(message)s')
+        formatter = factory()
+        self.record.relativeCreated = 406.7840576171875
+        output = formatter.format(self.record)
+        self.assertIn('+406.784 WARNING my message', output)
+
+    def test_relative_created_float_format(self):
+        factory = self.get_formatter_factory(
+            style='format',
+            format='{relativeCreated:+.3f} {levelname} {message}')
+        formatter = factory()
+        self.record.relativeCreated = 406.7840576171875
+        output = formatter.format(self.record)
+        self.assertIn('+406.784 WARNING my message', output)
