@@ -114,22 +114,24 @@ class StyledFormatterTestHelper(
         logger_factory = self.get_logger_factory(style=style, format=format)
         return logger_factory.handler_factories[0].create_formatter
 
+    def get_formatter(self, style=None, format=None):
+        factory = self.get_formatter_factory(style=style, format=format)
+        return factory()
+
 
 class LoggerStyledFormatterTestCase(StyledFormatterTestHelper,
                                     unittest.TestCase):
 
     def test_classic_explicit(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='classic',
             format='%(levelname)s %(levelno)s %(message)s')
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(content, "WARNING 30 my message, 'with' 'some args'")
 
     def test_classic_implicit(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             format='%(levelname)s %(levelno)s %(message)s')
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(content, "WARNING 30 my message, 'with' 'some args'")
 
@@ -143,10 +145,9 @@ class LoggerStyledFormatterTestCase(StyledFormatterTestHelper,
         # It would not be allowed in older versions of ZConfig, or for
         # classic style.
         #
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='format',
             format='{levelname} {levelno} {message} %(stuff)')
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(
             content, "WARNING 30 my message, 'with' 'some args' %(stuff)")
@@ -178,21 +179,18 @@ class LoggerStyledFormatterTestCase(StyledFormatterTestHelper,
     # substitutions.
     #
     def test_template_with_braces(self):
-        #
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='template',
             format='$${levelname} $${levelno} $${message} %(stuff) {extra}')
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(
             content, ("WARNING 30 my message, 'with' 'some args'"
                       " %(stuff) {extra}"))
 
     def test_template_without_braces(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='template',
             format='$$levelname $$levelno $$message %(stuff) {extra}')
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(
             content, ("WARNING 30 my message, 'with' 'some args'"
@@ -209,31 +207,28 @@ class LoggerStyledFormatterTestCase(StyledFormatterTestHelper,
                 format='$$} $${levelno')
 
     def test_safe_template_with_braces(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='safe-template',
             format='$${levelname} $${levelno} $${message} %(stuff) {extra}')
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(
             content, ("WARNING 30 my message, 'with' 'some args'"
                       " %(stuff) {extra}"))
 
     def test_safe_template_without_braces(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='safe-template',
             format='$$levelname $$levelno $$message %(stuff) {extra}')
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(
             content, ("WARNING 30 my message, 'with' 'some args'"
                       " %(stuff) {extra}"))
 
     def test_safe_template_with_junk(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='safe-template',
             format=('$${levelname} $${levelno} $${message} %(stuff) {extra}'
                     ' $$} $${levelno  $${bad-mojo}'))
-        formatter = factory()
         content = formatter.format(self.record)
         self.assertEqual(
             content, ("WARNING 30 my message, 'with' 'some args'"
@@ -259,10 +254,9 @@ class ZopeExceptionsFormatterTestCase(LoggerStyledFormatterTestCase):
     """
 
     def test_format_with_traceback_info(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='format',
             format='{levelname} {levelno} {message}')
-        formatter = factory()
 
         def fail():
             raise RuntimeError('foo')
@@ -450,55 +444,49 @@ class Py2EncodingTestCase(StyledFormatterTestHelper,
 class FieldTypesTestCase(StyledFormatterTestHelper, unittest.TestCase):
 
     def test_levelno_integer_classic(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='classic',
             format='%(levelname)s %(levelno)2d %(message)s')
-        formatter = factory()
         output = formatter.format(self.record)
         self.assertIn('WARNING 30 my message', output)
 
     def test_levelno_integer_format(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='format',
             format='{levelname} {levelno:02d} {message}')
-        formatter = factory()
         output = formatter.format(self.record)
         self.assertIn('WARNING 30 my message', output)
 
     def test_msecs_float_classic(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='classic',
             format='%(asctime)s.%(msecs)03.0f %(levelname)s %(message)s')
-        formatter = factory()
         self.record.msecs = 619.041919708252
         output = formatter.format(self.record)
         expected = '%s.619 WARNING my message' % self.record.asctime
         self.assertIn(expected, output)
 
     def test_msecs_float_format(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='format',
             format='{asctime}.{msecs:03.0f} {levelname} {message}')
-        formatter = factory()
         self.record.msecs = 619.041919708252
         output = formatter.format(self.record)
         expected = '%s.619 WARNING my message' % self.record.asctime
         self.assertIn(expected, output)
 
     def test_relative_created_float_classic(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='classic',
             format='%(relativeCreated)+.3f %(levelname)s %(message)s')
-        formatter = factory()
         self.record.relativeCreated = 406.7840576171875
         output = formatter.format(self.record)
         self.assertIn('+406.784 WARNING my message', output)
 
     def test_relative_created_float_format(self):
-        factory = self.get_formatter_factory(
+        formatter = self.get_formatter(
             style='format',
             format='{relativeCreated:+.3f} {levelname} {message}')
-        formatter = factory()
         self.record.relativeCreated = 406.7840576171875
         output = formatter.format(self.record)
         self.assertIn('+406.784 WARNING my message', output)
