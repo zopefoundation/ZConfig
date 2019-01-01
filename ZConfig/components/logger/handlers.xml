@@ -62,6 +62,21 @@
         ``template``, or ``safe-template``.
       </description>
     </key>
+    <key name="arbitrary-fields"
+         default="false"
+         datatype="boolean">
+      <description>
+        If true, allow arbitrary fields in the log record object to be
+        referenced from the ``format`` value.
+
+        This does not cause references to fields not present in the log
+        record to be accepted; it only means unknown fields will not
+        cause configuration of the formatter to be denied.
+
+        To get both effects, set this to ``true`` and use a ``style`` of
+        ``safe-template``.
+      </description>
+    </key>
   </sectiontype>
 
   <sectiontype name="logfile"
