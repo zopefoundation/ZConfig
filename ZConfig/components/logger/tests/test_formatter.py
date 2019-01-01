@@ -100,22 +100,28 @@ class StyledFormatterTestHelper(
         self.record.x1 = 24
         self.record.x2 = 37
 
-    def get_logger_factory(self, style=None, format=None):
+    def get_logger_factory(self, style=None, format=None,
+                           arbitrary_fields=False):
         formatter_lines = []
         if style:
             formatter_lines.append('style %s' % style)
         if format:
             formatter_lines.append('format %s' % format)
+        if arbitrary_fields:
+            formatter_lines.append('arbitrary-fields true')
         formatter_config = '\n    '.join(formatter_lines)
         parsed = self.get_config(self._config_template % formatter_config)
         return parsed.eventlog
 
-    def get_formatter_factory(self, style=None, format=None):
-        logger_factory = self.get_logger_factory(style=style, format=format)
+    def get_formatter_factory(self, style=None, format=None,
+                              arbitrary_fields=False):
+        logger_factory = self.get_logger_factory(
+            style=style, format=format, arbitrary_fields=arbitrary_fields)
         return logger_factory.handler_factories[0].create_formatter
 
-    def get_formatter(self, style=None, format=None):
-        factory = self.get_formatter_factory(style=style, format=format)
+    def get_formatter(self, style=None, format=None, arbitrary_fields=False):
+        factory = self.get_formatter_factory(
+            style=style, format=format, arbitrary_fields=arbitrary_fields)
         return factory()
 
 
@@ -490,3 +496,117 @@ class FieldTypesTestCase(StyledFormatterTestHelper, unittest.TestCase):
         self.record.relativeCreated = 406.7840576171875
         output = formatter.format(self.record)
         self.assertIn('+406.784 WARNING my message', output)
+
+
+class ArbitraryFieldsTestCase(StyledFormatterTestHelper, unittest.TestCase):
+
+    def test_classic_arbitrary_field_disallowed_by_default(self):
+        with self.assertRaises(KeyError) as cm:
+            self.get_formatter_factory(
+                style='classic',
+                format='%(levelno)s %(levelname)s %(undefined_field)s')
+        self.assertEqual(str(cm.exception), "'undefined_field'")
+
+    def test_format_arbitrary_field_disallowed_by_default(self):
+        with self.assertRaises(KeyError) as cm:
+            self.get_formatter_factory(
+                style='format',
+                format='{levelno} {levelname} {undefined_field}')
+        self.assertEqual(str(cm.exception), "'undefined_field'")
+
+    def test_template_arbitrary_field_disallowed_by_default(self):
+        with self.assertRaises(KeyError) as cm:
+            self.get_formatter_factory(
+                style='format',
+                format='$${levelno} $${levelname} $${undefined_field}')
+        self.assertEqual(str(cm.exception), "'undefined_field'")
+
+    # We don't need to check the safe-template variety, because it's
+    # highly permissive.
+
+    def test_classic_arbitrary_field_missing(self):
+        formatter = self.get_formatter(
+            style='classic',
+            format='%(levelno)s %(levelname)s %(undefined_field)s',
+            arbitrary_fields=True)
+
+        # The formatter still breaks when it references an undefined field:
+        with self.assertRaises(KeyError) as cm:
+            formatter.format(self.record)
+        self.assertEqual(str(cm.exception), "'undefined_field'")
+
+    def test_classic_arbitrary_field_present(self):
+        formatter = self.get_formatter(
+            style='classic',
+            format='%(levelno)s %(levelname)s %(undefined_field)s',
+            arbitrary_fields=True)
+
+        # Given the field, it formats just fine:
+        self.record.undefined_field = 'surprise!'
+        logentry = formatter.format(self.record)
+        self.assertIn('surprise!', logentry)
+
+    def test_format_arbitrary_field_missing(self):
+        formatter = self.get_formatter(
+            style='format',
+            format='{levelno} {levelname} {undefined_field}',
+            arbitrary_fields=True)
+
+        # The formatter still breaks when it references an undefined field:
+        with self.assertRaises(KeyError) as cm:
+            formatter.format(self.record)
+        self.assertEqual(str(cm.exception), "'undefined_field'")
+
+    def test_format_arbitrary_field_present(self):
+        formatter = self.get_formatter(
+            style='format',
+            format='{levelno} {levelname} {undefined_field}',
+            arbitrary_fields=True)
+
+        # Given the field, it formats just fine:
+        self.record.undefined_field = 'surprise!'
+        logentry = formatter.format(self.record)
+        self.assertIn('surprise!', logentry)
+
+    def test_template_arbitrary_field_missing(self):
+        formatter = self.get_formatter(
+            style='template',
+            format='$${levelno} $${levelname} $${undefined_field}',
+            arbitrary_fields=True)
+
+        # The formatter still breaks when it references an undefined field:
+        with self.assertRaises(KeyError) as cm:
+            formatter.format(self.record)
+        self.assertEqual(str(cm.exception), "'undefined_field'")
+
+    def test_template_arbitrary_field_present(self):
+        formatter = self.get_formatter(
+            style='template',
+            format='$${levelno} $${levelname} $${undefined_field}',
+            arbitrary_fields=True)
+
+        # Given the field, it formats just fine:
+        self.record.undefined_field = 'surprise!'
+        logentry = formatter.format(self.record)
+        self.assertIn('surprise!', logentry)
+
+    def test_safe_template_arbitrary_field_missing(self):
+        formatter = self.get_formatter(
+            style='safe-template',
+            format='$${levelno} $${levelname} $${undefined_field}',
+            arbitrary_fields=True)
+
+        # The formatter still breaks when it references an undefined field:
+        logentry = formatter.format(self.record)
+        self.assertIn(' ${undefined_field}', logentry)
+
+    def test_safe_template_arbitrary_field_present(self):
+        formatter = self.get_formatter(
+            style='safe-template',
+            format='$${levelno} $${levelname} $${undefined_field}',
+            arbitrary_fields=True)
+
+        # Given the field, it formats just fine:
+        self.record.undefined_field = 'surprise!'
+        logentry = formatter.format(self.record)
+        self.assertIn('surprise!', logentry)

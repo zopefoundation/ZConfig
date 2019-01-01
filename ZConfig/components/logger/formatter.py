@@ -24,6 +24,22 @@ import sys
 import ZConfig._compat
 
 
+if sys.version_info[0] == 2:
+
+    class StringFormatter(string.Formatter):
+
+        def get_field(self, field_name, args, kwargs):
+            if field_name == '':
+                # Not correctly supported in Python 2 string.Formatter;
+                # KeyError is raised instead of IndexError for the
+                # computed index.
+                raise IndexError('tuple index out of range')
+            return string.Formatter.get_field(self, field_name, args, kwargs)
+
+else:
+    StringFormatter = string.Formatter
+
+
 class PercentStyle(object):
 
     logging_style = '%'
@@ -48,8 +64,10 @@ class StrFormatStyle(PercentStyle):
     asctime_format = '{asctime}'
     asctime_search = '{asctime'
 
+    __formatter = StringFormatter()
+
     def format(self, record):
-        return self._fmt.format(**record.__dict__)
+        return self.__formatter.vformat(self._fmt, (), record.__dict__)
 
 
 class StringTemplateStyle(PercentStyle):
@@ -68,7 +86,7 @@ class StringTemplateStyle(PercentStyle):
         return fmt.find('$asctime') >= 0 or fmt.find(self.asctime_format) >= 0
 
     def format(self, record):
-        return self._tpl.substitute(**record.__dict__)
+        return self._tpl.substitute(record.__dict__)
 
 
 class SafeStringTemplateStyle(StringTemplateStyle):
@@ -76,7 +94,7 @@ class SafeStringTemplateStyle(StringTemplateStyle):
     logging_style = None
 
     def format(self, record):
-        return self._tpl.safe_substitute(**record.__dict__)
+        return self._tpl.safe_substitute(record.__dict__)
 
 
 _control_char_rewrites = {r'\n': '\n', r'\t': '\t', r'\b': '\b',
@@ -142,6 +160,24 @@ def resolve(name):
     return found
 
 
+class AnyFieldDict(dict):
+    # Only used for format string validation.
+
+    def __getitem__(self, key):
+        if key in self:
+            # Avoid magic for known keys; better to provide a sample
+            # value of an appropriate type when there is such a thing.
+            return dict.__getitem__(self, key)
+        else:
+            # Using an int as the default works with "reasonable" values
+            # that might be formatted in a logging configuration:
+            #
+            # - str/repr are safe
+            # - numeric formatting is safe, allowing for casting to float
+            #
+            return 42
+
+
 class FormatterFactory(object):
 
     def __init__(self, section):
@@ -179,6 +215,10 @@ class FormatterFactory(object):
         record = logging.LogRecord(__name__, logging.INFO, __file__,
                                    42, 'some message', (), None)
         record.__dict__.update(_log_format_variables)
+        if section.arbitrary_fields:
+            fields = AnyFieldDict()
+            fields.update(record.__dict__)
+            record.__dict__ = fields
         try:
             self.stylist.format(record)
         except IndexError:

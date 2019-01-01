@@ -5,15 +5,30 @@ Change History for ZConfig
 3.4.0 (unreleased)
 ------------------
 
-- The ``logfile`` section type defined by the ``ZConfig.components.logger``
-  package supports an optional ``style`` parameter.  This can be used to
-  configure alternate format styles as found in the Python 3 standard
-  library.  Four ``style`` values are supported: ``classic`` (the
-  default), ``format`` (equivalent to ``style='{'`` in Python 3),
-  ``template`` (equivalent to ``style='$'``), and ``safe-template``
-  (similar to ``template``, but using the ``string.Template`` method
-  ``safe_substitute`` method).  A best-effort implementation is provided
-  for Python 2.
+Many changes have been made in the support for logging configurations:
+
+- The log handler section types defined by the
+  ``ZConfig.components.logger`` package support additional, optional
+  parameters:
+
+  ``style``
+      Used to configure alternate format styles as found in the Python 3
+      standard library.  Four ``style`` values are supported:
+      ``classic`` (the default), ``format`` (equivalent to ``style='{'``
+      in Python 3), ``template`` (equivalent to ``style='$'``), and
+      ``safe-template`` (similar to ``template``, but using the
+      ``string.Template`` method ``safe_substitute`` method).  A
+      best-effort implementation is provided for Python 2.
+
+  ``arbitrary-fields``
+      A Boolean defauting to ``False`` for backward compatibility,
+      allows arbitrary replacement field names to be accepted in the
+      format string (regardless of the ``style`` setting).  This
+      supports applications where log records are known to be generated
+      with additional string or numeric fields, at least for some
+      loggers.  (An exception is still raised at format time if the
+      additional fields are not provided, unless the ``style`` value
+      ``safe-template`` is used.)
 
 - The ``logfile`` section type defined by the ``ZConfig.components.logger``
   package supports the optional ``delay`` and ``encoding`` parameters.
