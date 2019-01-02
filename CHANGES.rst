@@ -2,7 +2,7 @@
 Change History for ZConfig
 ==========================
 
-3.4.0 (unreleased)
+3.4.0 (2019-01-02)
 ------------------
 
 Many changes have been made in the support for logging configurations:
