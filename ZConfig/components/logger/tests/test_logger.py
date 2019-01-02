@@ -777,6 +777,22 @@ class TestFunctions(ZConfig.tests.support.TestHelper, unittest.TestCase):
         fmt = handlers.log_format(r'\n\t\b\f\r')
         self.assertEqual(fmt, '\n\t\b\f\r')
 
+    def test_log_format_func_name(self):
+        fmt = '%(funcName)s'
+        self.assertEqual(handlers.log_format(fmt), fmt)
+
+    def test_log_format_levelno_integer(self):
+        fmt = '%(levelno)2d'
+        self.assertEqual(handlers.log_format(fmt), fmt)
+
+    def test_log_format_msecs_float(self):
+        fmt = '%(msecs)03.0f'
+        self.assertEqual(handlers.log_format(fmt), fmt)
+
+    def test_log_format_relative_created_float(self):
+        fmt = '%(relativeCreated)+.3f'
+        self.assertEqual(handlers.log_format(fmt), fmt)
+
     def test_resolve_deep(self):
         old_mod = None
         if hasattr(logging, 'handlers'):

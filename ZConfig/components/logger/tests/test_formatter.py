@@ -449,6 +449,27 @@ class Py2EncodingTestCase(StyledFormatterTestHelper,
 
 class FieldTypesTestCase(StyledFormatterTestHelper, unittest.TestCase):
 
+    def test_func_name_classic(self):
+        formatter = self.get_formatter(
+            style='classic',
+            format='%(levelname)s %(levelno)2d %(funcName)s')
+        output = formatter.format(self.record)
+        self.assertIn('WARNING 30 faux_func', output)
+
+    def test_func_name_format(self):
+        formatter = self.get_formatter(
+            style='format',
+            format='{levelname} {levelno:02d} {funcName}')
+        output = formatter.format(self.record)
+        self.assertIn('WARNING 30 faux_func', output)
+
+    def test_func_name_template(self):
+        formatter = self.get_formatter(
+            style='template',
+            format='$$levelname $$levelno $$funcName')
+        output = formatter.format(self.record)
+        self.assertIn('WARNING 30 faux_func', output)
+
     def test_levelno_integer_classic(self):
         formatter = self.get_formatter(
             style='classic',
