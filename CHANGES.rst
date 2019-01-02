@@ -41,6 +41,11 @@ Many changes have been made in the support for logging configurations:
   This allows more checking of parameter combinations before any log
   files are opened.
 
+- The ``ZConfig.components.logger.handlers.log_format`` data type
+  function now supports formats that include numeric formatting for
+  ``levelno``, and accept ``funcName`` as a valid log record field
+  (added in Python 2.6 and 3.1).
+
 
 3.3.0 (2018-10-04)
 ------------------

@@ -122,6 +122,7 @@ _log_format_variables = {
     'thread': 1,
     'message': 'amessage',
     'process': 1,
+    'funcName': 'fname',
     }
 
 
