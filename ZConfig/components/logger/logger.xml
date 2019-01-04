@@ -29,7 +29,7 @@
       <description>
         The dotted name of the logger.  This give it a location in the
         logging hierarchy.  Most applications provide a specific set
-        of subsystem names for which logging is meaning; consult the
+        of subsystem names for which logging is meaningful; consult the
         application documentation for the set of names that are
         actually interesting for the application.
       </description>
