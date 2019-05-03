@@ -153,11 +153,8 @@ class BaseLoader(AbstractBaseClass):
         actual load, and returns whatever that method returns.
         """
         url = self.normalizeURL(url)
-        r = self.openResource(url)
-        try:
+        with self.openResource(url) as r:
             return self.loadResource(r)
-        finally:
-            r.close()
 
     def loadFile(self, file, url=None):
         """Load from an open file object, *file*.
@@ -172,11 +169,8 @@ class BaseLoader(AbstractBaseClass):
         """
         if not url:
             url = _url_from_file(file)
-        r = self.createResource(file, url)
-        try:
+        with self.createResource(file, url) as r:
             return self.loadResource(r)
-        finally:
-            r.close()
 
     # utilities
 
@@ -446,20 +440,14 @@ class ConfigLoader(BaseLoader):
         url = self._loader.schemaComponentSource(pkgname, '')
         if schema.hasComponent(url):
             return
-        resource = self.openResource(url)
         schema.addComponent(url)
-        try:
+        with self.openResource(url) as resource:
             ZConfig.schema.parseComponent(resource, self._loader, schema)
-        finally:
-            resource.close()
 
     def includeConfiguration(self, section, url, defines):
         url = self.normalizeURL(url)
-        r = self.openResource(url)
-        try:
+        with self.openResource(url) as r:
             self._parse_resource(section, r, defines)
-        finally:
-            r.close()
 
     # internal helper
 
@@ -507,7 +495,8 @@ class Resource(object):
     store the constructor arguments. These objects also have a
     :meth:`close` method which will call :meth:`~file.close` on
     *file*, then set the :attr:`file` attribute to ``None`` and the
-    :attr:`closed` attribute to ``True``.
+    :attr:`closed` attribute to ``True``. Using this object as a
+    context manager also closes the file.
 
     All other attributes are delegated to *file*.
     """
@@ -526,3 +515,9 @@ class Resource(object):
 
     def __getattr__(self, name):
         return getattr(self.file, name)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, t, v, tb):
+        self.close()

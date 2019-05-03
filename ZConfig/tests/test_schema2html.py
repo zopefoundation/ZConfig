@@ -197,6 +197,20 @@ class TestRst(unittest.TestCase):
         self.assertNotIn("SyslogHandlerFactory", doc_text)
         self.assertNotIn("FileHandlerFactory", doc_text)
 
+    def test_parse_package_schema(self):
+        text = """
+        Document
+        ========
+        .. zconfig:: ZConfig.tests
+            :file: sphinx_test_schema.xml
+        """
+        document = self._parse(text)
+        doc_text = document.astext()
+
+        # Check that it produced output
+        self.assertIn("EventLogFactory", doc_text)
+        self.assertIn("<eventlog>", doc_text)
+
     def test_description_dedent(self):
         text = """No leading whitespace on this line.
         But this line has whitespace.

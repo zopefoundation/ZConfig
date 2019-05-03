@@ -96,7 +96,8 @@ class BaseParser(xml.sax.ContentHandler):
                 self.error("%s elements may not be nested in %s elements"
                            % (_srepr(name), _srepr(parent)))
         elif name != self._top_level:
-            self.error("Unknown document type " + name)
+            self.error("Unknown document type " + name,
+                       ZConfig.UnknownDocumentTypeError)
 
         self._elem_stack.append(name)
 
@@ -321,12 +322,9 @@ class BaseParser(xml.sax.ContentHandler):
                 self.loadComponent(src)
 
     def loadComponent(self, src):
-        r = self._loader.openResource(src)
         parser = ComponentParser(self._loader, src, self._schema)
-        try:
+        with self._loader.openResource(src) as r:
             xml.sax.parse(r.file, parser)
-        finally:
-            r.close()
 
     def end_import(self):
         pass
@@ -468,8 +466,10 @@ class BaseParser(xml.sax.ContentHandler):
             e.url = self._locator.getSystemId()
         return e
 
-    def error(self, message):
-        raise_with_same_tb(self.initerror(ZConfig.SchemaError(message)))
+    def error(self, message, kind=None):
+        # Can't do this as a default value because of import order
+        kind = kind or ZConfig.SchemaError
+        raise_with_same_tb(self.initerror(kind(message)))
 
 
 class SchemaParser(BaseParser):
@@ -542,11 +542,8 @@ class SchemaParser(BaseParser):
 
     def extendSchema(self, src):
         parser = SchemaParser(self._loader, src, self)
-        r = self._loader.openResource(src)
-        try:
+        with self._loader.openResource(src) as r:
             xml.sax.parse(r.file, parser)
-        finally:
-            r.close()
 
     def end_schema(self):
         del self._stack[-1]
