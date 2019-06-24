@@ -2,7 +2,7 @@
  Change History for ZConfig
 ============================
 
-3.4.1 (unreleased)
+3.5.0 (2019-06-24)
 ==================
 
 - Add support for documenting schema files contained in packages to
