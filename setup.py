@@ -19,7 +19,7 @@ tests_require = [
 
 options = dict(
     name="ZConfig",
-    version='3.5.0',
+    version='3.5.1.dev0',
     author="Fred L. Drake, Jr.",
     author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
