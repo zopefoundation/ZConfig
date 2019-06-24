@@ -144,7 +144,10 @@ def main(argv=None):
 
     out = args.out or sys.stdout
 
-    schema = load_schema(args.schema, args.package, args.package_file)
+    if args.package:
+        schema = load_schema(args.package_file, args.schema)
+    else:
+        schema = load_schema(args.schema)
 
     printer_factory = HtmlSchemaPrinter
     if hasattr(args, 'format') and args.format == 'xml':

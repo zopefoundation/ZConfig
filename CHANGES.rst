@@ -1,15 +1,16 @@
-==========================
-Change History for ZConfig
-==========================
+============================
+ Change History for ZConfig
+============================
 
 3.4.1 (unreleased)
-------------------
+==================
 
-- TBD
-
+- Add support for documenting schema files contained in packages to
+  the Sphinx extension. See `issue 59
+  <https://github.com/zopefoundation/ZConfig/issues/59>`_.
 
 3.4.0 (2019-01-02)
-------------------
+==================
 
 Many changes have been made in the support for logging configurations:
 
@@ -54,7 +55,7 @@ Many changes have been made in the support for logging configurations:
 
 
 3.3.0 (2018-10-04)
-------------------
+==================
 
 - Drop support for Python 3.3.
 
@@ -72,7 +73,7 @@ Many changes have been made in the support for logging configurations:
   <https://github.com/zopefoundation/ZConfig/issues/37>`_.
 
 3.2.0 (2017-06-22)
-------------------
+==================
 
 - Drop support for Python 2.6 and 3.2 and add support for Python 3.6.
 
@@ -105,31 +106,31 @@ Many changes have been made in the support for logging configurations:
   https://github.com/zopefoundation/ZConfig/issues/17
 
 3.1.0 (2015-10-17)
-------------------
+==================
 
 - Add ability to do variable substitution from environment variables using
   $() syntax.
 
 3.0.4 (2014-03-20)
-------------------
+==================
 
 - Added Python 3.4 support.
 
 
 3.0.3 (2013-03-02)
-------------------
+==================
 
 - Added Python 3.2 support.
 
 
 3.0.2 (2013-02-14)
-------------------
+==================
 
 - Fixed ResourceWarning in BaseLoader.openResource().
 
 
 3.0.1 (2013-02-13)
-------------------
+==================
 
 - Removed an accidentally left `pdb` statement from the code.
 
@@ -137,7 +138,7 @@ Many changes have been made in the support for logging configurations:
 
 
 3.0.0 (2013-02-13)
-------------------
+==================
 
 - Added Python 3.3 support.
 
@@ -145,34 +146,34 @@ Many changes have been made in the support for logging configurations:
 
 
 2.9.3 (2012-06-25)
-------------------
+==================
 
 - Fixed: port values of 0 weren't allowed.  Port 0 is used to request
   an ephemeral port.
 
 
 2.9.2 (2012-02-11)
-------------------
+==================
 
 - Adjust test classes to avoid base classes being considered separate
   test cases by (at least) the "nose" test runner.
 
 
 2.9.1 (2012-02-11)
-------------------
+==================
 
 - Make FileHandler.reopen thread safe.
 
 
 2.9.0 (2011-03-22)
-------------------
+==================
 
 - Allow identical redefinition of ``%define`` names.
 - Added support for IPv6 addresses.
 
 
 2.8.0 (2010-04-13)
-------------------
+==================
 
 - Fix relative path recognition.
   https://bugs.launchpad.net/zconfig/+bug/405687
@@ -181,7 +182,7 @@ Many changes have been made in the support for logging configurations:
 
 
 2.7.1 (2009-06-13)
-------------------
+==================
 
 - Improved documentation
 
@@ -189,7 +190,7 @@ Many changes have been made in the support for logging configurations:
 
 
 2.7.0 (2009-06-11)
-------------------
+==================
 
 - Added a convenience function, ``ZConfig.configureLoggers(text)`` for
   configuring loggers.
@@ -200,7 +201,7 @@ Many changes have been made in the support for logging configurations:
 
 
 2.6.1 (2008-12-05)
-------------------
+==================
 
 - Fixed support for schema descriptions that override descriptions from a base
   schema.  If multiple base schema provide descriptions but the derived schema
@@ -213,7 +214,7 @@ Many changes have been made in the support for logging configurations:
 
 
 2.6.0 (2008-09-03)
-------------------
+==================
 
 - Added support for file rotation by time by specifying when and
   interval, rather than max-size, for log files.
@@ -222,7 +223,7 @@ Many changes have been made in the support for logging configurations:
 
 
 2.5.1 (2007-12-24)
-------------------
+==================
 
 - Made it possible to run unit tests via 'python setup.py test' (requires
   setuptools on sys.path).
@@ -231,7 +232,7 @@ Many changes have been made in the support for logging configurations:
 
 
 2.5 (2007-08-31)
-------------------------
+================
 
 *A note on the version number:*
 
@@ -268,14 +269,14 @@ something claiming to be ZConfig 2.4, and go straight to version 2.5.
 
 
 2.3.1 (2005-08-21)
-------------------
+==================
 
 - Isolated some of the case-normalization code so it will at least be
   easier to override.  This remains non-trivial.
 
 
 2.3 (2005-05-18)
-----------------
+================
 
 - Added "inet-binding-address" and "inet-connection-address" to the
   set of standard datatypes.  These are similar to the "inet-address"
@@ -290,7 +291,7 @@ something claiming to be ZConfig 2.4, and go straight to version 2.5.
 
 
 2.2 (2004-04-21)
-----------------
+================
 
 - More documentation has been written.
 
@@ -318,7 +319,7 @@ something claiming to be ZConfig 2.4, and go straight to version 2.5.
 
 
 2.1 (2004-04-12)
-----------------
+================
 
 - Removed compatibility with Python 2.1 and 2.2.
 
@@ -354,7 +355,7 @@ something claiming to be ZConfig 2.4, and go straight to version 2.5.
 
 
 2.0 (2003-10-27)
-----------------
+================
 
 - Configurations can import additional schema components using a new
   "%import" directive; this can be used to integrate 3rd-party
@@ -371,6 +372,6 @@ something claiming to be ZConfig 2.4, and go straight to version 2.5.
 
 
 1.0 (2003-03-25)
-----------------
+================
 
 - Initial release.

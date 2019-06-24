@@ -149,7 +149,7 @@ else:
 
     class SchemaToRstDirective(Directive):
         required_arguments = 1
-        optional_arguments = 2
+        optional_arguments = 0
         option_spec = {
             'file': str,
             'members': str,
@@ -157,8 +157,10 @@ else:
         }
 
         def run(self):
-            schema = load_schema(self.arguments[0],
-                                 True, self.options.get('file'))
+            schema = load_schema(
+                self.options.get('file', 'component.xml'),
+                self.arguments[0],
+            )
 
             members = ()
             if 'members' in self.options:

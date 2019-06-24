@@ -308,15 +308,31 @@ class AbstractSchemaPrinter(AbstractBaseClass):
     del TypeVisitor
 
 
-def load_schema(schema, package, package_file):
+def load_schema(schema, package=None):
+    """
+    Load the *schema* and return the schema object.
+
+    By default, *schema* is interpreted as a path on disk to a schema
+    file.
+
+    If *package* is set to a non-empty string, then *package* must
+    name a Python package, and the file in *schema* will be loaded
+    from that package. The *schema* can either refer to a component
+    definition (e.g., ``components.xml``) or to a schema.
+    """
+
     if not package:
+        # A schema file
         schema_reader = argparse.FileType('r')(schema)
-    else:
+        return ZConfig.loader.loadSchemaFile(schema_reader)
+
+    try:
+        # A component in a package
         schema_template = (
             "<schema><import package='%s' file='%s' /></schema>"
-            % (schema, package_file or 'component.xml'))
+            % (package, schema))
         from ZConfig._compat import TextIO
-        schema_reader = TextIO(schema_template)
-
-    schema = ZConfig.loader.loadSchemaFile(schema_reader)
-    return schema
+        return ZConfig.loader.loadSchemaFile(TextIO(schema_template))
+    except ZConfig.UnknownDocumentTypeError:
+        # Ok, not parseable as a component. Try a simple schema.
+        return ZConfig.loader.loadSchema('package:%s:%s' % (package, schema))

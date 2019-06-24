@@ -38,8 +38,8 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         # Files are decoded using utf-8 on open
         loader = ZConfig.loader.SchemaLoader()
         url = ZConfig.url.urljoin(CONFIG_BASE, "non-ascii.txt")
-        stream = loader.openResource(url)
-        val = stream.read()
+        with loader.openResource(url) as stream:
+            val = stream.read()
         self.assertEqual(
             val,
             u'# -*-coding: utf-8; mode: conf-*-\n'

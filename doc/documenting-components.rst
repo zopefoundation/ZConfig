@@ -5,10 +5,10 @@
  Documenting Components
 ========================
 
-ZConfig includes a docutils directive for documenting components that
-you create. This directive can function as a Sphinx extension if you
-include ``ZConfig.sphinx`` in the ``extensions`` value of your Sphinx
-configuration:
+ZConfig includes a docutils directive for documenting components and
+schemas that you create. This directive can function as a Sphinx
+extension if you include ``ZConfig.sphinx`` in the ``extensions``
+value of your Sphinx configuration:
 
 .. code-block:: python
 
@@ -24,11 +24,12 @@ There is one directive:
 
    .. versionadded:: 3.2.0
 
-   Document the components found in the Python package *package-name*.
+   Document the components or schema found in the Python package *package-name*.
 
    By default, the contents of ``component.xml`` will be documented.
    You can specify the ``:file:`` option to choose a different file
-   from that package.
+   from that package. This file can refer to a schema or component
+   definition.
 
    Each component will have its name, type, and default value
    documented. The description of the component will be rendered as

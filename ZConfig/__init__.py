@@ -115,6 +115,13 @@ class SchemaError(_ParseError):
         _ParseError.__init__(self, msg, url, lineno, colno)
 
 
+class UnknownDocumentTypeError(SchemaError):
+    """
+    Raised when the root element of the document being parsed is
+    unexpected.
+    """
+
+
 class SchemaResourceError(SchemaError):
     """Raised when there's an error locating a resource required by the
     schema.
