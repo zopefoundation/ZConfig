@@ -248,8 +248,17 @@ class FormatterFactory(object):
             else:
                 # A formatter class that supports style, but our style is
                 # non-standard, so we reach under the covers a bit.
+                #
+                # Python 3.8 adds a validate option, defaulting to True,
+                # which cases the format string to be checked.  Since
+                # safe-template is not a standard style, we want to
+                # suppress this.
+                #
+                kwargs = dict()
+                if sys.version_info >= (3, 8):
+                    kwargs['validate'] = False
                 formatter = self.factory(self.format, self.dateformat,
-                                         style='$')
+                                         style='$', **kwargs)
                 assert formatter._style._fmt == self.format
                 formatter._style = stylist
         else:
