@@ -25,6 +25,17 @@ import ZConfig.components.logger.formatter
 import ZConfig.components.logger.tests.support
 
 
+# In Python 3.8, a KeyError raised by string interpolation is re-written
+# into a ValueError reporting a reference to an undefined field.  We're
+# not masking the exception, but we want to check for the right one in
+# the tests below (without catching anything else).
+#
+if sys.version_info >= (3, 8):
+    MissingFieldError = ValueError
+else:
+    MissingFieldError = KeyError
+
+
 class LogFormatStyleTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -314,7 +325,10 @@ class CustomFormatterFactoryWithoutStyleParamTestCase(
 class StylelessFormatter(logging.Formatter):
 
     def __init__(self, fmt=None, datefmt=None):
-        logging.Formatter.__init__(self, fmt=fmt, datefmt=datefmt)
+        kwargs = dict()
+        if sys.version_info >= (3, 8):
+            kwargs['validate'] = False
+        logging.Formatter.__init__(self, fmt=fmt, datefmt=datefmt, **kwargs)
 
 
 def styleless_formatter(fmt=None, datefmt=None):
@@ -552,9 +566,9 @@ class ArbitraryFieldsTestCase(StyledFormatterTestHelper, unittest.TestCase):
             arbitrary_fields=True)
 
         # The formatter still breaks when it references an undefined field:
-        with self.assertRaises(KeyError) as cm:
+        with self.assertRaises(MissingFieldError) as cm:
             formatter.format(self.record)
-        self.assertEqual(str(cm.exception), "'undefined_field'")
+        self.assertIn("'undefined_field'", str(cm.exception))
 
     def test_classic_arbitrary_field_present(self):
         formatter = self.get_formatter(
@@ -574,9 +588,9 @@ class ArbitraryFieldsTestCase(StyledFormatterTestHelper, unittest.TestCase):
             arbitrary_fields=True)
 
         # The formatter still breaks when it references an undefined field:
-        with self.assertRaises(KeyError) as cm:
+        with self.assertRaises(MissingFieldError) as cm:
             formatter.format(self.record)
-        self.assertEqual(str(cm.exception), "'undefined_field'")
+        self.assertIn("'undefined_field'", str(cm.exception))
 
     def test_format_arbitrary_field_present(self):
         formatter = self.get_formatter(
@@ -596,9 +610,9 @@ class ArbitraryFieldsTestCase(StyledFormatterTestHelper, unittest.TestCase):
             arbitrary_fields=True)
 
         # The formatter still breaks when it references an undefined field:
-        with self.assertRaises(KeyError) as cm:
+        with self.assertRaises(MissingFieldError) as cm:
             formatter.format(self.record)
-        self.assertEqual(str(cm.exception), "'undefined_field'")
+        self.assertIn("'undefined_field'", str(cm.exception))
 
     def test_template_arbitrary_field_present(self):
         formatter = self.get_formatter(
