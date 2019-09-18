@@ -5,7 +5,10 @@
 3.5.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Added support for Python 3.8.  This primarily involves avoiding the
+  new-in-3.8 validation of the format string when using the
+  'safe-template' format style, since that's not supported in the Python
+  standard library.
 
 
 3.5.0 (2019-06-24)
