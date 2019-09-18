@@ -250,7 +250,7 @@ class FormatterFactory(object):
                 # non-standard, so we reach under the covers a bit.
                 #
                 # Python 3.8 adds a validate option, defaulting to True,
-                # which cases the format string to be checked.  Since
+                # which causes the format string to be checked.  Since
                 # safe-template is not a standard style, we want to
                 # suppress this.
                 #
