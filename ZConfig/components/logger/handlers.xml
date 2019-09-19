@@ -148,10 +148,10 @@
 
             \b  \f  \n  \r  \t
 
-        %-replacements are checked to refer to the fields available in
+        Field placeholders are checked to refer to the fields available in
         the :class:`logging.LogRecord` instances created without extra
         fields.  Referring to other fields will generate an error in
-        loading the configuration.
+        loading the configuration, unless ``arbitrary-fields`` is true.
       </description>
     </key>
     <key name="encoding" required="no" datatype="string">
