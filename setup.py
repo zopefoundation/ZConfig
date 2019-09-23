@@ -47,6 +47,9 @@ options = dict(
             'zconfig = ZConfig.validator:main',
             'zconfig_schema2html = ZConfig.schema2html:main',
         ],
+        'pygments.lexers': [
+            'zconfig = ZConfig.pygments:ZConfigLexer',
+        ],
     },
     include_package_data=True,
     zip_safe=False,
@@ -75,7 +78,7 @@ options = dict(
         'test': tests_require,
         'docs': [
             'sphinxcontrib-programoutput',
-        ]
+        ],
     },
 )
 
