@@ -25,8 +25,8 @@ try:
     import pygments.token
 except ImportError:
     pygments = None
-
-import ZConfig.pygments
+else:
+    import ZConfig.pygments
 
 
 class ZConfigLexerTestCase(unittest.TestCase):
