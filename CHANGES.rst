@@ -2,13 +2,18 @@
  Change History for ZConfig
 ============================
 
-3.5.1 (unreleased)
+3.6.0 (unreleased)
 ==================
 
 - Added support for Python 3.8.  This primarily involves avoiding the
   new-in-3.8 validation of the format string when using the
   'safe-template' format style, since that's not supported in the Python
   standard library.
+
+- Added ``ZConfig.pygments`` module containing a lexer compatible with
+  the ``pygments`` library.  Made discoverable via an entry point; use
+  **zconfig** as the highlight language for ``code-block`` directives in
+  Sphinx documents.
 
 
 3.5.0 (2019-06-24)

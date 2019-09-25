@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2002, 2003 Zope Foundation and Contributors.
+# Copyright (c) 2002, 2003, 2019 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -19,7 +19,8 @@ import re
 import ZConfig
 
 
-_name_match = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*").match
+_name_re = r'[a-zA-Z_][a-zA-Z0-9_]*'
+_name_match = re.compile(_name_re).match
 
 
 def substitute(s, mapping):
