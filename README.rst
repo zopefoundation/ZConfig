@@ -44,7 +44,7 @@ Reference documentation is available at https://zconfig.readthedocs.io.
 Information on the latest released version of the ZConfig package is
 available at
 
-  https://pypi.python.org/pypi/ZConfig/
+  https://pypi.org/project/ZConfig/
 
 You may either create an RPM and install this, or install directly from
 the source distribution.
