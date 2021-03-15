@@ -252,3 +252,17 @@ For example, the value for ``key`` will evaluate to ``value``::
 
   %define name value
   key $name
+
+
+Substitution in Values from Environment Variables
+-------------------------------------------------
+
+Values in :mod:`ZConfig` can be substituted from environment variables.
+It utilizes Pythons ``os.getenv`` to fetch the values. Syntax is a ``$``
+followed by round brackets (parentheses). In this example the variable
+key gets a value assigned from the enviroment named ENVKEY::
+
+  key $(ENVKEY)
+
+Further details and examples are described in the :mod:`ZConfig.substitution`
+module.

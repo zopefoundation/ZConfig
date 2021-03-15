@@ -9,13 +9,14 @@ found in the Bourne shell (``sh`` on most UNIX platforms).
 
 The replacements supported by this module include:
 
-=========== ================================ =====
-Source      Replacement                      Notes
-=========== ================================ =====
-``$$``      ``$``                            (1)
-``$name``   The result of looking up *name*  (2)
+=========== =================================================== =====
+Source      Replacement                                         Notes
+=========== =================================================== =====
+``$$``      ``$``                                               (1)
+``$name``   The result of looking up *name*                     (2)
 ``${name}`` The result of looking up *name*
-=========== ================================ =====
+``$(name)`` The result of looking up *name*  in the environment (3)
+=========== =================================================== =====
 
 Notes:
 
@@ -27,6 +28,7 @@ Notes:
 2.  Any character which immediately follows *name* may
     not be a valid character in a name.
 
+3. This is not Bourne shell style.
 
 In each case, *name* is a non-empty sequence of alphanumeric and
 underscore characters not starting with a digit.  If there is not a
@@ -59,3 +61,8 @@ Examples
   'value'
   >>> substitute('$top', d)
   '$middle'
+  >>> import os
+  >>> os.environ['from_environment'] = 'From environment.'
+  >>> substitute('$(from_einvironment)', d)
+  'From environment.'
+  
