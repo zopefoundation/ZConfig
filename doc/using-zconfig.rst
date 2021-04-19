@@ -163,7 +163,7 @@ abstract types defined by the application.  This allows third-party
 implementations of abstract types to be used in place of or in
 addition to implementations provided with the application.
 
-Consider an example application application which supports logging in
+Consider an example application which supports logging in
 the same way Zope 2 does.  There are some parameters which configure
 the general behavior of the logging mechanism, and an arbitrary number
 of **log handlers** may be specified to control how the log
