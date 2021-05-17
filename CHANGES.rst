@@ -5,8 +5,8 @@
 3.6.0 (unreleased)
 ==================
 
-- Added support for Python 3.8 and 3.9.  This primarily involves avoiding
-  the new-in-3.8 validation of the format string when using the
+- Added support for Python 3.8, 3.9 and 3.10.  This primarily involves
+  avoiding the new-in-3.8 validation of the format string when using the
   'safe-template' format style, since that's not supported in the Python
   standard library.
 
