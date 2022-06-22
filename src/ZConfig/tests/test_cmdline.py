@@ -18,7 +18,6 @@ import unittest
 
 import ZConfig
 import ZConfig.tests.support
-
 from ZConfig.cmdline import ExtendedConfigLoader
 
 

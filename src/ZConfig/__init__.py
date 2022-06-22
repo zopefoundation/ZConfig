@@ -33,8 +33,9 @@ separate packages.
 """
 __docformat__ = "reStructuredText"
 
-from ZConfig._compat import TextIO
 import ZConfig.loader
+from ZConfig._compat import TextIO
+
 
 loadConfigFile = ZConfig.loader.loadConfigFile
 loadSchemaFile = ZConfig.loader.loadSchemaFile

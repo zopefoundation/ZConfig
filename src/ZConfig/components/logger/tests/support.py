@@ -20,10 +20,10 @@ import logging
 import os
 import tempfile
 
-from ZConfig.components.logger import loghandler
-import ZConfig._compat
 import ZConfig
+import ZConfig._compat
 import ZConfig.tests.support
+from ZConfig.components.logger import loghandler
 
 
 class LoggingTestHelper(ZConfig.tests.support.TestHelper):

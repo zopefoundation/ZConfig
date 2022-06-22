@@ -16,11 +16,9 @@ import unittest
 
 from ZConfig import ConfigurationError
 from ZConfig import DataConversionError
-
-from ZConfig.matcher import SectionValue
-from ZConfig.matcher import SectionMatcher
 from ZConfig.matcher import BaseMatcher
-
+from ZConfig.matcher import SectionMatcher
+from ZConfig.matcher import SectionValue
 from ZConfig.tests.support import TestHelper
 
 

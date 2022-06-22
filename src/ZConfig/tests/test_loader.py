@@ -21,11 +21,10 @@ import unittest
 import ZConfig
 import ZConfig.loader
 import ZConfig.url
-
 from ZConfig._compat import NStringIO as StringIO
 from ZConfig._compat import urllib2
-
-from ZConfig.tests.support import CONFIG_BASE, TestHelper
+from ZConfig.tests.support import CONFIG_BASE
+from ZConfig.tests.support import TestHelper
 
 
 myfile = os.path.abspath(__file__)

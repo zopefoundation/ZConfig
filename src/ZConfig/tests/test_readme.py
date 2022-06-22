@@ -12,13 +12,14 @@
 #
 ##############################################################################
 import doctest
-import manuel.capture
-import manuel.doctest
-import manuel.testing
+import logging
 import os
 import os.path
 import unittest
-import logging
+
+import manuel.capture
+import manuel.doctest
+import manuel.testing
 
 
 options = doctest.REPORT_NDIFF | doctest.ELLIPSIS
@@ -60,7 +61,7 @@ def docSetUp(test):
     old['pwd'] = os.getcwd()
     doc_path = os.path.join(
         findRoot(),
-        'doc')
+        'docs')
     os.chdir(doc_path)
     setUp(test)
 
@@ -83,7 +84,7 @@ def test_suite():
         ),
         manuel.testing.TestSuite(
             plugins,
-            os.path.join(root, 'doc', 'using-logging.rst'),
+            os.path.join(root, 'docs', 'using-logging.rst'),
             globs={'resetLoggers': lambda: tearDown(None)},
             setUp=docSetUp, tearDown=docTearDown,
         ),

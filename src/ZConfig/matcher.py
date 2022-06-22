@@ -14,9 +14,8 @@
 """Utility that manages the binding of configuration data to a section."""
 
 import ZConfig
-
-from ZConfig.info import ValueInfo
 from ZConfig._compat import raise_with_same_tb
+from ZConfig.info import ValueInfo
 
 
 class BaseMatcher(object):

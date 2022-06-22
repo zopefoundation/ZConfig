@@ -20,12 +20,11 @@ import sys
 import unittest
 
 import ZConfig
-
+from ZConfig._compat import NStringIO as StringIO
+from ZConfig._compat import pathname2url
 from ZConfig.loader import ConfigLoader
 from ZConfig.url import urljoin
 
-from ZConfig._compat import NStringIO as StringIO
-from ZConfig._compat import pathname2url
 
 INPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
 CONFIG_BASE = "file://%s/" % pathname2url(INPUT_DIR)

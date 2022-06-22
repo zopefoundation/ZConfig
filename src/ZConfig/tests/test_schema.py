@@ -16,8 +16,8 @@
 import unittest
 
 import ZConfig
-
-from ZConfig.tests.support import TestHelper, CONFIG_BASE
+from ZConfig.tests.support import CONFIG_BASE
+from ZConfig.tests.support import TestHelper
 
 
 def uppercase(value):
@@ -1182,8 +1182,8 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
                             "non-blank character data")
 
     def test_error_subclass(self):
-        import ZConfig.schema
         import ZConfig.datatypes
+        import ZConfig.schema
 
         class MockLoader(object):
             registry = ZConfig.datatypes.Registry()

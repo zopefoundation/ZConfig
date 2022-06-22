@@ -17,9 +17,10 @@ Test driver for ZConfig.schemaless.
 """
 __docformat__ = "reStructuredText"
 
+import unittest
+
 import manuel.doctest
 import manuel.testing
-import unittest
 
 from ZConfig.schemaless import Section
 

@@ -14,12 +14,11 @@
 """Objects that can describe a ZConfig schema."""
 
 import copy
-import ZConfig
-
 from abc import abstractmethod
 from collections import OrderedDict
 from functools import total_ordering
 
+import ZConfig
 from ZConfig._compat import AbstractBaseClass
 
 

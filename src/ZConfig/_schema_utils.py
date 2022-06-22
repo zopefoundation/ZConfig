@@ -13,30 +13,29 @@
 ##############################################################################
 from __future__ import print_function
 
-from abc import abstractmethod
 import argparse
 import itertools
 import sys
 import textwrap
+from abc import abstractmethod
+
 
 try:
-    from itertools import ifilterfalse
     from itertools import ifilter
+    from itertools import ifilterfalse
 except ImportError:
     # Py3
     from itertools import filterfalse as ifilterfalse
     ifilter = filter
 
 import ZConfig.loader
-
 from ZConfig._compat import AbstractBaseClass
-
 from ZConfig.datatypes import null_conversion
-from ZConfig.info import SectionType
-from ZConfig.info import SectionInfo
-from ZConfig.info import ValueInfo
-from ZConfig.info import MultiKeyInfo
 from ZConfig.info import AbstractType
+from ZConfig.info import MultiKeyInfo
+from ZConfig.info import SectionInfo
+from ZConfig.info import SectionType
+from ZConfig.info import ValueInfo
 
 
 MARKER = object()

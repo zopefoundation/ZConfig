@@ -21,16 +21,13 @@ import sys
 import unittest
 
 import ZConfig
-
+import ZConfig.components.logger.tests.support
+import ZConfig.tests.support
+from ZConfig._compat import NStringIO as StringIO
+from ZConfig._compat import maxsize
 from ZConfig.components.logger import datatypes
 from ZConfig.components.logger import handlers
 from ZConfig.components.logger import loghandler
-
-from ZConfig._compat import NStringIO as StringIO
-from ZConfig._compat import maxsize
-
-import ZConfig.tests.support
-import ZConfig.components.logger.tests.support
 
 
 class CustomFormatter(logging.Formatter):

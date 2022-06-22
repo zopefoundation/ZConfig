@@ -18,7 +18,6 @@ import unittest
 
 import ZConfig
 import ZConfig.tests.support
-
 from ZConfig._compat import NStringIO as StringIO
 
 

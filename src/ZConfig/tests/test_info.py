@@ -14,18 +14,16 @@
 
 import unittest
 
-from ZConfig import SchemaError
 from ZConfig import ConfigurationError
-
-from ZConfig.info import Unbounded
+from ZConfig import SchemaError
+from ZConfig.info import AbstractType
 from ZConfig.info import BaseInfo
 from ZConfig.info import BaseKeyInfo
 from ZConfig.info import KeyInfo
-from ZConfig.info import SectionInfo
-from ZConfig.info import AbstractType
-from ZConfig.info import SectionType
 from ZConfig.info import SchemaType
-
+from ZConfig.info import SectionInfo
+from ZConfig.info import SectionType
+from ZConfig.info import Unbounded
 from ZConfig.tests.support import TestHelper
 
 

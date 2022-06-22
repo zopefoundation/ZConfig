@@ -16,7 +16,6 @@
 import os.path
 import re
 import sys
-
 from abc import abstractmethod
 from io import StringIO
 
@@ -27,12 +26,11 @@ import ZConfig.info
 import ZConfig.matcher
 import ZConfig.schema
 import ZConfig.url
-
-from ZConfig._compat import reraise
-from ZConfig._compat import raise_with_same_tb
-from ZConfig._compat import urllib2
 from ZConfig._compat import AbstractBaseClass
 from ZConfig._compat import pathname2url
+from ZConfig._compat import raise_with_same_tb
+from ZConfig._compat import reraise
+from ZConfig._compat import urllib2
 
 
 def loadSchema(url):

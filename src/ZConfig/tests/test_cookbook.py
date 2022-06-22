@@ -20,8 +20,9 @@ The ZConfig Cookbook is available online at:
 
 """
 
-import ZConfig.tests.support
 import unittest
+
+import ZConfig.tests.support
 
 
 def basic_key_mapping_password_to_passwd(key):

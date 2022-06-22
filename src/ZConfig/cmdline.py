@@ -28,7 +28,6 @@ Each setting is given by a value specifier string, as described by
 import ZConfig
 import ZConfig.loader
 import ZConfig.matcher
-
 from ZConfig._compat import raise_with_same_tb
 
 

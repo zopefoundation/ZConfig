@@ -30,12 +30,15 @@ properly propagated.
 
 """
 
+import datetime
 import os
 import re
 import sys
-import datetime
 
-from ZConfig._compat import have_unicode, text_type, PY3
+from ZConfig._compat import PY3
+from ZConfig._compat import have_unicode
+from ZConfig._compat import text_type
+
 
 if PY3:
     from functools import reduce

@@ -15,12 +15,14 @@
 
 # This is needed to support Python 2.1.
 from __future__ import nested_scopes
-import os
 
+import os
 import unittest
 
-from ZConfig import SubstitutionReplacementError, SubstitutionSyntaxError
-from ZConfig.substitution import isname, substitute
+from ZConfig import SubstitutionReplacementError
+from ZConfig import SubstitutionSyntaxError
+from ZConfig.substitution import isname
+from ZConfig.substitution import substitute
 
 
 class SubstitutionTestCase(unittest.TestCase):

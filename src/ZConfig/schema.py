@@ -18,11 +18,10 @@ import sys
 import xml.sax
 
 import ZConfig
-
 from ZConfig import info
 from ZConfig import url
-
 from ZConfig._compat import raise_with_same_tb
+
 
 BLANK = u''
 

@@ -11,16 +11,17 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import print_function, absolute_import
-
+from __future__ import absolute_import
+from __future__ import print_function
 
 from contextlib import contextmanager
 
+
 try:
-    from docutils import nodes
-    import docutils.utils
     import docutils.frontend
     import docutils.parsers.rst
+    import docutils.utils
+    from docutils import nodes
     from docutils.parsers.rst import Directive
 except ImportError:  # pragma: no cover
     RstSchemaPrinter = None
@@ -28,10 +29,10 @@ except ImportError:  # pragma: no cover
 else:
 
     from ZConfig._compat import string_types
-    from ZConfig._schema_utils import load_schema
+    from ZConfig._schema_utils import MARKER
     from ZConfig._schema_utils import AbstractSchemaFormatter
     from ZConfig._schema_utils import AbstractSchemaPrinter
-    from ZConfig._schema_utils import MARKER
+    from ZConfig._schema_utils import load_schema
 
     class RstSchemaFormatter(AbstractSchemaFormatter):
 

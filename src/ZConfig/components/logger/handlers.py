@@ -13,14 +13,13 @@
 ##############################################################################
 """ZConfig factory datatypes for log handlers."""
 
-from abc import abstractmethod
 import functools
 import sys
+from abc import abstractmethod
 
-from ZConfig._compat import urlparse
-
-from ZConfig.components.logger.factory import Factory
 import ZConfig.components.logger.formatter
+from ZConfig._compat import urlparse
+from ZConfig.components.logger.factory import Factory
 
 
 _log_format_variables = (

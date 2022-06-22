@@ -17,11 +17,9 @@ import tempfile
 import unittest
 
 import ZConfig
-
+from ZConfig._compat import NStringIO as StringIO
 from ZConfig.tests.support import CONFIG_BASE
 from ZConfig.tests.support import TestHelper
-
-from ZConfig._compat import NStringIO as StringIO
 
 
 class ConfigurationTestCase(TestHelper, unittest.TestCase):

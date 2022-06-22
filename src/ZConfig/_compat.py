@@ -12,10 +12,10 @@
 #
 ##############################################################################
 
-from io import StringIO
-from io import BytesIO
 import abc
 import sys
+from io import BytesIO
+from io import StringIO
 
 
 PY3 = sys.version_info[0] >= 3

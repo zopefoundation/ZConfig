@@ -17,10 +17,10 @@ import textwrap
 import unittest
 
 import docutils
-import docutils.utils
 import docutils.frontend
 import docutils.parsers.rst
 import docutils.parsers.rst.directives
+import docutils.utils
 
 
 try:
@@ -32,12 +32,9 @@ try:
 except ImportError:
     from ZConfig._compat import NStringIO as StringIO
 
-
 from ZConfig import schema2html
-
-from ZConfig.sphinx import SchemaToRstDirective
 from ZConfig.sphinx import RstSchemaFormatter
-
+from ZConfig.sphinx import SchemaToRstDirective
 from ZConfig.tests import support
 
 

@@ -16,8 +16,9 @@
 ZConfig.components.basic.
 """
 
-import ZConfig.tests.support
 import unittest
+
+import ZConfig.tests.support
 
 
 SIMPLE_SCHEMA = '''\

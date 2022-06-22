@@ -18,5 +18,6 @@ $Id: __init__.py,v 1.2 2003/10/03 17:11:33 fdrake Exp $
 
 import os
 
+
 here = os.path.dirname(__file__)
 __path__.append(os.path.join(here, "extras"))

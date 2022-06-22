@@ -17,9 +17,9 @@ import re
 
 import ZConfig
 import ZConfig.url
-
-from ZConfig.substitution import isname, substitute
 from ZConfig._compat import raise_with_same_tb
+from ZConfig.substitution import isname
+from ZConfig.substitution import substitute
 
 
 # _name_re does not allow "(" or ")" for historical reasons.  Though

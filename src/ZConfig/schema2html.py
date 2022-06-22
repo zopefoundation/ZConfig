@@ -14,16 +14,19 @@
 
 import argparse
 from contextlib import contextmanager
+
+
 try:
     import html
 except ImportError:
     # Py2
     import cgi as html
+
 import sys
 
-from ZConfig._schema_utils import AbstractSchemaPrinter
-from ZConfig._schema_utils import AbstractSchemaFormatter
 from ZConfig._schema_utils import MARKER
+from ZConfig._schema_utils import AbstractSchemaFormatter
+from ZConfig._schema_utils import AbstractSchemaPrinter
 from ZConfig._schema_utils import load_schema
 from ZConfig.sphinx import RstSchemaPrinter
 

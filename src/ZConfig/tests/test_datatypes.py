@@ -13,18 +13,18 @@
 ##############################################################################
 """Tests of standard ZConfig datatypes."""
 
+import datetime
 import os
-import sys
 import shutil
 import socket
-import datetime
+import sys
 import tempfile
 import unittest
 
 import ZConfig._compat
 import ZConfig.datatypes
-
 from ZConfig.tests.support import TestHelper
+
 
 here = os.path.abspath(__file__)
 
