@@ -9,6 +9,9 @@ ZConfig: Schema-driven configuration
         :target: https://pypi.org/project/ZConfig/
         :alt: Supported Python versions
 
+.. image:: https://github.com/zopefoundation/ZConfig/actions/workflows/tests.yml/badge.svg
+        :target: https://github.com/zopefoundation/ZConfig/actions/workflows/tests.yml
+
 .. image:: https://coveralls.io/repos/github/zopefoundation/ZConfig/badge.svg?branch=master
         :target: https://coveralls.io/github/zopefoundation/ZConfig?branch=master
 
