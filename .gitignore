@@ -1,27 +1,32 @@
+# Generated from:
+# https://github.com/zopefoundation/meta/tree/master/config/pure-python
+*.dll
+*.egg-info/
+*.profraw
 *.pyc
-/.cache/
-/.tox/
-/build/
-/dist/
-/doc/_build
-ZConfig.egg-info
+*.pyo
+*.so
+.coverage
+.coverage.*
+.eggs/
+.installed.cfg
+.mr.developer.cfg
+.tox/
+.vscode/
 __pycache__/
-nosetests.xml
-
-# Buildout
-#
-/.installed.cfg
-/bin/
-/develop-eggs/
-/eggs/
-/parts/
-
-# Coverage
-#
-# No / at the end of htmlcov so it can be a symlink that points to some
-# more interesting location (possibly served by a webserver).
-#
-/.coverage
-/.coverage.*
-/coverage.xml
-/htmlcov
+bin/
+build/
+coverage.xml
+develop-eggs/
+develop/
+dist/
+docs/_build
+eggs/
+etc/
+lib/
+lib64
+log/
+parts/
+pyvenv.cfg
+testing.log
+var/

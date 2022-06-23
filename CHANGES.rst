@@ -5,7 +5,7 @@
 3.6.1 (unreleased)
 ==================
 
-- Nothing yet.
+- Drop support for Python 3.4.
 
 
 3.6.0 (2021-05-19)

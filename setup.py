@@ -42,6 +42,7 @@ options = dict(
         "ZConfig.tests.library.thing",
         "ZConfig.tests.library.widget",
         ],
+    package_dir={'': 'src'},
     entry_points={
         'console_scripts': [
             'zconfig = ZConfig.validator:main',
@@ -63,7 +64,6 @@ options = dict(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
