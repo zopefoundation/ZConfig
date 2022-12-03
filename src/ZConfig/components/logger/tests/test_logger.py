@@ -352,7 +352,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         syslog.close()  # avoid ResourceWarning
         try:
             syslog.socket.close()  # ResourceWarning under 3.2
-        except socket.SocketError:  # pragma: no cover
+        except socket.error:  # pragma: no cover
             pass
 
     def test_with_http_logger_localhost(self):
