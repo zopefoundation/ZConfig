@@ -5,6 +5,8 @@
 3.6.1 (unreleased)
 ==================
 
+- Add support for Python 3.11.
+
 - Drop support for Python 3.4.
 
 
