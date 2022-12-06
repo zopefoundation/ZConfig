@@ -339,7 +339,6 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         self.assertTrue(sio.getvalue().find("Don't panic") >= 0)
 
     def test_with_syslog(self):
-        import socket
         logger = self.check_simple_logger("<eventlog>\n"
                                           "  <syslog>\n"
                                           "    level error\n"
