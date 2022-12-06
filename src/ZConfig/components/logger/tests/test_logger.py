@@ -339,7 +339,6 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         self.assertTrue(sio.getvalue().find("Don't panic") >= 0)
 
     def test_with_syslog(self):
-        import socket
         logger = self.check_simple_logger("<eventlog>\n"
                                           "  <syslog>\n"
                                           "    level error\n"
@@ -350,10 +349,6 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         self.assertEqual(syslog.level, logging.ERROR)
         self.assertTrue(isinstance(syslog, loghandler.SysLogHandler))
         syslog.close()  # avoid ResourceWarning
-        try:
-            syslog.socket.close()  # ResourceWarning under 3.2
-        except socket.SocketError:  # pragma: no cover
-            pass
 
     def test_with_http_logger_localhost(self):
         logger = self.check_simple_logger("<eventlog>\n"
