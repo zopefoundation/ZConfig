@@ -12,15 +12,14 @@
 #
 ##############################################################################
 
+from abc import ABC
 from abc import abstractmethod
-
-from ZConfig._compat import AbstractBaseClass
 
 
 _marker = object()
 
 
-class Factory(AbstractBaseClass):
+class Factory(ABC):
     """Generic wrapper for instance construction.
 
     Calling the factory causes the instance to be created if it hasn't

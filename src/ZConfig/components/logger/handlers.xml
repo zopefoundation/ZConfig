@@ -14,9 +14,7 @@
       <description>
         Logging formatter class.
 
-        The default is :class:`logging.Formatter` except for Python 2,
-        where a compatible formatter is used that supports the ``style``
-        option added in Python 3.
+        The default is :class:`logging.Formatter`.
 
         One alternative is 'zope.exceptions.log.Formatter',
         which enhances exception tracebacks with information from

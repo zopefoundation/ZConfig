@@ -18,10 +18,10 @@ import contextlib
 import os
 import sys
 import unittest
+from io import StringIO
+from urllib.request import pathname2url
 
 import ZConfig
-from ZConfig._compat import NStringIO as StringIO
-from ZConfig._compat import pathname2url
 from ZConfig.loader import ConfigLoader
 from ZConfig.url import urljoin
 
@@ -76,7 +76,7 @@ def with_stdin_from_input_file(fname):
     return make_wrapper
 
 
-class TestHelper(object):
+class TestHelper:
     """Utility methods which can be used with the schema support."""
 
     # Not derived from unittest.TestCase; some test runners seem to

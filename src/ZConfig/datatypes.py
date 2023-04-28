@@ -34,17 +34,10 @@ import datetime
 import os
 import re
 import sys
-
-from ZConfig._compat import PY3
-from ZConfig._compat import have_unicode
-from ZConfig._compat import text_type
+from functools import reduce
 
 
-if PY3:
-    from functools import reduce
-
-
-class MemoizedConversion(object):
+class MemoizedConversion:
     """Simple memoization for potentially expensive conversions.
 
     This conversion helper caches each successful conversion for re-use
@@ -67,7 +60,7 @@ class MemoizedConversion(object):
             return v
 
 
-class RangeCheckedConversion(object):
+class RangeCheckedConversion:
     """Conversion helper that performs range checks on the result of
     another conversion.
 
@@ -95,7 +88,7 @@ class RangeCheckedConversion(object):
         return v
 
 
-class RegularExpressionConversion(object):
+class RegularExpressionConversion:
     """Conversion that checks that the input matches the regular
     expression *regex*.
 
@@ -113,7 +106,7 @@ class RegularExpressionConversion(object):
         if m and m.group() == value:
             return value
         else:
-            raise ValueError("%s: %s" % (self.reason, repr(value)))
+            raise ValueError("{}: {}".format(self.reason, repr(value)))
 
 
 def check_locale(value):
@@ -144,12 +137,7 @@ class BasicKeyConversion(RegularExpressionConversion):
 
 
 class ASCIIConversion(RegularExpressionConversion):
-
-    def __call__(self, value):
-        value = RegularExpressionConversion.__call__(self, value)
-        if have_unicode and isinstance(value, text_type):
-            value = value.encode("ascii")
-        return value
+    pass
 
 
 _ident_re = "[_a-zA-Z][_a-zA-Z0-9]*"
@@ -167,7 +155,7 @@ class DottedNameConversion(ASCIIConversion):
 
     def __init__(self):
         ASCIIConversion.__init__(self,
-                                 r"%s(?:\.%s)*" % (_ident_re, _ident_re))
+                                 r"{}(?:\.{})*".format(_ident_re, _ident_re))
 
 
 class DottedNameSuffixConversion(ASCIIConversion):
@@ -206,7 +194,7 @@ def string_list(s):
 port_number = RangeCheckedConversion(integer, min=0, max=0xffff).__call__
 
 
-class InetAddress(object):
+class InetAddress:
 
     def __init__(self, default_host):
         self.DEFAULT_HOST = default_host
@@ -250,7 +238,7 @@ inet_connection_address = InetAddress("127.0.0.1")
 inet_binding_address = InetAddress("")
 
 
-class SocketAddress(object):
+class SocketAddress:
     # Parsing results in family and address
     # Family can be AF_UNIX (for addresses that are path names)
     # or AF_INET6 (for inet addresses with colons in them)
@@ -315,7 +303,7 @@ class IpaddrOrHostname(RegularExpressionConversion):
             import socket
             try:
                 socket.inet_pton(socket.AF_INET6, result)
-            except socket.error:
+            except OSError:
                 raise ValueError('%r is not a valid IPv6 address' % value)
         return result
 
@@ -353,7 +341,7 @@ def existing_dirpath(v):
                      'does not exist.' % v)
 
 
-class SuffixMultiplier(object):
+class SuffixMultiplier:
     # d is a dictionary of suffixes to integer multipliers.  If no suffixes
     # match, default is the multiplier.  Matches are case insensitive.  Return
     # values are in the fundamental unit.
@@ -409,7 +397,7 @@ def timedelta(s):
         elif suffix == 's':
             seconds = val
         else:
-            raise TypeError('bad part %s in %s' % (part, s))
+            raise TypeError('bad part {} in {}'.format(part, s))
     return datetime.timedelta(weeks=weeks, days=days, hours=hours,
                               minutes=minutes, seconds=seconds)
 
@@ -451,7 +439,7 @@ stock_datatypes = {
     }
 
 
-class Registry(object):
+class Registry:
     """Implementation of a simple type registry.
 
     If given, *stock* should be a mapping which defines the "built-in"

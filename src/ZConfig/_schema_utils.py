@@ -11,25 +11,16 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import print_function
 
 import argparse
 import itertools
 import sys
 import textwrap
+from abc import ABC
 from abc import abstractmethod
-
-
-try:
-    from itertools import ifilter
-    from itertools import ifilterfalse
-except ImportError:
-    # Py3
-    from itertools import filterfalse as ifilterfalse
-    ifilter = filter
+from itertools import filterfalse
 
 import ZConfig.loader
-from ZConfig._compat import AbstractBaseClass
 from ZConfig.datatypes import null_conversion
 from ZConfig.info import AbstractType
 from ZConfig.info import MultiKeyInfo
@@ -41,7 +32,7 @@ from ZConfig.info import ValueInfo
 MARKER = object()
 
 
-class _VisitorBuilder(object):
+class _VisitorBuilder:
 
     def __init__(self):
         self.visitors = []
@@ -53,7 +44,7 @@ class _VisitorBuilder(object):
         return dec
 
 
-class AbstractSchemaFormatter(AbstractBaseClass):
+class AbstractSchemaFormatter(ABC):
 
     def __init__(self, schema, stream=None):
         self.stream = stream or sys.stdout
@@ -101,7 +92,7 @@ class AbstractSchemaFormatter(AbstractBaseClass):
 
             for k, v in sorted(kwargs.items()):
                 if v:
-                    self.write(self.esc("(%s: %s)" % (k, v)))
+                    self.write(self.esc("({}: {})".format(k, v)))
 
     def description(self, description):
         if description:
@@ -133,7 +124,7 @@ class AbstractSchemaFormatter(AbstractBaseClass):
         "Context manager for the whole document"
 
 
-class AbstractSchemaPrinter(AbstractBaseClass):
+class AbstractSchemaPrinter(ABC):
 
     def __init__(self, schema, stream=None,
                  allowed_names=(), excluded_names=()):
@@ -162,12 +153,11 @@ class AbstractSchemaPrinter(AbstractBaseClass):
             return it
 
         if allowed_names:
-            self._iter_schema_items = _make_filter(allowed_names, ifilter)
+            self._iter_schema_items = _make_filter(allowed_names, filter)
 
         if excluded_names:
             excluded_names = {x.lower() for x in excluded_names}
-            self._iter_schema_items = _make_filter(excluded_names,
-                                                   ifilterfalse)
+            self._iter_schema_items = _make_filter(excluded_names, filterfalse)
             self._included = lambda st: st.name not in excluded_names
 
     @abstractmethod
@@ -215,8 +205,7 @@ class AbstractSchemaPrinter(AbstractBaseClass):
                     # XXX: This isn't catching everything. Witness the
                     # relstorage component.
                 elif isinstance(info, SectionType):
-                    for x in abstract_sections(info):
-                        yield x
+                    yield from abstract_sections(info)
         return itertools.chain(abstract_sections(everything()), everything())
 
     def printSchema(self):
@@ -330,8 +319,8 @@ def load_schema(schema, package=None):
         schema_template = (
             "<schema><import package='%s' file='%s' /></schema>"
             % (package, schema))
-        from ZConfig._compat import TextIO
-        return ZConfig.loader.loadSchemaFile(TextIO(schema_template))
+        from io import StringIO
+        return ZConfig.loader.loadSchemaFile(StringIO(schema_template))
     except ZConfig.UnknownDocumentTypeError:
         # Ok, not parseable as a component. Try a simple schema.
-        return ZConfig.loader.loadSchema('package:%s:%s' % (package, schema))
+        return ZConfig.loader.loadSchema(f'package:{package}:{schema}')

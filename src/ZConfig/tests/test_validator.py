@@ -11,12 +11,11 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import absolute_import
 
 import unittest
+from io import StringIO
 
 from ZConfig import validator
-from ZConfig._compat import NStringIO as StringIO
 from ZConfig.tests import support
 
 

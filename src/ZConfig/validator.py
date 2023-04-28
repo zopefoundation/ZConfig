@@ -15,7 +15,6 @@
 """Script to check validity of a configuration file.
 """
 
-from __future__ import print_function
 
 import argparse
 import sys

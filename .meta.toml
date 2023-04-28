@@ -16,7 +16,7 @@ with-macos = false
 use-flake8 = true
 
 [coverage]
-fail-under = 95
+fail-under = 98
 
 [manifest]
 additional-rules = [

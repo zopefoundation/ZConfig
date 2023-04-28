@@ -21,26 +21,8 @@ import logging
 import string
 import sys
 
-import ZConfig._compat
 
-
-if sys.version_info[0] == 2:
-
-    class StringFormatter(string.Formatter):
-
-        def get_field(self, field_name, args, kwargs):
-            if field_name == '':
-                # Not correctly supported in Python 2 string.Formatter;
-                # KeyError is raised instead of IndexError for the
-                # computed index.
-                raise IndexError('tuple index out of range')
-            return string.Formatter.get_field(self, field_name, args, kwargs)
-
-else:
-    StringFormatter = string.Formatter
-
-
-class PercentStyle(object):
+class PercentStyle:
 
     logging_style = '%'
     default_format = '%(message)s'
@@ -64,7 +46,7 @@ class StrFormatStyle(PercentStyle):
     asctime_format = '{asctime}'
     asctime_search = '{asctime'
 
-    __formatter = StringFormatter()
+    __formatter = string.Formatter()
 
     def format(self, record):
         return self.__formatter.vformat(self._fmt, (), record.__dict__)
@@ -179,7 +161,7 @@ class AnyFieldDict(dict):
             return 42
 
 
-class FormatterFactory(object):
+class FormatterFactory:
 
     def __init__(self, section):
         self.format = section.format
@@ -189,9 +171,6 @@ class FormatterFactory(object):
         self.formatter = section.formatter or 'logging.Formatter'
         if section.formatter:
             self.factory = resolve(section.formatter)
-        elif sys.version_info[0] == 2:
-            self.factory = Py2Formatter
-            self.formatter = __name__ + '.Py2Formatter'
         else:
             self.factory = logging.Formatter
 
@@ -199,13 +178,7 @@ class FormatterFactory(object):
             func = self.factory.__init__
         else:
             func = self.factory
-        # getargspec is deprecated, but signature is not available in Python 2.
-        try:
-            inspect.signature
-        except AttributeError:
-            params = inspect.getargspec(func).args
-        else:
-            params = inspect.signature(func).parameters
+        params = inspect.signature(func).parameters
         self._has_style_param = 'style' in params
 
         # Check that the format specified complies with the style; we
@@ -228,17 +201,13 @@ class FormatterFactory(object):
             # format-style templates that used {} or {#} placeholders,
             # since those aren't allowed when formatting with a mapping.
             #
-            e = ValueError('%s formats cannot use positional placeholders')
-            ZConfig._compat.raise_with_same_tb(e)
+            raise ValueError('%s formats cannot use positional placeholders')
 
     def __call__(self):
         #
         # Need to determine if we should pass
         # style=self.message_formatter.logging_style, or if we need to
         # clobber usesTime and formatMessage directly.
-        #
-        # Python 2.7 does not use formatMessage; we'll need to deal with
-        # format instead.
         #
         stylist = self.stylist
         if self._has_style_param:
@@ -272,100 +241,4 @@ class FormatterFactory(object):
                 #
                 formatter.usesTime = stylist.usesTime
                 formatter.formatMessage = stylist.format
-                #
-                # If Python 2 and format is not overridden, we need to
-                # replace it with a version that uses formatMessage.  If
-                # it is overridden, we need to scream, because we don't
-                # know what to do.
-                #
-                if sys.version_info[0] == 2:
-                    ff = formatter.format
-                    custom = (ff.im_class.format.im_func
-                              is not logging.Formatter.format.im_func)
-                    if custom:
-                        raise ValueError(
-                            'cannot inject non-classic formatting into'
-                            ' formatter %s' % self.formatter)
-
-                    # Style was not explicitly supported in the
-                    # arguments, as expected, but the format method is
-                    # inherited from logging.Formatter, so we can deal
-                    # with this.
-                    #
-                    # Create a bound method on formatter using
-                    # Py2Formatter.format, and apply that.  That'll
-                    # still access the formatException provided by the
-                    # configured formatter factory, and do what else
-                    # that needs to be done for Python 2.
-                    #
-                    function = Py2Formatter.__dict__['format']
-                    bound = function.__get__(formatter, formatter.__class__)
-                    formatter.format = bound
-
         return formatter
-
-
-class Py2Formatter(logging.Formatter):
-
-    def __init__(self, fmt=None, datefmt=None, style='%'):
-        for stylist in _log_format_styles.values():  # pragma: no branch
-            if stylist.logging_style == style:
-                self._style = stylist(fmt)
-                break
-        logging.Formatter.__init__(self, self._style._fmt, datefmt)
-
-    def usesTime(self):
-        """
-        Check if the format uses the creation time of the record.
-        """
-        return self._style.usesTime()
-
-    def formatMessage(self, record):
-        try:
-            s = self._style.format(record)
-        except UnicodeDecodeError as e:
-            # Issue 25664. The logger name may be Unicode. Try again ...
-            try:
-                record.name = record.name.decode('utf-8')
-                s = self._style.format(record)
-            except UnicodeDecodeError:
-                raise e
-        return s
-
-    def format(self, record):
-        """
-        Format the specified record as text.
-
-        The record's attribute dictionary is used as the operand to a
-        string formatting operation which yields the returned string.
-        Before formatting the dictionary, a couple of preparatory steps
-        are carried out. The message attribute of the record is computed
-        using LogRecord.getMessage(). If the formatting string uses the
-        time (as determined by a call to usesTime(), formatTime() is
-        called to format the event time. If there is exception information,
-        it is formatted using formatException() and appended to the message.
-        """
-        record.message = record.getMessage()
-        if self.usesTime():
-            record.asctime = self.formatTime(record, self.datefmt)
-        s = self.formatMessage(record)
-        if record.exc_info:
-            # Cache the traceback text to avoid converting it multiple times
-            # (it's constant anyway)
-            if not record.exc_text:
-                record.exc_text = self.formatException(record.exc_info)
-        if record.exc_text:
-            if s[-1:] != "\n":
-                s = s + "\n"
-            try:
-                s = s + record.exc_text
-            except UnicodeError:
-                # Sometimes filenames have non-ASCII chars, which can lead
-                # to errors when s is Unicode and record.exc_text is str
-                # See issue 8924.
-                # We also use replace for when there are multiple
-                # encodings, e.g. UTF-8 for the filesystem and latin-1
-                # for a script. See issue 13232.
-                s = s + record.exc_text.decode(sys.getfilesystemencoding(),
-                                               'replace')
-        return s

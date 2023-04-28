@@ -26,7 +26,7 @@ class SectionValueTestCase(unittest.TestCase):
 
     def test_repr(self):
 
-        class MockMatcher(object):
+        class MockMatcher:
             type = None
 
         matcher = MockMatcher()
@@ -53,7 +53,7 @@ class SectionMatcherTestCase(TestHelper, unittest.TestCase):
 
     def test_constructor_error(self):
 
-        class Mock(object):
+        class Mock:
             name = 'name'
 
             def allowUnnamed(self):
@@ -91,7 +91,7 @@ class BaseMatcherTestCase(TestHelper, unittest.TestCase):
 
     def test_construct_errors(self):
 
-        class MockType(object):
+        class MockType:
             attribute = 'attr'
 
             _multi = True
@@ -107,7 +107,7 @@ class BaseMatcherTestCase(TestHelper, unittest.TestCase):
         matcher = BaseMatcher(None, type_, None)
         type_.append(('key', MockType()))
 
-        class MockSection(object):
+        class MockSection:
             def getSectionDefinition(self):
                 return self
 

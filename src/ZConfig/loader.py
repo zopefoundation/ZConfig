@@ -16,8 +16,11 @@
 import os.path
 import re
 import sys
+import urllib.request
+from abc import ABC
 from abc import abstractmethod
 from io import StringIO
+from urllib.request import pathname2url
 
 import ZConfig
 import ZConfig.cfgparser
@@ -26,11 +29,6 @@ import ZConfig.info
 import ZConfig.matcher
 import ZConfig.schema
 import ZConfig.url
-from ZConfig._compat import AbstractBaseClass
-from ZConfig._compat import pathname2url
-from ZConfig._compat import raise_with_same_tb
-from ZConfig._compat import reraise
-from ZConfig._compat import urllib2
 
 
 def loadSchema(url):
@@ -124,7 +122,7 @@ def _get_config_loader(schema, overrides):
     return loader
 
 
-class BaseLoader(AbstractBaseClass):
+class BaseLoader(ABC):
     """Base class for loader objects.
 
     This should not be instantiated
@@ -184,7 +182,7 @@ class BaseLoader(AbstractBaseClass):
     def openResource(self, url):
         """Returns a resource object that represents the URL *url*.
 
-        The URL is opened using the :func:`urllib2.urlopen` function,
+        The URL is opened using the :func:`urllib.request.urlopen` function,
         and the returned resource object is created using
         :meth:`createResource`. If the URL cannot be opened,
         :exc:`~.ConfigurationError` is raised.
@@ -202,22 +200,14 @@ class BaseLoader(AbstractBaseClass):
             file = openPackageResource(package, filename)
         else:
             try:
-                file = urllib2.urlopen(url)
-            except urllib2.URLError as e:
-                # urllib2.URLError has a particularly hostile str(), so we
-                # generally don't want to pass it along to the user.
+                file = urllib.request.urlopen(url)
+            except urllib.request.URLError as e:
+                # urllib.request.URLError has a particularly hostile str(), so
+                # we generally don't want to pass it along to the user.
                 self._raise_open_error(url, e.reason)  # pragma: no cover
-            except (IOError, OSError) as e:
-                # Python 2.1 raises a different error from Python 2.2+,
-                # so we catch both to make sure we detect the situation.
+            except OSError as e:
                 self._raise_open_error(url, str(e))
 
-            # Python 3 support: file.read() returns bytes, so we convert it
-            # to an StringIO.  (Can't use io.TextIOWrapper because of
-            # http://bugs.python.org/issue16723 and probably other bugs).
-            # Do this even on Python 2 to avoid keeping a network connection
-            # open for an unbounded amount of time and to catch IOErrors here,
-            # where they make sense.
             try:
                 data = file.read()
             finally:
@@ -232,14 +222,12 @@ class BaseLoader(AbstractBaseClass):
     def _raise_open_error(self, url, message):
         if url[:7].lower() == "file://":
             what = "file"
-            ident = urllib2.url2pathname(url[7:])
+            ident = urllib.request.url2pathname(url[7:])
         else:
             what = "URL"
             ident = url
-        error = ZConfig.ConfigurationError(
-            "error opening %s %s: %s" % (what, ident, message),
-            url)
-        raise_with_same_tb(error)
+        raise ZConfig.ConfigurationError(
+            "error opening {} {}: {}".format(what, ident, message), url)
 
     def normalizeURL(self, url):
         """Return a URL for *url*
@@ -301,7 +289,7 @@ def openPackageResource(package, path):
                                               path=pkg.__path__)
         url = "file:" + pathname2url(filename)
         url = ZConfig.url.urlnormalize(url)
-        return urllib2.urlopen(url)
+        return urllib.parse.urlopen(url)
     else:
         v, tb = (None, None)
         for dirname in pkg.__path__:
@@ -319,7 +307,7 @@ def openPackageResource(package, path):
 
         if v is not None:
             try:
-                reraise(type(v), v, tb)
+                raise v.with_traceback(tb)
             finally:
                 del tb
 
@@ -375,7 +363,7 @@ class SchemaLoader(BaseLoader):
             __import__(package)
         except ImportError as e:
             raise ZConfig.SchemaResourceError(
-                "could not load package %s: %s" % (package, str(e)),
+                "could not load package {}: {}".format(package, str(e)),
                 filename=filename,
                 package=package)
         pkg = sys.modules[package]
@@ -383,7 +371,7 @@ class SchemaLoader(BaseLoader):
             raise ZConfig.SchemaResourceError(
                 "import name does not refer to a package",
                 filename=filename, package=package)
-        return "package:%s:%s" % (package, filename)
+        return "package:{}:{}".format(package, filename)
 
 
 class ConfigLoader(BaseLoader):
@@ -454,7 +442,7 @@ class ConfigLoader(BaseLoader):
         parser.parse(matcher)
 
 
-class CompositeHandler(object):
+class CompositeHandler:
 
     def __init__(self, handlers, schema):
         self._handlers = handlers
@@ -485,7 +473,7 @@ class CompositeHandler(object):
         return len(self._handlers)
 
 
-class Resource(object):
+class Resource:
     """Object that allows an open file object and a URL to be bound
     together to ease handling.
 

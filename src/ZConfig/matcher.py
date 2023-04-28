@@ -14,11 +14,10 @@
 """Utility that manages the binding of configuration data to a section."""
 
 import ZConfig
-from ZConfig._compat import raise_with_same_tb
 from ZConfig.info import ValueInfo
 
 
-class BaseMatcher(object):
+class BaseMatcher:
     def __init__(self, info, type_, handlers):
         self.info = info
         self.type = type_
@@ -38,7 +37,7 @@ class BaseMatcher(object):
     def __repr__(self):
         clsname = self.__class__.__name__
         extra = "type " + repr(self.type.name)
-        return "<%s for %s>" % (clsname, extra)
+        return "<{} for {}>".format(clsname, extra)
 
     def addSection(self, type_, name, sectvalue):
         if name:
@@ -81,7 +80,7 @@ class BaseMatcher(object):
             else:
                 extra = ""
             raise ZConfig.ConfigurationError(
-                "%s is not a valid key name%s" % (repr(key), extra))
+                "{} is not a valid key name{}".format(repr(key), extra))
 
         ismulti = ci.ismulti()
         attr = ci.attribute
@@ -152,7 +151,7 @@ class BaseMatcher(object):
                 default = ci.getdefault()
                 if default is None:
                     raise ZConfig.ConfigurationError(
-                        "no values for %s; %s required" % (key, ci.minOccurs))
+                        f"no values for {key}; {ci.minOccurs} required")
                 else:
                     v = values[attr] = default[:]  # pragma: no cover
             if ci.ismulti():
@@ -188,8 +187,8 @@ class BaseMatcher(object):
                             try:
                                 s = st.datatype(s)
                             except ValueError as e:
-                                raise_with_same_tb(ZConfig.DataConversionError(
-                                    e, s, (-1, -1, None)))
+                                raise ZConfig.DataConversionError(
+                                    e, s, (-1, -1, None))
 
                         v.append(s)
                 elif ci.name == '+':
@@ -204,8 +203,8 @@ class BaseMatcher(object):
                     try:
                         v = st.datatype(values[attr])
                     except ValueError as e:
-                        raise_with_same_tb(ZConfig.DataConversionError(
-                            e, values[attr], (-1, -1, None)))
+                        raise ZConfig.DataConversionError(
+                            e, values[attr], (-1, -1, None))
 
                 else:
                     v = None
@@ -257,7 +256,7 @@ class SchemaMatcher(BaseMatcher):
         return v
 
 
-class SectionValue(object):
+class SectionValue:
     """Generic 'bag-of-values' object for a section.
 
     Derived classes should always call the SectionValue constructor
@@ -278,7 +277,7 @@ class SectionValue(object):
             # identify uniquely
             name = "at %#x" % id(self)
         clsname = self.__class__.__name__
-        return "<%s for %s %s>" % (clsname, self._matcher.type.name, name)
+        return "<{} for {} {}>".format(clsname, self._matcher.type.name, name)
 
     def __str__(self):
         lst = []

@@ -21,7 +21,6 @@ import sys
 import tempfile
 import unittest
 
-import ZConfig._compat
 import ZConfig.datatypes
 from ZConfig.tests.support import TestHelper
 
@@ -69,7 +68,7 @@ class DatatypeTestCase(unittest.TestCase):
         raises = self.assertRaises
 
         eq(convert("1"), 1.0)
-        self.assertIs(type(convert(1)), type(1.0))
+        self.assertIs(type(convert(1)), float)
         eq(convert("1.1"), 1.1)
         eq(convert("50.50"), 50.50)
         eq(convert("-50.50"), -50.50)
@@ -82,9 +81,7 @@ class DatatypeTestCase(unittest.TestCase):
         raises(ValueError, convert, "0x234.1.9")
         raises(ValueError, convert, "0.9-")
 
-        # float handles inf/nan portably in both bytes and
-        # unicode on both Python 2.6+ and Python 3. Make sure conversion
-        # does too.
+        # float handles inf/nan. Make sure conversion does too.
         for literal in ("inf", "-inf", b"inf", b"-inf"):
             eq(convert(literal), float(literal))
 
@@ -113,11 +110,6 @@ class DatatypeTestCase(unittest.TestCase):
         v = convert(value)
         self.assertEqual(v, value)
         self.assertTrue(isinstance(v, str))
-        if ZConfig._compat.have_unicode:
-            unicode_value = ZConfig._compat.text_type(value)
-            v = convert(unicode_value)
-            self.assertEqual(v, value)
-            self.assertTrue(isinstance(v, str))
 
     def check_never_namelike(self, convert):
         raises = self.assertRaises

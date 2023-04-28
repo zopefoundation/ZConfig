@@ -19,12 +19,12 @@ import logging
 import os
 import sys
 import unittest
+from io import StringIO
+from sys import maxsize
 
 import ZConfig
 import ZConfig.components.logger.tests.support
 import ZConfig.tests.support
-from ZConfig._compat import NStringIO as StringIO
-from ZConfig._compat import maxsize
 from ZConfig.components.logger import datatypes
 from ZConfig.components.logger import handlers
 from ZConfig.components.logger import loghandler
@@ -409,7 +409,6 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
                                           "  </email-notifier>\n"
                                           "</eventlog>")
 
-        self.assertTrue(sys.version_info >= (2, 6))
         handler = logger.handlers[0]
         self.assertEqual(handler.toaddrs, ["sysadmin@example.com"])
         self.assertEqual(handler.fromaddr, "zlog-user@example.com")
@@ -816,7 +815,7 @@ class TestFunctions(ZConfig.tests.support.TestHelper, unittest.TestCase):
         self.assertEqual(v, ('server', '/path;param?q=v#fragment'))
 
     def test_close_files(self):
-        class F(object):
+        class F:
             closed = 0
 
             def close(self):

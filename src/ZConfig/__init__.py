@@ -33,8 +33,9 @@ separate packages.
 """
 __docformat__ = "reStructuredText"
 
+from io import StringIO
+
 import ZConfig.loader
-from ZConfig._compat import TextIO
 
 
 loadConfigFile = ZConfig.loader.loadConfigFile
@@ -194,7 +195,7 @@ class DataConversionError(ConfigurationError, ValueError):
         self.lineno, self.colno, self.url = position
 
     def __str__(self):
-        s = "%s (line %s" % (self.message, self.lineno)
+        s = "{} (line {}".format(self.message, self.lineno)
         if self.colno is not None:
             s += ", %s" % self.colno
         if self.url:
@@ -227,13 +228,13 @@ class SubstitutionReplacementError(ConfigurationSyntaxError, LookupError):
 def configureLoggers(text):
     """Configure one or more loggers from configuration text."""
 
-    schema = ZConfig.loader.loadSchemaFile(TextIO("""
+    schema = ZConfig.loader.loadSchemaFile(StringIO("""
     <schema>
     <import package='ZConfig.components.logger'/>
     <multisection type='logger' name='*' attribute='loggers'/>
     </schema>
     """))
 
-    config, _ = ZConfig.loader.loadConfigFile(schema, TextIO(text))
+    config, _ = ZConfig.loader.loadConfigFile(schema, StringIO(text))
     for factory in config.loggers:
         factory()

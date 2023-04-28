@@ -17,7 +17,6 @@ import re
 
 import ZConfig
 import ZConfig.url
-from ZConfig._compat import raise_with_same_tb
 from ZConfig.substitution import isname
 from ZConfig.substitution import substitute
 
@@ -33,7 +32,7 @@ _section_start_rx = re.compile(r"(?P<type>%s)"
                                % (_name_re, _name_re))
 
 
-class ZConfigParser(object):
+class ZConfigParser:
 
     __slots__ = ('resource', 'context', 'lineno',
                  'stack', 'defines', 'file', 'url')
@@ -192,9 +191,7 @@ class ZConfigParser(object):
             raise
 
     def error(self, message):
-        raise_with_same_tb(
-            ZConfig.ConfigurationSyntaxError(
-                message, self.url, self.lineno))
+        raise ZConfig.ConfigurationSyntaxError(message, self.url, self.lineno)
 
     def _normalize_case(self, string):
         # This method is factored out solely to allow subclasses to modify

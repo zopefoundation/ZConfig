@@ -46,7 +46,7 @@ open for reading.  Let's take a look at this, and what it returns::
   ...
   ... '''
 
-  >>> from ZConfig._compat import NStringIO as StringIO
+  >>> from io import StringIO
   >>> config = schemaless.loadConfigFile(StringIO(config_text))
 
 The `config` object is a mapping from top-level keys to lists of

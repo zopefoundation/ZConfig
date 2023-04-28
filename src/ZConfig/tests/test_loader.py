@@ -17,12 +17,12 @@ import os.path
 import sys
 import tempfile
 import unittest
+import urllib.request
+from io import StringIO
 
 import ZConfig
 import ZConfig.loader
 import ZConfig.url
-from ZConfig._compat import NStringIO as StringIO
-from ZConfig._compat import urllib2
 from ZConfig.tests.support import CONFIG_BASE
 from ZConfig.tests.support import TestHelper
 
@@ -41,8 +41,8 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             val = stream.read()
         self.assertEqual(
             val,
-            u'# -*-coding: utf-8; mode: conf-*-\n'
-            u'This file contains a snowman, U+2603: \u2603\n'
+            '# -*-coding: utf-8; mode: conf-*-\n'
+            'This file contains a snowman, U+2603: \u2603\n'
         )
 
     def test_schema_caching(self):
@@ -77,7 +77,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
 
     def test_config_loader_abstract_schema(self):
 
-        class MockSchema(object):
+        class MockSchema:
             _abstract = True
 
             def isabstract(self):
@@ -223,31 +223,6 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         sio = StringIO("%import ZConfig.tests.library.widget")
         loader.loadFile(sio)
 
-    def test_urlsplit_urlunsplit(self):
-        # Extracted from Python's test.test_urlparse module:
-        samples = [
-            ('http://www.python.org',
-             ('http', 'www.python.org', '', '', '', ''),
-             ('http', 'www.python.org', '', '', '')),
-            ('http://www.python.org#abc',
-             ('http', 'www.python.org', '', '', '', 'abc'),
-             ('http', 'www.python.org', '', '', 'abc')),
-            ('http://www.python.org/#abc',
-             ('http', 'www.python.org', '/', '', '', 'abc'),
-             ('http', 'www.python.org', '/', '', 'abc')),
-            ("http://a/b/c/d;p?q#f",
-             ('http', 'a', '/b/c/d', 'p', 'q', 'f'),
-             ('http', 'a', '/b/c/d;p', 'q', 'f')),
-            ('file:///tmp/junk.txt',
-             ('file', '', '/tmp/junk.txt', '', '', ''),
-             ('file', '', '/tmp/junk.txt', '', '')),
-        ]
-        for url, parsed, split in samples:
-            result = ZConfig.url.urlsplit(url)
-            self.assertEqual(result, split)
-            result2 = ZConfig.url.urlunsplit(result)
-            self.assertEqual(result2, url)
-
     def test_file_url_normalization(self):
         self.assertEqual(
             ZConfig.url.urlnormalize("file:/abc/def"),
@@ -263,7 +238,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             ("file:///abc/def", "frag"))
 
     def test_url_from_file(self):
-        class MockFile(object):
+        class MockFile:
             name = 'path'
         self.assertEqual('file://',
                          ZConfig.loader._url_from_file(MockFile)[:7])
@@ -302,11 +277,11 @@ class TestNonExistentResources(unittest.TestCase):
     # test.
 
     def setUp(self):
-        self.urllib2_urlopen = urllib2.urlopen
-        urllib2.urlopen = self.fake_urlopen
+        self.urllib2_urlopen = urllib.request.urlopen
+        urllib.request.urlopen = self.fake_urlopen
 
     def tearDown(self):
-        urllib2.urlopen = self.urllib2_urlopen
+        urllib.request.urlopen = self.urllib2_urlopen
 
     def fake_urlopen(self, url):
         raise self.error()
@@ -402,7 +377,7 @@ class TestOpenPackageResource(TestHelper, unittest.TestCase):
         del sys.modules[self.magic_name]
 
     def test_package_loader_resource_error(self):
-        class MockLoader(object):
+        class MockLoader:
             pass
         self.__loader__ = MockLoader()
         self.__path__ = ['dir']

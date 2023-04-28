@@ -119,7 +119,7 @@ class SectionInfoTestCase(InfoMixin, unittest.TestCase):
 
     Class = SectionInfo
 
-    class MockSectionType(object):
+    class MockSectionType:
         name = None
 
         @classmethod
@@ -179,7 +179,7 @@ class SectionTypeTestCase(TestHelper, unittest.TestCase):
 
     def test_getsectioninfo(self):
 
-        class MockChild(object):
+        class MockChild:
             _issection = False
 
             def issection(self):
@@ -205,7 +205,7 @@ class SectionTypeTestCase(TestHelper, unittest.TestCase):
 class SchemaTypeTestCase(TestHelper, unittest.TestCase):
 
     def test_various(self):
-        class Mock(object):
+        class Mock:
             pass
 
         mock = Mock()
