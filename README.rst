@@ -106,10 +106,5 @@ To install to another prefix (for example, /usr/local)::
   python setup.py install --prefix=/usr/local
 
 
-If you need to force the python interpreter to (for example) python2::
-
-  python2 setup.py install
-
-
 For more information on installing packages, please refer to the
 `Python Packaging User Guide <https://packaging.python.org/>`__.
