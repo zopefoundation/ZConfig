@@ -50,7 +50,7 @@ def findRoot():
 
 
 def docSetUp(test):
-    # Python 2 makes __path__ and __file__ relative in some
+    # Python makes __path__ and __file__ relative in some
     # cases (such as when we're executing with the 'ZConfig'
     # directory on sys.path as CWD). This breaks finding
     # schema components when we change directories.

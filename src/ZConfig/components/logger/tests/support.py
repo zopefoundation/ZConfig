@@ -19,9 +19,9 @@ Test support for ZConfig.components.logger.
 import logging
 import os
 import tempfile
+from io import StringIO
 
 import ZConfig
-import ZConfig._compat
 import ZConfig.tests.support
 from ZConfig.components.logger import loghandler
 
@@ -77,12 +77,12 @@ class LoggingTestHelper(ZConfig.tests.support.TestHelper):
 
     def get_schema(self):
         if self._schema is None:
-            sio = ZConfig._compat.NStringIO(self._schematext)
+            sio = StringIO(self._schematext)
             self.__class__._schema = ZConfig.loadSchemaFile(sio)
         return self._schema
 
     def get_config(self, text):
-        conf, handler = ZConfig.loadConfigFile(self.get_schema(),
-                                               ZConfig._compat.NStringIO(text))
+        conf, handler = ZConfig.loadConfigFile(
+            self.get_schema(), StringIO(text))
         self.assertTrue(not handler)
         return conf

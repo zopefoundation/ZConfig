@@ -11,8 +11,6 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import absolute_import
-from __future__ import print_function
 
 from contextlib import contextmanager
 
@@ -28,7 +26,6 @@ except ImportError:  # pragma: no cover
     RstSchemaFormatter = None
 else:
 
-    from ZConfig._compat import string_types
     from ZConfig._schema_utils import MARKER
     from ZConfig._schema_utils import AbstractSchemaFormatter
     from ZConfig._schema_utils import AbstractSchemaPrinter
@@ -39,7 +36,7 @@ else:
         settings = None
 
         def __init__(self, schema, stream=None):
-            super(RstSchemaFormatter, self).__init__(schema, stream)
+            super().__init__(schema, stream)
             self.document = None
             self._current_node = None
             self._nodes = []
@@ -60,7 +57,7 @@ else:
 
         def write(self, *texts):
             for text in texts:
-                if isinstance(text, string_types):
+                if isinstance(text, str):
                     self._current_node += nodes.Text(' ' + text + ' ', text)
                 else:
                     # Already parsed
@@ -145,7 +142,7 @@ else:
         _schema_formatter = RstSchemaFormatter
 
         def printSchema(self):
-            super(RstSchemaPrinter, self).printSchema()
+            super().printSchema()
             print(self.fmt.document.pformat(), file=self.fmt.stream)
 
     class SchemaToRstDirective(Directive):

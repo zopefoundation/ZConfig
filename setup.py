@@ -17,9 +17,9 @@ tests_require = [
     'zope.testrunner',
 ]
 
-options = dict(
+setup(
     name="ZConfig",
-    version='3.6.2.dev0',
+    version='4.0.dev0',
     author="Fred L. Drake, Jr.",
     author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
@@ -61,11 +61,7 @@ options = dict(
         'License :: OSI Approved :: Zope Public License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
@@ -76,7 +72,7 @@ options = dict(
         'Operating System :: OS Independent',
         'Topic :: Software Development',
     ],
-    tests_require=tests_require,
+    python_requires='>=3.7',
     extras_require={
         'test': tests_require,
         'docs': [
@@ -84,6 +80,3 @@ options = dict(
         ],
     },
 )
-
-
-setup(**options)

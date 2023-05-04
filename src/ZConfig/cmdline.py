@@ -28,7 +28,6 @@ Each setting is given by a value specifier string, as described by
 import ZConfig
 import ZConfig.loader
 import ZConfig.matcher
-from ZConfig._compat import raise_with_same_tb
 
 
 class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
@@ -97,7 +96,7 @@ class ExtendedConfigLoader(ZConfig.loader.ConfigLoader):
         return OptionBag(self.schema, self.schema, self.clopts)
 
 
-class OptionBag(object):
+class OptionBag:
     def __init__(self, schema, sectiontype, options):
         self.sectiontype = sectiontype
         self.schema = schema
@@ -116,8 +115,8 @@ class OptionBag(object):
         try:
             return self._basic_key(s)
         except ValueError as e:
-            raise_with_same_tb(ZConfig.ConfigurationSyntaxError(
-                "could not convert basic-key value: " + str(e), *pos))
+            raise ZConfig.ConfigurationSyntaxError(
+                f"could not convert basic-key value: {e}", *pos)
 
     def add_value(self, name, val, pos):
         if name in self.keypairs:
@@ -170,7 +169,7 @@ class OptionBag(object):
         return string.lower()
 
 
-class MatcherMixin(object):
+class MatcherMixin:
 
     def set_optionbag(self, bag):
         self.optionbag = bag
@@ -179,7 +178,7 @@ class MatcherMixin(object):
         try:
             realkey = self.type.keytype(key)
         except ValueError as e:
-            raise_with_same_tb(ZConfig.DataConversionError(e, key, position))
+            raise ZConfig.DataConversionError(e, key, position)
 
         if realkey in self.optionbag:
             return

@@ -26,7 +26,7 @@ def loadConfigFile(file, url=None):
     return c.top
 
 
-class Resource(object):
+class Resource:
 
     def __init__(self, file, url=''):
         self.file, self.url = file, url
@@ -59,16 +59,16 @@ class Section(dict):
 
         if self.type:
             if self.name:
-                start = '%s<%s %s>' % (pre, self.type, self.name)
+                start = '{}<{} {}>'.format(pre, self.type, self.name)
             else:
-                start = '%s<%s>' % (pre, self.type)
+                start = '{}<{}>'.format(pre, self.type)
             result.append(start)
             pre += '  '
 
         lst = sorted(self.items())
         for name, values in lst:
             for value in values:
-                result.append('%s%s %s' % (pre, name, value))
+                result.append('{}{} {}'.format(pre, name, value))
 
         if self.sections and self:
             result.append('')
@@ -78,7 +78,7 @@ class Section(dict):
 
         if self.type:
             pre = pre[:-2]
-            result.append('%s</%s>' % (pre, self.type))
+            result.append('{}</{}>'.format(pre, self.type))
             result.append('')
 
         result = '\n'.join(result).rstrip()
@@ -87,7 +87,7 @@ class Section(dict):
         return result
 
 
-class Context(object):
+class Context:
 
     def __init__(self):
         self.top = Section()

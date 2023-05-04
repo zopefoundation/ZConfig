@@ -14,16 +14,16 @@
 """Objects that can describe a ZConfig schema."""
 
 import copy
+from abc import ABC
 from abc import abstractmethod
 from collections import OrderedDict
 from functools import total_ordering
 
 import ZConfig
-from ZConfig._compat import AbstractBaseClass
 
 
 @total_ordering
-class UnboundedThing(object):
+class UnboundedThing:
     __slots__ = ()
 
     def __gt__(self, other):
@@ -41,7 +41,7 @@ class UnboundedThing(object):
 Unbounded = UnboundedThing()
 
 
-class ValueInfo(object):
+class ValueInfo:
     __slots__ = 'value', 'position'
 
     def __init__(self, value, position):
@@ -56,7 +56,7 @@ class ValueInfo(object):
             raise ZConfig.DataConversionError(e, self.value, self.position)
 
 
-class BaseInfo(object):
+class BaseInfo:
     """Information about a single configuration key."""
 
     description = None
@@ -85,7 +85,7 @@ class BaseInfo(object):
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        return "<%s for %s>" % (clsname, repr(self.name))
+        return "<{} for {}>".format(clsname, repr(self.name))
 
     def isabstract(self):
         return False
@@ -97,7 +97,7 @@ class BaseInfo(object):
         return False
 
 
-class BaseKeyInfo(AbstractBaseClass, BaseInfo):
+class BaseKeyInfo(ABC, BaseInfo):
 
     _rawdefaults = None
 
@@ -244,7 +244,7 @@ class SectionInfo(BaseInfo):
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        return "<%s for %s (%s)>" % (
+        return "<{} for {} ({})>".format(
             clsname, self.sectiontype.name, repr(self.name))
 
     def issection(self):
@@ -271,7 +271,7 @@ class SectionInfo(BaseInfo):
             return None
 
 
-class AbstractType(object):
+class AbstractType:
     # This isn't actually "abstract" in the Python ABC sense,
     # it's only abstract from the schema sense. This class is
     # instantiated, and not expected to be subclassed.
@@ -307,7 +307,7 @@ class AbstractType(object):
         return True
 
 
-class SectionType(object):
+class SectionType:
     def __init__(self, name, keytype, valuetype, datatype, registry, types):
         # name      - name of the section, or '*' or '+'
         # datatype  - type for the section itself

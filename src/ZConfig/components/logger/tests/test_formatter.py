@@ -1,4 +1,3 @@
-# coding=utf-8
 ##############################################################################
 #
 # Copyright (c) 2018 Zope Foundation and Contributors.
@@ -256,8 +255,7 @@ class ZopeExceptionsFormatterTestCase(LoggerStyledFormatterTestCase):
 
     # We test against the zope.exceptions formatter since it's a common
     # example of a formatter that inherits almost everything, but
-    # defines it's own formatException.  For Python 2, we want to be
-    # sure the extended formatException is used.
+    # defines it's own formatException.
 
     _config_template = """\
       <eventlog>
@@ -333,132 +331,6 @@ class StylelessFormatter(logging.Formatter):
 
 def styleless_formatter(fmt=None, datefmt=None):
     return StylelessFormatter(fmt=fmt, datefmt=datefmt)
-
-
-class UnstylableFormatter(StylelessFormatter):
-
-    # Really only declared unstylable on Python 2; Python 3 formatters
-    # are assumed to be cooperative w/r/t format invoking formatMessage.
-
-    def format(self, record):
-        return 'No playing nice!'
-
-
-class UnstylableFormatterTestCase(StyledFormatterTestHelper,
-                                  unittest.TestCase):
-
-    _config_template = """\
-      <eventlog>
-        <logfile>
-          path STDOUT
-          level debug
-          formatter %s.UnstylableFormatter
-          %%s
-        </logfile>
-      </eventlog>
-    """ % __name__
-
-    @unittest.skipIf(sys.version_info[0] > 2,
-                     'Only applies for Python 2.')
-    def test_py2_unstylable(self):
-        factory = self.get_formatter_factory(
-            style='template',
-            format='$${levelname} $${levelno} $${message}')
-        with self.assertRaises(ValueError) as cm:
-            factory()
-        self.assertIn('cannot inject non-classic formatting into formatter',
-                      str(cm.exception))
-
-
-class Py2EncodingTestCase(StyledFormatterTestHelper,
-                          unittest.TestCase):
-
-    text = u'\u6d4b\u8bd5'  # u'测试'
-    encoded_text = text.encode('utf-8')
-
-    @unittest.skipIf(sys.version_info[0] > 2,
-                     'Only applies for Python 2.')
-    def test_format_message_with_unhandlable_unicode_decoding_error(self):
-        # Triggering outer exception handler in Py2Formatter.formatMessage.
-        formatter = ZConfig.components.logger.formatter.Py2Formatter(
-            '%(name)s %(message)s ' + self.encoded_text)
-        self.record.message = u'simple text'
-
-        # Because the decoding error is caused by the unicode message,
-        # decoding the nsame of the logger doesn't help:
-        with self.assertRaises(UnicodeDecodeError) as cm:
-            formatter.formatMessage(self.record)
-
-        emsg = str(cm.exception)
-        self.assertIn("'ascii' codec can't decode byte", emsg)
-        self.assertIn('ordinal not in range(128)', emsg)
-
-    @unittest.skipIf(sys.version_info[0] > 2,
-                     'Only applies for Python 2.')
-    def _test_format_message_with_unicode_logger_name(self):
-        # https://bugs.python.org/issue25664
-        logname = __name__ + '.' + self.encoded_text
-        assert isinstance(logname, bytes)
-        self.record.name = logname
-        formatter = ZConfig.components.logger.formatter.Py2Formatter(
-            '%(name)s %(message)s')
-        self.record.message = self.record.getMessage()
-
-        msg = formatter.formatMessage(self.record)
-
-        self.assertIsInstance(msg, bytes)
-        self.assertEqual(msg, logname + b" my message, 'with' 'some args'")
-
-    @unittest.skipIf(sys.version_info[0] > 2,
-                     'Only applies for Python 2.')
-    def test_format_with_unicode_traceback_content(self):
-        try:
-            raise RuntimeError('we made this up')
-        except RuntimeError:
-            self.record.exc_info = sys.exc_info()
-        formatter = ZConfig.components.logger.formatter.Py2Formatter(
-            '%(name)s %(message)s')
-        # For formatMessage to return unicode:
-        self.record.msg += u''
-        formatter.format(self.record)
-        assert isinstance(self.record.exc_text, bytes)
-        assert isinstance(formatter.formatMessage(self.record), unicode)  # NOQA
-        # We're now certain self.record.exc_text has been properly formatted.
-        # Convert to unicode and add some interesting bits.
-        encoded_text = self.text.encode(sys.getfilesystemencoding())
-        self.record.exc_text = (self.record.exc_text + encoded_text)
-        self.record.message = self.record.message.decode('utf-8')
-
-        msg = formatter.format(self.record)
-
-        self.assertIsInstance(msg, unicode)  # NOQA
-
-    @unittest.skipIf(sys.version_info[0] > 2,
-                     'Only applies for Python 2.')
-    def test_format_with_unicode_traceback_content_trailing_msg_newline(self):
-        # The point of this is to cover the case of *not* adding a
-        # newline to the message before appending the formatted
-        # traceback.
-        try:
-            raise RuntimeError('we made this up')
-        except RuntimeError:
-            self.record.exc_info = sys.exc_info()
-        formatter = ZConfig.components.logger.formatter.Py2Formatter(
-            '%(name)s %(message)s')
-        # For formatMessage to return unicode:
-        self.record.msg += u'\n'
-        formatter.format(self.record)
-        assert isinstance(self.record.exc_text, bytes)
-        assert isinstance(formatter.formatMessage(self.record), unicode)  # NOQA
-        # We're now certain self.record.exc_text has been properly formatted.
-        # Convert to unicode and add some interesting bits.
-        encoded_text = self.text.encode(sys.getfilesystemencoding())
-        self.record.exc_text = (self.record.exc_text + encoded_text)
-        self.record.message = self.record.message.decode('utf-8')
-
-        msg = formatter.format(self.record)
-
-        self.assertIsInstance(msg, unicode)  # NOQA
 
 
 class FieldTypesTestCase(StyledFormatterTestHelper, unittest.TestCase):

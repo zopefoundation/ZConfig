@@ -13,16 +13,9 @@
 ##############################################################################
 
 import argparse
-from contextlib import contextmanager
-
-
-try:
-    import html
-except ImportError:
-    # Py2
-    import cgi as html
-
+import html
 import sys
+from contextlib import contextmanager
 
 from ZConfig._schema_utils import MARKER
 from ZConfig._schema_utils import AbstractSchemaFormatter

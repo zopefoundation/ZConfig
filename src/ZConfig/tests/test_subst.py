@@ -13,9 +13,6 @@
 ##############################################################################
 """Tests of the string interpolation module."""
 
-# This is needed to support Python 2.1.
-from __future__ import nested_scopes
-
 import os
 import unittest
 

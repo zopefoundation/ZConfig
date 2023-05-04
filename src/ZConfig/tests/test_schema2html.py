@@ -11,26 +11,16 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import absolute_import
 
 import textwrap
 import unittest
+from io import StringIO
 
 import docutils
 import docutils.frontend
 import docutils.parsers.rst
 import docutils.parsers.rst.directives
 import docutils.utils
-
-
-try:
-    # Note that we're purposely using the old
-    # StringIO object on Python 2 because it auto-converts
-    # Unicode to str, which io.BytesIO and io.StringIO don't
-    # but which normal printing to default sys.stdout *does*
-    from cStringIO import StringIO
-except ImportError:
-    from ZConfig._compat import NStringIO as StringIO
 
 from ZConfig import schema2html
 from ZConfig.sphinx import RstSchemaFormatter

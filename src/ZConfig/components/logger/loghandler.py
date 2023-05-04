@@ -17,8 +17,7 @@ import logging
 import logging.handlers
 import os
 import weakref
-
-from ZConfig._compat import maxsize
+from sys import maxsize
 
 
 # Export these, they're used in handlers.py

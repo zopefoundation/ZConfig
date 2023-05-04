@@ -14,14 +14,12 @@
 """urlparse-like helpers that normalize file: URLs.
 
 ZConfig and urllib2 expect file: URLs to consistently use the '//'
-hostpart seperator; the functions here enforce this constraint.
+hostpart separator; the functions here enforce this constraint.
 
 """
 
-from ZConfig._compat import urlparse as _urlparse
-
-
-urlsplit = _urlparse.urlsplit
+import urllib.parse
+import urllib.request
 
 
 def urlnormalize(url):
@@ -34,7 +32,7 @@ def urlnormalize(url):
 def urlunsplit(parts):
     parts = list(parts)
     parts.insert(3, '')
-    url = _urlparse.urlunparse(tuple(parts))
+    url = urllib.request.urlunparse(tuple(parts))
     if (parts[0] == "file"
             and url.startswith("file:/")
             and not url.startswith("file:///")):
@@ -45,12 +43,12 @@ def urlunsplit(parts):
 
 
 def urldefrag(url):
-    url, fragment = _urlparse.urldefrag(url)
+    url, fragment = urllib.parse.urldefrag(url)
     return urlnormalize(url), fragment
 
 
 def urljoin(base, relurl):
-    url = _urlparse.urljoin(base, relurl)
+    url = urllib.request.urljoin(base, relurl)
     if url.startswith("file:/") and not url.startswith("file:///"):
         # It may not be possible to get here anymore with
         # modern urlparse, at least not on posix?

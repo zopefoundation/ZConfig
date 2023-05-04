@@ -15,10 +15,10 @@
 
 import functools
 import sys
+import urllib.parse
 from abc import abstractmethod
 
 import ZConfig.components.logger.formatter
-from ZConfig._compat import urlparse
 from ZConfig.components.logger.factory import Factory
 
 
@@ -178,7 +178,7 @@ class Win32EventLogFactory(HandlerFactory):
 
 
 def http_handler_url(value):
-    scheme, netloc, path, param, query, fragment = urlparse.urlparse(value)
+    scheme, netloc, path, param, query, fragment = urllib.parse.urlparse(value)
     if scheme != 'http':
         raise ValueError('url must be an http url')
     if not netloc:

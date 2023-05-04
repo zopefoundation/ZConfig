@@ -14,16 +14,11 @@
 """Parser for ZConfig schemas."""
 
 import os
-import sys
 import xml.sax
 
 import ZConfig
 from ZConfig import info
 from ZConfig import url
-from ZConfig._compat import raise_with_same_tb
-
-
-BLANK = u''
 
 
 def parseResource(resource, loader):
@@ -35,13 +30,6 @@ def parseResource(resource, loader):
 def parseComponent(resource, loader, schema):
     parser = ComponentParser(loader, resource.url, schema)
     xml.sax.parse(resource.file, parser)
-
-
-def _srepr(ob):
-    if isinstance(ob, type(BLANK)) and sys.version_info[0] < 3:
-        # drop the leading "u" from a unicode repr
-        return repr(ob)[1:]
-    return repr(ob)
 
 
 class BaseParser(xml.sax.ContentHandler):
@@ -92,8 +80,9 @@ class BaseParser(xml.sax.ContentHandler):
             if name not in self._allowed_parents:
                 self.error("Unknown tag " + name)
             if parent not in self._allowed_parents[name]:
-                self.error("%s elements may not be nested in %s elements"
-                           % (_srepr(name), _srepr(parent)))
+                self.error(
+                    f"{name!r} elements may not be nested"
+                    " in {parent!r} elements")
         elif name != self._top_level:
             self.error("Unknown document type " + name,
                        ZConfig.UnknownDocumentTypeError)
@@ -168,8 +157,7 @@ class BaseParser(xml.sax.ContentHandler):
             try:
                 name = convert(name)
             except ValueError as err:
-                self.error("not a valid prefix: %s (%s)"
-                           % (_srepr(name), str(err)))
+                self.error(f"not a valid prefix: {name!r} ({err})")
             if name[0] == ".":
                 prefix = self._prefixes[-1] + name
             else:
@@ -468,7 +456,7 @@ class BaseParser(xml.sax.ContentHandler):
     def error(self, message, kind=None):
         # Can't do this as a default value because of import order
         kind = kind or ZConfig.SchemaError
-        raise_with_same_tb(self.initerror(kind(message)))
+        raise self.initerror(kind(message))
 
 
 class SchemaParser(BaseParser):

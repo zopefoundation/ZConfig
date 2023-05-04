@@ -77,19 +77,19 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         dtname = __name__ + ".uppercase"
         schema = self.load_schema_text("""\
             <schema>
-              <key name='a' datatype='%s'/>
-              <key name='b' datatype='%s' default='abc'/>
-              <multikey name='c' datatype='%s'>
+              <key name='a' datatype='{}'/>
+              <key name='b' datatype='{}' default='abc'/>
+              <multikey name='c' datatype='{}'>
                 <default>abc</default>
                 <default>abc</default>
                 </multikey>
-              <multikey name='d' datatype='%s'>
+              <multikey name='d' datatype='{}'>
                 <default>not</default>
                 <default>lower</default>
                 <default>case</default>
                 </multikey>
             </schema>
-            """ % (dtname, dtname, dtname, dtname))
+            """.format(dtname, dtname, dtname, dtname))
         conf = self.load_config_text(schema, """\
                                      a qwerty
                                      c upp
@@ -995,10 +995,10 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
 
     def test_simple_extends(self):
         schema = self.load_schema_text("""\
-           <schema extends='%s/simple.xml %s/library.xml'>
+           <schema extends='{}/simple.xml {}/library.xml'>
              <section name='A' type='type-a' />
            </schema>
-           """ % (CONFIG_BASE, CONFIG_BASE))
+           """.format(CONFIG_BASE, CONFIG_BASE))
         self._verifySimpleConf(self.load_config(schema, "simple.conf"))
 
     def test_extends_fragment_failure(self):
@@ -1008,64 +1008,64 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
 
     def test_extends_description_override(self):
         schema = self.load_schema_text("""\
-           <schema extends='%s/base.xml %s/library.xml'>
+           <schema extends='{}/base.xml {}/library.xml'>
              <description>
                overriding description
              </description>
              <section name='A' type='type-a' />
              <section name='X' type='type-X' />
            </schema>
-           """ % (CONFIG_BASE, CONFIG_BASE))
+           """.format(CONFIG_BASE, CONFIG_BASE))
         description = schema.description.strip()
         self.assertEqual(description, "overriding description")
 
     def test_extends_description_first_extended_wins(self):
         schema = self.load_schema_text("""\
-           <schema extends='%s/base.xml %s/library.xml'>
+           <schema extends='{}/base.xml {}/library.xml'>
              <section name='A' type='type-a' />
              <section name='X' type='type-X' />
            </schema>
-           """ % (CONFIG_BASE, CONFIG_BASE))
+           """.format(CONFIG_BASE, CONFIG_BASE))
         description = schema.description.strip()
         self.assertEqual(description, "base description")
 
     def test_multi_extends_implicit_OK(self):
         self.load_schema_text("""\
-           <schema extends='%s/base.xml %s/library.xml'>
+           <schema extends='{}/base.xml {}/library.xml'>
              <section name='A' type='type-a' />
              <section name='X' type='type-X' />
            </schema>
-           """ % (CONFIG_BASE, CONFIG_BASE))
+           """.format(CONFIG_BASE, CONFIG_BASE))
 
     def test_multi_extends_explicit_datatype_OK(self):
         self.load_schema_text("""\
-           <schema extends='%s/base-datatype1.xml %s/base-datatype2.xml'
+           <schema extends='{}/base-datatype1.xml {}/base-datatype2.xml'
                    datatype='null'>
              <section name='One' type='type-1' />
              <section name='Two' type='type-2' />
            </schema>
-           """ % (CONFIG_BASE, CONFIG_BASE))
+           """.format(CONFIG_BASE, CONFIG_BASE))
 
     def test_multi_extends_explicit_keytype_OK(self):
         self.load_schema_text("""\
-           <schema extends='%s/base-keytype1.xml %s/base-keytype2.xml'
-                   keytype='%s.uppercase'>
+           <schema extends='{}/base-keytype1.xml {}/base-keytype2.xml'
+                   keytype='{}.uppercase'>
              <section name='One' type='type-1' />
              <section name='Two' type='type-2' />
            </schema>
-           """ % (CONFIG_BASE, CONFIG_BASE, __name__))
+           """.format(CONFIG_BASE, CONFIG_BASE, __name__))
 
     def test_multi_extends_datatype_conflict(self):
         self.assertRaises(ZConfig.SchemaError,
                           self.load_schema_text, """\
-            <schema extends='%s/base-datatype1.xml %s/base-datatype2.xml'/>
-            """ % (CONFIG_BASE, CONFIG_BASE))
+            <schema extends='{}/base-datatype1.xml {}/base-datatype2.xml'/>
+            """.format(CONFIG_BASE, CONFIG_BASE))
 
     def test_multi_extends_keytype_conflict(self):
         self.assertRaises(ZConfig.SchemaError,
                           self.load_schema_text, """\
-            <schema extends='%s/base-keytype1.xml %s/base-keytype2.xml'/>
-            """ % (CONFIG_BASE, CONFIG_BASE))
+            <schema extends='{}/base-keytype1.xml {}/base-keytype2.xml'/>
+            """.format(CONFIG_BASE, CONFIG_BASE))
 
     def test_multiple_descriptions_is_error(self):
         self.assertRaises(ZConfig.SchemaError,
@@ -1075,12 +1075,6 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
               <description>  bar  </description>
             </schema>
             """)
-
-    def test_srepr(self):
-        from ZConfig.schema import _srepr
-        FOO = u'foo'
-        self.assertEqual(_srepr('foo'), "'foo'")
-        self.assertEqual(_srepr(FOO), "'foo'")
 
     def test_schema_example(self):
         schema = self.load_schema_text("""\
@@ -1185,7 +1179,7 @@ class SchemaTestCase(TestHelper, unittest.TestCase):
         import ZConfig.datatypes
         import ZConfig.schema
 
-        class MockLoader(object):
+        class MockLoader:
             registry = ZConfig.datatypes.Registry()
 
         parser = ZConfig.schema.SchemaParser(MockLoader(), 'url')

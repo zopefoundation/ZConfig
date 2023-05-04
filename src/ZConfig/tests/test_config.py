@@ -15,9 +15,9 @@
 import os
 import tempfile
 import unittest
+from io import StringIO
 
 import ZConfig
-from ZConfig._compat import NStringIO as StringIO
 from ZConfig.tests.support import CONFIG_BASE
 from ZConfig.tests.support import TestHelper
 

@@ -15,10 +15,10 @@
 """
 
 import unittest
+from io import StringIO
 
 import ZConfig
 import ZConfig.tests.support
-from ZConfig._compat import NStringIO as StringIO
 
 
 class TestImportFromConfiguration(ZConfig.tests.support.TestHelper,
