@@ -76,6 +76,7 @@ setup(
     extras_require={
         'test': tests_require,
         'docs': [
+            'sphinx-rtd-theme',
             'sphinxcontrib-programoutput',
         ],
     },
