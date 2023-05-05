@@ -1,5 +1,12 @@
+version: 2
+
 formats:
   - none
+
+build:
+  os: "ubuntu-20.04"
+  tools:
+    python: "3.9"
 
 python:
   pip_install: true
