@@ -19,7 +19,7 @@ tests_require = [
 
 setup(
     name="ZConfig",
-    version='4.0',
+    version='4.1.dev0',
     author="Fred L. Drake, Jr.",
     author_email="fred@fdrake.net",
     maintainer="Zope Foundation and Contributors",
