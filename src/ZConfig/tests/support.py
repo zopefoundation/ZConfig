@@ -17,7 +17,6 @@
 import contextlib
 import os
 import sys
-import unittest
 from io import StringIO
 from urllib.request import pathname2url
 
@@ -78,12 +77,6 @@ def with_stdin_from_input_file(fname):
 
 class TestHelper:
     """Utility methods which can be used with the schema support."""
-
-    # Not derived from unittest.TestCase; some test runners seem to
-    # think that means this class contains tests.
-
-    assertRaisesRegex = getattr(unittest.TestCase, 'assertRaisesRegex',
-                                unittest.TestCase.assertRaisesRegexp)
 
     def load_both(self, schema_url, conf_url):
         schema = self.load_schema(schema_url)
