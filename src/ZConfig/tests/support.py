@@ -82,8 +82,11 @@ class TestHelper(object):
     # Not derived from unittest.TestCase; some test runners seem to
     # think that means this class contains tests.
 
-    assertRaisesRegex = getattr(unittest.TestCase, 'assertRaisesRegex',
-                                unittest.TestCase.assertRaisesRegexp)
+    try:
+        assertRaisesRegex = unittest.TestCase.assertRaisesRegex
+    except AttributeError:
+        # Python 2; note assertRaisesRegexp is gone in Python 3.12+
+        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
     def load_both(self, schema_url, conf_url):
         schema = self.load_schema(schema_url)
