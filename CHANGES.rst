@@ -2,7 +2,7 @@
  Change History for ZConfig
 ============================
 
-4.1 (unreleased)
+4.1 (2024-05-03)
 ================
 
 - Add support for Python 3.12.
