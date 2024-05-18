@@ -699,8 +699,19 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
         h = self.handler_factory(fn)
 
         calls = []
-        h.acquire = lambda: calls.append("acquire")
-        h.release = lambda: calls.append("release")
+
+        class _LockMockup:
+            def acquire(*args, **kw):
+                calls.append("acquire")
+
+            __enter__ = acquire
+
+            def release(*args, **kw):
+                calls.append("release")
+
+            __exit__ = release
+
+        h.lock = _LockMockup()
 
         h.reopen()
         self.assertEqual(calls, ["acquire", "release"])
