@@ -5,9 +5,6 @@
 4.2 (unreleased)
 ================
 
-- Fix test failure for Python 3.13b1
-  (`#97 <https://github.com/zopefoundation/ZConfig/issues/97>`_).
-
 
 4.1 (2024-05-03)
 ================
