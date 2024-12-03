@@ -21,8 +21,7 @@ We can load this file and pass its contents to ``configureLoggers``:
         configureLoggers(f.read())
 
 .. -> src
-  >>> import six
-  >>> six.exec_(src)
+  >>> exec(src)
 
 When this returns, the root logger is configured to output messages
 logged at INFO or above to the console, as we can see in the following
