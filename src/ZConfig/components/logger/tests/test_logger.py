@@ -59,14 +59,14 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
 
     def test_config_without_logger(self):
         conf = self.get_config("")
-        self.assertTrue(conf.eventlog is None)
+        self.assertIsNone(conf.eventlog)
 
     def test_config_without_handlers(self):
         logger = self.check_simple_logger("<eventlog/>")
         # Make sure there's a NullHandler, since a warning gets
         # printed if there are no handlers:
         self.assertEqual(len(logger.handlers), 1)
-        self.assertTrue(isinstance(logger.handlers[0], loghandler.NullHandler))
+        self.assertIsInstance(logger.handlers[0], loghandler.NullHandler)
 
         # And it does nothing
         logger.handlers[0].emit(None)
@@ -105,7 +105,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
                                           "</eventlog>" % fn)
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
-        self.assertTrue(isinstance(logfile, loghandler.FileHandler))
+        self.assertIsInstance(logfile, loghandler.FileHandler)
         self.assertFalse(logfile.delay)
         self.assertIsNotNone(logfile.stream)
         logger.removeHandler(logfile)
@@ -122,7 +122,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
                                           "</eventlog>" % fn)
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
-        self.assertTrue(isinstance(logfile, loghandler.FileHandler))
+        self.assertIsInstance(logfile, loghandler.FileHandler)
         self.assertFalse(logfile.delay)
         self.assertIsNotNone(logfile.stream)
         self.assertEqual(logfile.stream.encoding, "shift-jis")
@@ -140,7 +140,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
                                           "</eventlog>" % fn)
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
-        self.assertTrue(isinstance(logfile, loghandler.FileHandler))
+        self.assertIsInstance(logfile, loghandler.FileHandler)
         self.assertTrue(logfile.delay)
         self.assertIsNone(logfile.stream)
         logger.info("this is a test")
@@ -179,8 +179,8 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assertEqual(logfile.backupCount, 10)
-        self.assertEqual(logfile.maxBytes, 5*1024*1024)
-        self.assertTrue(isinstance(logfile, loghandler.RotatingFileHandler))
+        self.assertEqual(logfile.maxBytes, 5 * 1024 * 1024)
+        self.assertIsInstance(logfile, loghandler.RotatingFileHandler)
         logger.removeHandler(logfile)
         logfile.close()
 
@@ -198,7 +198,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         logfile = logger.handlers[0]
         self.assertEqual(logfile.level, logging.DEBUG)
         self.assertEqual(logfile.backupCount, 11)
-        self.assertEqual(logfile.interval, 86400*3)
+        self.assertEqual(logfile.interval, 86400 * 3)
         self.assertIsInstance(logfile, loghandler.TimedRotatingFileHandler)
         logger.removeHandler(logfile)
         logfile.close()
@@ -270,7 +270,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
               </logfile>
             </eventlog>
             """ % name.upper())
-        self.assertTrue(conf.eventlog is not None)
+        self.assertIsNotNone(conf.eventlog)
         # The factory has already been created; make sure it picks up
         # the stderr we set here when we create the logger and
         # handlers:
@@ -282,7 +282,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
             setattr(sys, name, old_stream)
         logger.warning("woohoo!")
         self.assertIs(logger.handlers[0].stream, sio)
-        self.assertTrue(sio.getvalue().find("woohoo!") >= 0)
+        self.assertGreaterEqual(sio.getvalue().find("woohoo!"), 0)
 
     def check_standard_stream_cannot_delay(self, name):
         with self.assertRaises(ZConfig.DataConversionError) as cm:
@@ -335,8 +335,8 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
             raise KeyError
         except KeyError:
             logger.exception("testing a KeyError")
-        self.assertTrue(sio.getvalue().find("KeyError") >= 0)
-        self.assertTrue(sio.getvalue().find("Don't panic") >= 0)
+        self.assertGreaterEqual(sio.getvalue().find("KeyError"), 0)
+        self.assertGreaterEqual(sio.getvalue().find("Don't panic"), 0)
 
     def test_with_syslog(self):
         logger = self.check_simple_logger("<eventlog>\n"
@@ -347,7 +347,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
                                           "</eventlog>")
         syslog = logger.handlers[0]
         self.assertEqual(syslog.level, logging.ERROR)
-        self.assertTrue(isinstance(syslog, loghandler.SysLogHandler))
+        self.assertIsInstance(syslog, loghandler.SysLogHandler)
         syslog.close()  # avoid ResourceWarning
 
     def test_with_http_logger_localhost(self):
@@ -364,7 +364,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         self.assertEqual(handler.url, "/")
         self.assertEqual(handler.level, logging.ERROR)
         self.assertEqual(handler.method, "POST")
-        self.assertTrue(isinstance(handler, loghandler.HTTPHandler))
+        self.assertIsInstance(handler, loghandler.HTTPHandler)
 
     def test_with_http_logger_remote_host(self):
         logger = self.check_simple_logger("<eventlog>\n"
@@ -380,7 +380,7 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
         self.assertEqual(handler.url, "/log/")
         self.assertEqual(handler.level, logging.NOTSET)
         self.assertEqual(handler.method, "GET")
-        self.assertTrue(isinstance(handler, loghandler.HTTPHandler))
+        self.assertIsInstance(handler, loghandler.HTTPHandler)
 
     def test_with_email_notifier(self):
         logger = self.check_simple_logger("<eventlog>\n"
@@ -452,13 +452,13 @@ class TestConfig(ZConfig.components.logger.tests.support.LoggingTestHelper,
 
     def check_simple_logger_factory(self, text, level=logging.INFO):
         conf = self.get_config(text)
-        self.assertTrue(conf.eventlog is not None)
+        self.assertIsNotNone(conf.eventlog)
         self.assertEqual(conf.eventlog.level, level)
         return conf.eventlog
 
     def check_simple_logger(self, text, level=logging.INFO):
         logger = self.check_simple_logger_factory(text, level)()
-        self.assertTrue(isinstance(logger, logging.Logger))
+        self.assertIsInstance(logger, logging.Logger)
         self.assertEqual(len(logger.handlers), 1)
         return logger
 
@@ -553,11 +553,11 @@ class TestReopeningRotatingLogfiles(
         text1 = read_file(nfn1)
         text2 = read_file(nfn2)
         text3 = read_file(fn)
-        self.assertTrue("message 1" in text1)
-        self.assertTrue("message 2" in text1)
-        self.assertTrue("message 3" in text2)
-        self.assertTrue("message 4" in text2)
-        self.assertTrue("message 5" in text3)
+        self.assertIn("message 1", text1)
+        self.assertIn("message 2", text1)
+        self.assertIn("message 3", text2)
+        self.assertIn("message 4", text2)
+        self.assertIn("message 5", text3)
 
     def test_logfile_reopening(self):
         #
@@ -569,7 +569,7 @@ class TestReopeningRotatingLogfiles(
             "path0": paths[0],
             "path1": paths[1],
             "path2": paths[2],
-            }
+        }
         text = self._sampleconfig_template % d
         conf = self.get_config(text)
         self.assertEqual(len(conf.loggers), 2)
@@ -647,7 +647,7 @@ class TestReopeningLogfiles(TestReopeningRotatingLogfiles):
             "path0": paths[0],
             "path1": paths[1],
             "path2": paths[2],
-            }
+        }
         text = self._sampleconfig_template % d
         conf = self.get_config(text)
         self.assertEqual(len(conf.loggers), 2)

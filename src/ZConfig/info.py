@@ -85,7 +85,7 @@ class BaseInfo:
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        return "<{} for {}>".format(clsname, repr(self.name))
+        return f"<{clsname} for {repr(self.name)}>"
 
     def isabstract(self):
         return False

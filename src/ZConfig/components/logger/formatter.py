@@ -105,7 +105,7 @@ _log_format_variables = {
     'message': 'amessage',
     'process': 1,
     'funcName': 'fname',
-    }
+}
 
 
 def ctrl_char_insert(value):
@@ -224,8 +224,7 @@ class FormatterFactory:
                 # suppress this.
                 #
                 kwargs = dict()
-                if sys.version_info >= (3, 8):
-                    kwargs['validate'] = False
+                kwargs['validate'] = False
                 formatter = self.factory(self.format, self.dateformat,
                                          style='$', **kwargs)
                 assert formatter._style._fmt == self.format

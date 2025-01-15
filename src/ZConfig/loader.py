@@ -227,7 +227,7 @@ class BaseLoader(ABC):
             what = "URL"
             ident = url
         raise ZConfig.ConfigurationError(
-            "error opening {} {}: {}".format(what, ident, message), url)
+            f"error opening {what} {ident}: {message}", url)
 
     def normalizeURL(self, url):
         """Return a URL for *url*
@@ -363,7 +363,7 @@ class SchemaLoader(BaseLoader):
             __import__(package)
         except ImportError as e:
             raise ZConfig.SchemaResourceError(
-                "could not load package {}: {}".format(package, str(e)),
+                f"could not load package {package}: {str(e)}",
                 filename=filename,
                 package=package)
         pkg = sys.modules[package]
@@ -371,7 +371,7 @@ class SchemaLoader(BaseLoader):
             raise ZConfig.SchemaResourceError(
                 "import name does not refer to a package",
                 filename=filename, package=package)
-        return "package:{}:{}".format(package, filename)
+        return f"package:{package}:{filename}"
 
 
 class ConfigLoader(BaseLoader):

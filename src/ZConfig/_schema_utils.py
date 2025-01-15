@@ -92,7 +92,7 @@ class AbstractSchemaFormatter(ABC):
 
             for k, v in sorted(kwargs.items()):
                 if v:
-                    self.write(self.esc("({}: {})".format(k, v)))
+                    self.write(self.esc(f"({k}: {v})"))
 
     def description(self, description):
         if description:

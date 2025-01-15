@@ -29,10 +29,7 @@ import ZConfig.components.logger.tests.support
 # not masking the exception, but we want to check for the right one in
 # the tests below (without catching anything else).
 #
-if sys.version_info >= (3, 8):
-    MissingFieldError = ValueError
-else:
-    MissingFieldError = KeyError
+MissingFieldError = ValueError
 
 
 class LogFormatStyleTestCase(unittest.TestCase):
@@ -324,8 +321,7 @@ class StylelessFormatter(logging.Formatter):
 
     def __init__(self, fmt=None, datefmt=None):
         kwargs = dict()
-        if sys.version_info >= (3, 8):
-            kwargs['validate'] = False
+        kwargs['validate'] = False
         logging.Formatter.__init__(self, fmt=fmt, datefmt=datefmt, **kwargs)
 
 

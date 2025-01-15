@@ -59,16 +59,16 @@ class Section(dict):
 
         if self.type:
             if self.name:
-                start = '{}<{} {}>'.format(pre, self.type, self.name)
+                start = f'{pre}<{self.type} {self.name}>'
             else:
-                start = '{}<{}>'.format(pre, self.type)
+                start = f'{pre}<{self.type}>'
             result.append(start)
             pre += '  '
 
         lst = sorted(self.items())
         for name, values in lst:
             for value in values:
-                result.append('{}{} {}'.format(pre, name, value))
+                result.append(f'{pre}{name} {value}')
 
         if self.sections and self:
             result.append('')
@@ -78,7 +78,7 @@ class Section(dict):
 
         if self.type:
             pre = pre[:-2]
-            result.append('{}</{}>'.format(pre, self.type))
+            result.append(f'{pre}</{self.type}>')
             result.append('')
 
         result = '\n'.join(result).rstrip()

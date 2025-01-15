@@ -195,7 +195,7 @@ class DataConversionError(ConfigurationError, ValueError):
         self.lineno, self.colno, self.url = position
 
     def __str__(self):
-        s = "{} (line {}".format(self.message, self.lineno)
+        s = f"{self.message} (line {self.lineno}"
         if self.colno is not None:
             s += ", %s" % self.colno
         if self.url:

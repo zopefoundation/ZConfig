@@ -41,7 +41,7 @@ setup(
         "ZConfig.tests.library",
         "ZConfig.tests.library.thing",
         "ZConfig.tests.library.widget",
-        ],
+    ],
     package_dir={'': 'src'},
     entry_points={
         'console_scripts': [

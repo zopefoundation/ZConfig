@@ -106,7 +106,7 @@ class RegularExpressionConversion:
         if m and m.group() == value:
             return value
         else:
-            raise ValueError("{}: {}".format(self.reason, repr(value)))
+            raise ValueError(f"{self.reason}: {repr(value)}")
 
 
 def check_locale(value):
@@ -155,7 +155,7 @@ class DottedNameConversion(ASCIIConversion):
 
     def __init__(self):
         ASCIIConversion.__init__(self,
-                                 r"{}(?:\.{})*".format(_ident_re, _ident_re))
+                                 fr"{_ident_re}(?:\.{_ident_re})*")
 
 
 class DottedNameSuffixConversion(ASCIIConversion):
@@ -397,46 +397,46 @@ def timedelta(s):
         elif suffix == 's':
             seconds = val
         else:
-            raise TypeError('bad part {} in {}'.format(part, s))
+            raise TypeError(f'bad part {part} in {s}')
     return datetime.timedelta(weeks=weeks, days=days, hours=hours,
                               minutes=minutes, seconds=seconds)
 
 
 stock_datatypes = {
-    "boolean":           asBoolean,
-    "dotted-name":       DottedNameConversion(),
-    "dotted-suffix":     DottedNameSuffixConversion(),
-    "identifier":        IdentifierConversion(),
-    "integer":           integer,
-    "float":             float_conversion,
-    "string":            str,
-    "string-list":       string_list,
-    "null":              null_conversion,
-    "locale":            MemoizedConversion(check_locale),
-    "port-number":       port_number,
-    "basic-key":         BasicKeyConversion(),
-    "inet-address":      inet_address,
-    "inet-binding-address":    inet_binding_address,
+    "boolean": asBoolean,
+    "dotted-name": DottedNameConversion(),
+    "dotted-suffix": DottedNameSuffixConversion(),
+    "identifier": IdentifierConversion(),
+    "integer": integer,
+    "float": float_conversion,
+    "string": str,
+    "string-list": string_list,
+    "null": null_conversion,
+    "locale": MemoizedConversion(check_locale),
+    "port-number": port_number,
+    "basic-key": BasicKeyConversion(),
+    "inet-address": inet_address,
+    "inet-binding-address": inet_binding_address,
     "inet-connection-address": inet_connection_address,
-    "socket-address":    SocketAddress,
-    "socket-binding-address":    SocketBindingAddress,
+    "socket-address": SocketAddress,
+    "socket-binding-address": SocketBindingAddress,
     "socket-connection-address": SocketConnectionAddress,
     "ipaddr-or-hostname": IpaddrOrHostname(),
     "existing-directory": existing_directory,
-    "existing-path":     existing_path,
-    "existing-file":     existing_file,
-    "existing-dirpath":  existing_dirpath,
-    "byte-size":         SuffixMultiplier({'kb': 1024,
-                                           'mb': 1024*1024,
-                                           'gb': 1024*1024*1024,
-                                           }),
-    "time-interval":     SuffixMultiplier({'s': 1,
-                                           'm': 60,
-                                           'h': 60*60,
-                                           'd': 60*60*24,
-                                           }),
-    "timedelta":         timedelta,
-    }
+    "existing-path": existing_path,
+    "existing-file": existing_file,
+    "existing-dirpath": existing_dirpath,
+    "byte-size": SuffixMultiplier({'kb': 1024,
+                                   'mb': 1024 * 1024,
+                                   'gb': 1024 * 1024 * 1024,
+                                   }),
+    "time-interval": SuffixMultiplier({'s': 1,
+                                       'm': 60,
+                                       'h': 60 * 60,
+                                       'd': 60 * 60 * 24,
+                                       }),
+    "timedelta": timedelta,
+}
 
 
 class Registry:

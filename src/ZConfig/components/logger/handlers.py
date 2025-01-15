@@ -151,7 +151,7 @@ _syslog_facilities = {
     "local5": 1,
     "local6": 1,
     "local7": 1,
-    }
+}
 
 
 def syslog_facility(value):
