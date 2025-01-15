@@ -24,7 +24,7 @@ import ZConfig.components.logger.formatter
 import ZConfig.components.logger.tests.support
 
 
-# In Python 3.8, a KeyError raised by string interpolation is re-written
+# A KeyError raised by string interpolation is re-written
 # into a ValueError reporting a reference to an undefined field.  We're
 # not masking the exception, but we want to check for the right one in
 # the tests below (without catching anything else).

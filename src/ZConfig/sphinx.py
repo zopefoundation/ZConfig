@@ -21,7 +21,7 @@ try:
     import docutils.utils
     from docutils import nodes
     from docutils.parsers.rst import Directive
-except ImportError:  # pragma: no cover
+except ModuleNotFoundError:  # pragma: no cover
     RstSchemaPrinter = None
     RstSchemaFormatter = None
 else:

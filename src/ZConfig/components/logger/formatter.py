@@ -19,7 +19,6 @@ ZConfig log message formatting support.
 import inspect
 import logging
 import string
-import sys
 
 
 class PercentStyle:
@@ -218,7 +217,7 @@ class FormatterFactory:
                 # A formatter class that supports style, but our style is
                 # non-standard, so we reach under the covers a bit.
                 #
-                # Python 3.8 adds a validate option, defaulting to True,
+                # Python has validate option, defaulting to True,
                 # which causes the format string to be checked.  Since
                 # safe-template is not a standard style, we want to
                 # suppress this.
