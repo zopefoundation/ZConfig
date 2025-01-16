@@ -2,6 +2,12 @@
  Change History for ZConfig
 ============================
 
+4.3 (unreleased)
+================
+
+- Nothing changed yet.
+
+
 4.2 (2025-01-16)
 ================
 
