@@ -99,7 +99,7 @@ def main(argv=None):
               " Optionally, a Python package."
               " If not given, defaults to reading a schema file from stdin"),
         default="-",
-        )
+    )
     argparser.add_argument(
         "--out", "-o",
         help="Write the schema to this file; if not given, write to stdout",
@@ -112,7 +112,7 @@ def main(argv=None):
         help=("The SCHEMA-OR-PACKAGE argument indicates a Python package"
               " instead of a file. The component.xml (by default) from the"
               " package will be read."),
-        )
+    )
     argparser.add_argument(
         "--package-file",
         action="store",

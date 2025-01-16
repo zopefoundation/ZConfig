@@ -62,7 +62,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "</schema>")
         url2 = ZConfig.url.urljoin(CONFIG_BASE, "stringio")
         schema2 = loader.loadFile(sio, url2)
-        self.assertTrue(schema1.gettype("type-a") is schema2.gettype("type-a"))
+        self.assertIs(schema1.gettype("type-a"), schema2.gettype("type-a"))
 
     def test_schema_loader_source_errors(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -134,7 +134,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
         e = ctx.exception
         self.assertEqual(e.filename, "component.xml")
         self.assertEqual(e.package, "ZConfig.tests.test_loader")
-        self.assertTrue(e.path is None)
+        self.assertIsNone(e.path)
         # make sure the str() doesn't raise an unexpected exception
         str(e)
 
@@ -144,7 +144,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "  <import package='ZConfig.tests.library.widget'/>"
                        "</schema>")
         schema = loader.loadFile(sio)
-        self.assertTrue(schema.gettype("widget-a") is not None)
+        self.assertIsNotNone(schema.gettype("widget-a"))
 
     def test_import_from_package_with_file(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -153,7 +153,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "          file='extra.xml' />"
                        "</schema>")
         schema = loader.loadFile(sio)
-        self.assertTrue(schema.gettype("extra-type") is not None)
+        self.assertIsNotNone(schema.gettype("extra-type"))
 
     def test_import_from_package_extra_directory(self):
         loader = ZConfig.loader.SchemaLoader()
@@ -162,7 +162,7 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
                        "          file='extras.xml' />"
                        "</schema>")
         schema = loader.loadFile(sio)
-        self.assertTrue(schema.gettype("extra-thing") is not None)
+        self.assertIsNotNone(schema.gettype("extra-thing"))
 
     def test_import_from_package_with_missing_file(self):
         loader = ZConfig.loader.SchemaLoader()

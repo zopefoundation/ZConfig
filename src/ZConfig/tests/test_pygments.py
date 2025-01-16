@@ -23,7 +23,7 @@ import unittest
 try:
     import pygments.lexer
     import pygments.token
-except ImportError:
+except ModuleNotFoundError:
     pygments = None
 else:
     import ZConfig.pygments

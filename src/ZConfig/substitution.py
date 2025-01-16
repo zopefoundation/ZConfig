@@ -75,12 +75,12 @@ def _split(s):
     #   (may be '' or None)
     if "$" in s:
         i = s.find("$")
-        c = s[i+1:i+2]
+        c = s[i + 1:i + 2]
         if c == "":
             raise ZConfig.SubstitutionSyntaxError(
                 "illegal lone '$' at end of source")
         if c == "$":
-            return s[:i+1], None, None, s[i+2:], None
+            return s[:i + 1], None, None, s[i + 2:], None
         prefix = s[:i]
         vtype = 'define'
         if c == "{":
@@ -105,7 +105,7 @@ def _split(s):
                     "'$(%s' not followed by ')'" % name)
             vtype = 'env'
         else:
-            m = _name_match(s, i+1)
+            m = _name_match(s, i + 1)
             if not m:
                 raise ZConfig.SubstitutionSyntaxError(
                     "'$' not followed by '$' or name")

@@ -37,7 +37,7 @@ class BaseMatcher:
     def __repr__(self):
         clsname = self.__class__.__name__
         extra = "type " + repr(self.type.name)
-        return "<{} for {}>".format(clsname, extra)
+        return f"<{clsname} for {extra}>"
 
     def addSection(self, type_, name, sectvalue):
         if name:
@@ -80,7 +80,7 @@ class BaseMatcher:
             else:
                 extra = ""
             raise ZConfig.ConfigurationError(
-                "{} is not a valid key name{}".format(repr(key), extra))
+                f"{repr(key)} is not a valid key name{extra}")
 
         ismulti = ci.ismulti()
         attr = ci.attribute
@@ -277,7 +277,7 @@ class SectionValue:
             # identify uniquely
             name = "at %#x" % id(self)
         clsname = self.__class__.__name__
-        return "<{} for {} {}>".format(clsname, self._matcher.type.name, name)
+        return f"<{clsname} for {self._matcher.type.name} {name}>"
 
     def __str__(self):
         lst = []

@@ -26,7 +26,7 @@ _logging_levels = {
     "trace": 5,
     "all": 1,
     "notset": 0,
-    }
+}
 
 
 def logging_level(value):

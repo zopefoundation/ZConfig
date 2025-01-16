@@ -36,8 +36,8 @@ class ConfigurationTestCase(TestHelper, unittest.TestCase):
         url = CONFIG_BASE + relurl
         self.conf, self.handlers = ZConfig.loadConfig(self.get_schema(), url)
         conf = self.conf
-        self.assertTrue(conf.getSectionName() is None)
-        self.assertTrue(conf.getSectionType() is None)
+        self.assertIsNone(conf.getSectionName())
+        self.assertIsNone(conf.getSectionType())
         return conf
 
     def loadtext(self, text):
@@ -102,12 +102,12 @@ class ConfigurationTestCase(TestHelper, unittest.TestCase):
                     if sect.getSectionName() == "name")[0]
         self.assertEqual(sect.var, "bar")
         self.assertEqual(sect.var_one, "splat")
-        self.assertTrue(sect.var_three is None)
+        self.assertIsNone(sect.var_three)
         sect = list(sect for sect in conf.sections
                     if sect.getSectionName() == "delegate")[0]
         self.assertEqual(sect.var, "spam")
         self.assertEqual(sect.var_two, "stuff")
-        self.assertTrue(sect.var_three is None)
+        self.assertIsNone(sect.var_three)
 
     def test_include(self):
         conf = self.load("include.conf")

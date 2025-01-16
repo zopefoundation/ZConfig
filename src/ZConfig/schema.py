@@ -53,7 +53,7 @@ class BaseParser(xml.sax.ContentHandler):
         "multikey": ["schema", "sectiontype"],
         "section": ["schema", "sectiontype"],
         "multisection": ["schema", "sectiontype"],
-        }
+    }
 
     def __init__(self, loader, url):
         self._registry = loader.registry
