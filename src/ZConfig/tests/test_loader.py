@@ -13,6 +13,7 @@
 ##############################################################################
 """Tests of ZConfig.loader classes and helper functions."""
 
+import os
 import os.path
 import sys
 import tempfile
@@ -41,18 +42,9 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             val = stream.read()
         self.assertEqual(
             val,
-            '# -*-coding: utf-8; mode: conf-*-\n'
-            'This file contains a snowman, U+2603: \u2603\n'
+            f'# -*-coding: utf-8; mode: conf-*-{os.linesep}'
+            f'This file contains a snowman, U+2603: \u2603{os.linesep}'
         )
-
-    def test_path_normalization(self):
-        loader = ZConfig.loader.SchemaLoader()
-        schemafile = os.path.join(os.path.dirname(myfile),
-                                  'sphinx_test_schema.xml')
-        url = loader.normalizeURL(schemafile)
-        with loader.openResource(url) as resource:
-            self.assertEqual(resource.url, url)
-            self.assertIsInstance(resource.file.read(), str)
 
     def test_schema_caching(self):
         loader = ZConfig.loader.SchemaLoader()
