@@ -248,6 +248,7 @@ class BaseLoader(ABC):
             raise ZConfig.ConfigurationError(
                 "fragment identifiers are not supported",
                 url)
+        print(f'XXX Normalized {url} to {newurl} XXX\n')
         return newurl
 
     # from RFC 3986:
