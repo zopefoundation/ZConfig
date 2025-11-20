@@ -235,7 +235,7 @@ else:
 
 inet_address = InetAddress(DEFAULT_HOST)
 inet_connection_address = InetAddress("127.0.0.1")
-inet_binding_address = InetAddress("")
+inet_binding_address = InetAddress(DEFAULT_HOST)
 
 
 class SocketAddress:
