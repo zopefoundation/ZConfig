@@ -45,6 +45,15 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             'This file contains a snowman, U+2603: \u2603\n'
         )
 
+    def test_path_normalization(self):
+        loader = ZConfig.loader.SchemaLoader()
+        schemafile = os.path.join(os.path.dirname(myfile),
+                                  'sphinx_test_schema.xml')
+        url = loader.normalizeURL(schemafile)
+        with loader.openResource(url) as resource:
+            self.assertEqual(resource.url, url)
+            self.assertIsInstance(resource.file.read(), str)
+
     def test_schema_caching(self):
         loader = ZConfig.loader.SchemaLoader()
         url = ZConfig.url.urljoin(CONFIG_BASE, "simple.xml")
