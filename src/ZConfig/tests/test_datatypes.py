@@ -176,7 +176,7 @@ class DatatypeTestCase(unittest.TestCase):
     def test_datatype_inet_binding_address(self):
         convert = self.types.get("inet-binding-address")
         eq = self.assertEqual
-        defhost = ""
+        defhost = ZConfig.datatypes.DEFAULT_HOST
         eq(convert("Host.Example.Com:80"), ("host.example.com", 80))
         eq(convert(":80"), (defhost, 80))
         eq(convert("80"), (defhost, 80))
