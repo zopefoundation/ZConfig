@@ -2,7 +2,7 @@
  Change History for ZConfig
 ============================
 
-4.3 (unreleased)
+4.3 (2025-11-21)
 ================
 
 - Add support for Python 3.14.
@@ -29,6 +29,7 @@
 
 
 - Drop support for Python 2.7, 3.5, 3.6.
+
 
 3.6.1 (2022-12-06)
 ==================
@@ -58,6 +59,7 @@
 - Add support for documenting schema files contained in packages to
   the Sphinx extension. See `issue 59
   <https://github.com/zopefoundation/ZConfig/issues/59>`_.
+
 
 3.4.0 (2019-01-02)
 ==================
@@ -122,6 +124,7 @@ Many changes have been made in the support for logging configurations:
   the default encoding (usually ASCII). See `issue 37
   <https://github.com/zopefoundation/ZConfig/issues/37>`_.
 
+
 3.2.0 (2017-06-22)
 ==================
 
@@ -155,11 +158,13 @@ Many changes have been made in the support for logging configurations:
   arguments so there should not be any user-visible changes. See
   https://github.com/zopefoundation/ZConfig/issues/17
 
+
 3.1.0 (2015-10-17)
 ==================
 
 - Add ability to do variable substitution from environment variables using
   $() syntax.
+
 
 3.0.4 (2014-03-20)
 ==================
