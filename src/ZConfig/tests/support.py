@@ -16,9 +16,9 @@
 
 import contextlib
 import os
+import pathlib
 import sys
 from io import StringIO
-from urllib.request import pathname2url
 
 import ZConfig
 from ZConfig.loader import ConfigLoader
@@ -26,7 +26,7 @@ from ZConfig.url import urljoin
 
 
 INPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "input"))
-CONFIG_BASE = "file://%s/" % pathname2url(INPUT_DIR)
+CONFIG_BASE = '%s/' % pathlib.Path(INPUT_DIR).as_uri()
 
 
 def input_file(fname):

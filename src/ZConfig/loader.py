@@ -14,13 +14,13 @@
 """Schema loader utility."""
 
 import os.path
+import pathlib
 import re
 import sys
 import urllib.request
 from abc import ABC
 from abc import abstractmethod
 from io import StringIO
-from urllib.request import pathname2url
 
 import ZConfig
 import ZConfig.cfgparser
@@ -242,13 +242,12 @@ class BaseLoader(ABC):
         a URL of a filesystem path.
         """
         if self.isPath(url):
-            url = "file://" + pathname2url(os.path.abspath(url))
+            url = pathlib.Path(os.path.abspath(url)).as_uri()
         newurl, fragment = ZConfig.url.urldefrag(url)
         if fragment:
             raise ZConfig.ConfigurationError(
                 "fragment identifiers are not supported",
                 url)
-        print(f'XXX Normalized {url} to {newurl} XXX\n')
         return newurl
 
     # from RFC 3986:
@@ -288,7 +287,7 @@ def openPackageResource(package, path):
                                               filename=path,
                                               package=package,
                                               path=pkg.__path__)
-        url = "file:" + pathname2url(filename)
+        url = pathlib.Path(filename).absolute().as_uri()
         url = ZConfig.url.urlnormalize(url)
         return urllib.parse.urlopen(url)
     else:
@@ -321,7 +320,7 @@ def openPackageResource(package, path):
 def _url_from_file(file_or_path):
     name = getattr(file_or_path, "name", None)
     if name and name[0] != "<" and name[-1] != ">":
-        return "file://" + pathname2url(os.path.abspath(name))
+        return pathlib.Path(os.path.abspath(name)).as_uri()
 
 
 class SchemaLoader(BaseLoader):
