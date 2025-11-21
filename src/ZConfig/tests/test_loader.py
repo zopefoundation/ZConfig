@@ -13,6 +13,7 @@
 ##############################################################################
 """Tests of ZConfig.loader classes and helper functions."""
 
+import os
 import os.path
 import sys
 import tempfile
@@ -41,8 +42,8 @@ class LoaderTestCase(TestHelper, unittest.TestCase):
             val = stream.read()
         self.assertEqual(
             val,
-            '# -*-coding: utf-8; mode: conf-*-\n'
-            'This file contains a snowman, U+2603: \u2603\n'
+            f'# -*-coding: utf-8; mode: conf-*-{os.linesep}'
+            f'This file contains a snowman, U+2603: \u2603{os.linesep}'
         )
 
     def test_schema_caching(self):
