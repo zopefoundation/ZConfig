@@ -94,7 +94,7 @@ The following data types are provided by the default type registry.
 
 **integer**
   Convert a value to an integer.  This will be a Python :class:`int` if
-  the value is in the range allowed by :class`int`, otherwise a Python
+  the value is in the range allowed by :class:`int`, otherwise a Python
   :class:`long` is returned.
 
 **ipaddr-or-hostname**
