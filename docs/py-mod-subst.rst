@@ -65,4 +65,4 @@ Examples
   >>> os.environ['from_environment'] = 'From environment.'
   >>> substitute('$(from_einvironment)', d)
   'From environment.'
-  
+
