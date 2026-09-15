@@ -312,7 +312,7 @@ schema in which it is listed.
 
 **attribute** (**identifier**)
     The name of the Python attribute which this key should be the
-    value of on a :class`SectionValue` instance.  This must be unique
+    value of on a :class:`SectionValue` instance.  This must be unique
     within the immediate contents of a section type or schema.  If
     this attribute is not specified, an attribute name will be
     computed by converting hyphens in the key name to underscores.
