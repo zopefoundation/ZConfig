@@ -6,6 +6,10 @@
 ================
 
 
+- Add support for Python 3.15.
+
+- Drop support for Python 3.10.
+
 4.3 (2025-11-21)
 ================
 
